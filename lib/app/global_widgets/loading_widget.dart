@@ -12,7 +12,7 @@ class LoadingWidget extends StatelessWidget {
     super.key,
     this.message,
     this.color,
-    this.size = 50,
+    this.size = 40,
   });
 
   @override
@@ -22,7 +22,7 @@ class LoadingWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           SpinKitFadingCircle(
-            color: color ?? AppColors.primary,
+            color: color ?? AppColors.primary700,
             size: size,
           ),
           if (message != null) ...[

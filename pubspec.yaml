@@ -20,6 +20,7 @@ dependencies:
   logger: ^2.6.2
   google_fonts: ^8.0.2
   flutter_spinkit: ^5.2.2
+  smooth_page_indicator: ^2.0.1
 
 
 dev_dependencies:
@@ -28,9 +29,9 @@ dev_dependencies:
 
 
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.4
 
-# For information on the generic Dart part of this file, see the
-# following page: https://dart.dev/tools/pub/pubspec
+
 
 # The following section is specific to Flutter packages.
 flutter:
@@ -41,3 +42,20 @@ flutter:
   assets:
      - assets/
      - assets/images/
+
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/images/icon.png"
+  web:
+    generate: true
+    image_path: "assets/images/icon.png"
+    background_color: "#ffffff"
+    theme_color: "#ffffff"
+  windows:
+    generate: true
+    image_path: "assets/images/icon.png"
+  macos:
+    generate: true
+    image_path: "assets/images/icon.png"
