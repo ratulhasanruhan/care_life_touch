@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/utils/app_logger.dart';
 
 /// Base API Provider
 /// This handles all HTTP requests
@@ -13,6 +14,9 @@ class ApiProvider extends GetConnect {
 
     // Add request interceptor
     httpClient.addRequestModifier<dynamic>((request) {
+      // Log request
+      AppLogger.api(request.method, request.url.toString());
+
       // Add headers
       request.headers['Accept'] = 'application/json';
       request.headers['Content-Type'] = 'application/json';
@@ -28,7 +32,13 @@ class ApiProvider extends GetConnect {
 
     // Add response interceptor
     httpClient.addResponseModifier((request, response) {
-      // Handle response modifications if needed
+      // Log response
+      if (response.statusCode == 200) {
+        AppLogger.success('API ${request.method} ${response.statusCode}');
+      } else {
+        AppLogger.warning('API ${request.method} ${response.statusCode}');
+      }
+
       return response;
     });
 
@@ -43,8 +53,9 @@ class ApiProvider extends GetConnect {
   }) async {
     try {
       return await get<T>(endpoint, query: query, headers: headers);
-    } catch (e) {
-      throw _handleError(e);
+    } catch (e, stackTrace) {
+      AppLogger.error('GET $endpoint failed', e, stackTrace);
+      rethrow;
     }
   }
 
@@ -56,8 +67,9 @@ class ApiProvider extends GetConnect {
   }) async {
     try {
       return await post<T>(endpoint, body, headers: headers);
-    } catch (e) {
-      throw _handleError(e);
+    } catch (e, stackTrace) {
+      AppLogger.error('POST $endpoint failed', e, stackTrace);
+      rethrow;
     }
   }
 
@@ -69,8 +81,9 @@ class ApiProvider extends GetConnect {
   }) async {
     try {
       return await put<T>(endpoint, body, headers: headers);
-    } catch (e) {
-      throw _handleError(e);
+    } catch (e, stackTrace) {
+      AppLogger.error('PUT $endpoint failed', e, stackTrace);
+      rethrow;
     }
   }
 
@@ -81,17 +94,10 @@ class ApiProvider extends GetConnect {
   }) async {
     try {
       return await delete<T>(endpoint, headers: headers);
-    } catch (e) {
-      throw _handleError(e);
+    } catch (e, stackTrace) {
+      AppLogger.error('DELETE $endpoint failed', e, stackTrace);
+      rethrow;
     }
-  }
-
-  /// Handle errors
-  String _handleError(dynamic error) {
-    if (error is Exception) {
-      return 'Network error occurred';
-    }
-    return 'An unexpected error occurred';
   }
 }
 

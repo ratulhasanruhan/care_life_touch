@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/utils/app_logger.dart';
 
 /// Home Controller - Manages home screen state and logic
 class HomeController extends GetxController {
@@ -27,7 +28,8 @@ class HomeController extends GetxController {
   Future<void> loadData() async {
     try {
       isLoading.value = true;
-      
+      AppLogger.info('Loading home data...');
+
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
       
@@ -41,9 +43,10 @@ class HomeController extends GetxController {
         'Vitamin C',
         'Cough Syrup',
       ];
-    } catch (e) {
-      // Handle error
-      print('Error loading data: $e');
+
+      AppLogger.success('Home data loaded successfully');
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to load home data', e, stackTrace);
     } finally {
       isLoading.value = false;
     }
@@ -56,12 +59,14 @@ class HomeController extends GetxController {
 
   /// Navigate to category
   void onCategoryTap(String category) {
+    AppLogger.debug('Category tapped: $category');
     // TODO: Navigate to category page
     Get.snackbar('Category', 'Navigating to $category');
   }
 
   /// Navigate to medicine details
   void onMedicineTap(String medicine) {
+    AppLogger.debug('Medicine tapped: $medicine');
     // TODO: Navigate to medicine details page
     Get.snackbar('Medicine', 'Selected $medicine');
   }

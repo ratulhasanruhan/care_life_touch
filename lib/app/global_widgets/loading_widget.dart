@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import '../core/values/app_colors.dart';
 
-/// Loading widget
+/// Loading widget with FadingCircle animation
 class LoadingWidget extends StatelessWidget {
   final String? message;
   final Color? color;
@@ -11,7 +12,7 @@ class LoadingWidget extends StatelessWidget {
     super.key,
     this.message,
     this.color,
-    this.size = 40,
+    this.size = 50,
   });
 
   @override
@@ -20,14 +21,9 @@ class LoadingWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
-            width: size,
-            height: size,
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(
-                color ?? AppColors.primary,
-              ),
-            ),
+          SpinKitFadingCircle(
+            color: color ?? AppColors.primary,
+            size: size,
           ),
           if (message != null) ...[
             const SizedBox(height: 16),
