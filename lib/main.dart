@@ -3,10 +3,18 @@ import 'package:get/get.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/core/constants/app_constants.dart';
 import 'app/core/utils/app_logger.dart';
+import 'app/data/providers/storage_provider.dart';
 import 'app/routes/app_pages.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   AppLogger.info('🚀 App starting...');
+
+  // Initialize storage
+  final storage = StorageService();
+  await storage.init();
+  Get.put(storage);
+
   runApp(const MyApp());
 }
 

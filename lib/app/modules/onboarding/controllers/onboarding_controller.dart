@@ -34,23 +34,23 @@ class OnboardingController extends GetxController {
         curve: Curves.easeInOut,
       );
     } else {
-      // Last page - navigate to home
-      _navigateToHome();
+      // Last page - navigate to register
+      _navigateToRegister();
     }
   }
 
-  /// Navigate to home
-  void _navigateToHome() {
+  /// Navigate to register
+  void _navigateToRegister() {
     AppLogger.info('Onboarding completed');
-    AppLogger.navigation(Routes.HOME);
-    Get.offNamed(Routes.HOME);
+    AppLogger.navigation(Routes.REGISTER);
+    Get.offNamed(Routes.REGISTER);
   }
 
   /// Skip onboarding
   void skipOnboarding() {
     AppLogger.info('Onboarding skipped');
-    AppLogger.navigation(Routes.HOME);
-    Get.offNamed(Routes.HOME);
+    AppLogger.navigation(Routes.REGISTER);
+    Get.offNamed(Routes.REGISTER);
   }
 }
 

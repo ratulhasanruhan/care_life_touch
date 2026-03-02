@@ -13,6 +13,10 @@ abstract class Routes {
   static const CHECKOUT = _Paths.CHECKOUT;
   static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
   static const PROFILE = _Paths.PROFILE;
+  static const TERMS = LegalRoutes.terms;
+  static const PRIVACY = LegalRoutes.privacy;
+  static const ABOUT = LegalRoutes.about;
+  static const PROFILE_COMPLETION = _Paths.PROFILE_COMPLETION;
   // Add more routes as needed
 }
 
@@ -23,6 +27,7 @@ abstract class _Paths {
   static const HOME = '/home';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const PROFILE_COMPLETION = '/profile-completion';
   static const PRODUCT_DETAILS = '/product-details';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
