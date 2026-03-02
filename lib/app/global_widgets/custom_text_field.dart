@@ -87,8 +87,8 @@ class CustomTextField extends StatelessWidget {
               height: 1.5,
               color: Color(0xFFA2A8AF),
             ),
-            prefixIcon: isRTL ? null : prefixIcon,
-            suffixIcon: isRTL ? prefixIcon : suffixIcon,
+            prefixIcon: isRTL ? null : (prefixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: prefixIcon!) : null),
+            suffixIcon: isRTL ? (prefixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: prefixIcon!) : null) : (suffixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: suffixIcon!) : null),
             filled: true,
             fillColor: AppColors.white,
 
@@ -123,7 +123,7 @@ class CustomTextField extends StatelessWidget {
               // Shadow for typing state with error
             ),
 
-            contentPadding: const EdgeInsets.all(16),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
 
             // Remove helper text padding if not needed
             helperText: helperText,

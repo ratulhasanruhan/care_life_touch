@@ -85,7 +85,7 @@ class RegisterView extends GetView<AuthController> {
                       controller.isPasswordVisible.value
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: const Color(0xFF43505C),
+                      color: AppColors.inner,
                     ),
                     onPressed: controller.togglePasswordVisibility,
                   ),

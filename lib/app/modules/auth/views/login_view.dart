@@ -20,38 +20,37 @@ class LoginView extends GetView<AuthController> {
           child: Form(
             key: controller.loginFormKey,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 20),
 
                 // Title
                 const Text(
-                  'Welcome Back',
+                  'Sign in',
                   style: TextStyle(
-                    fontSize: 32,
+                    fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF01060F),
-                    height: 1.2,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
 
                 // Subtitle
                 const Text(
-                  'Login to continue to Care Life Touch',
+                  'Enter your registered email and password to access your account.',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF43505C),
                     height: 1.5,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 40),
 
                 // Email field
                 CustomTextField(
                   controller: controller.emailController,
-                  labelText: 'Email Address',
                   hintText: 'Enter your email',
                   prefixIcon: const Icon(Icons.email_outlined),
                   keyboardType: TextInputType.emailAddress,
@@ -63,7 +62,6 @@ class LoginView extends GetView<AuthController> {
                 // Password field
                 Obx(() => CustomTextField(
                   controller: controller.passwordController,
-                  labelText: 'Password',
                   hintText: 'Enter your password',
                   prefixIcon: const Icon(Icons.lock_outline),
                   obscureText: !controller.isPasswordVisible.value,
@@ -74,7 +72,7 @@ class LoginView extends GetView<AuthController> {
                       controller.isPasswordVisible.value
                           ? Icons.visibility_outlined
                           : Icons.visibility_off_outlined,
-                      color: const Color(0xFF43505C),
+                      color: AppColors.inner,
                     ),
                     onPressed: controller.togglePasswordVisibility,
                   ),
@@ -102,10 +100,12 @@ class LoginView extends GetView<AuthController> {
 
                 // Login button
                 Obx(() => CustomButton(
-                  text: 'Login',
+                  text: 'Sign in',
                   onPressed: controller.isLoading.value ? null : () {
+                    if(!controller.loginFormKey.currentState!.validate()) return;
                     // TODO: Implement login
                     Get.snackbar('Info', 'Login functionality coming soon!');
+
                   },
                   isLoading: controller.isLoading.value,
                   fullWidth: true,
@@ -142,25 +142,6 @@ class LoginView extends GetView<AuthController> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                // Social login buttons
-                _buildSocialButton(
-                  icon: Icons.g_mobiledata,
-                  label: 'Continue with Google',
-                  onPressed: () {
-                    Get.snackbar('Info', 'Google login coming soon!');
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                _buildSocialButton(
-                  icon: Icons.facebook,
-                  label: 'Continue with Facebook',
-                  onPressed: () {
-                    Get.snackbar('Info', 'Facebook login coming soon!');
-                  },
-                ),
-                const SizedBox(height: 32),
 
                 // Register link
                 Center(
