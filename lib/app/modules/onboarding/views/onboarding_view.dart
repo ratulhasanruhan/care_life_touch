@@ -116,8 +116,8 @@ class OnboardingView extends GetView<OnboardingController> {
             page.title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
               color: AppColors.textPrimary,
               height: 1.3,
             ),

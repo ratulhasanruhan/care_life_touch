@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
+import '../../../global_widgets/primary_appbar.dart';
 import '../controllers/legal_controller.dart';
 
 class TermsView extends GetView<LegalController> {
@@ -9,11 +10,8 @@ class TermsView extends GetView<LegalController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Terms of Service'),
-        backgroundColor: AppColors.primary,
-        elevation: 0,
-        centerTitle: true,
+      appBar: PrimaryAppBar(
+        title: 'Terms of Service',
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
