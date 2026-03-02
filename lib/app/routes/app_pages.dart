@@ -5,6 +5,7 @@ import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
+import '../modules/legal/routes.dart';
 
 part 'app_routes.dart';
 
@@ -30,6 +31,8 @@ class AppPages {
       page: () => const HomeView(),
       binding: HomeBinding(),
     ),
+    // Legal module routes
+    ...LegalRoutes.pages,
     // Add more routes here as you create modules
   ];
 }

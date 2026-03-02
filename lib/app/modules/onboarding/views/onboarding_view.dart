@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widgets/custom_button.dart';
+import '../../../global_widgets/terms_rich_text.dart';
 import '../controllers/onboarding_controller.dart';
 
 class OnboardingView extends GetView<OnboardingController> {
@@ -33,15 +34,6 @@ class OnboardingView extends GetView<OnboardingController> {
               right: 0,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-                decoration: BoxDecoration(
-                  color: AppColors.white,
-                  border: Border(
-                    top: BorderSide(
-                      color: AppColors.border,
-                      width: 1,
-                    ),
-                  ),
-                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -49,10 +41,10 @@ class OnboardingView extends GetView<OnboardingController> {
                     SmoothPageIndicator(
                       controller: controller.pageController,
                       count: controller.pages.length,
-                      effect: WormEffect(
-                        dotHeight: 8,
-                        dotWidth: 8,
-                        spacing: 8,
+                      effect: ExpandingDotsEffect(
+                        dotHeight: 6,
+                        dotWidth: 6,
+                        spacing: 4,
                         activeDotColor: AppColors.primary,
                         dotColor: AppColors.lightGrey,
                         paintStyle: PaintingStyle.fill,
@@ -84,15 +76,9 @@ class OnboardingView extends GetView<OnboardingController> {
                     const SizedBox(height: 24),
 
                     // Terms and Privacy Text
-                    Text(
-                      'By continuing, you agree to our\nTerms of Service and Privacy Policy',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: AppColors.textTertiary,
-                        height: 1.5,
-                      ),
+                    TermsRichText(
+                      onTermsTapped: () => Get.toNamed('/legal/terms'),
+                      onPrivacyTapped: () => Get.toNamed('/legal/privacy'),
                     ),
                   ],
                 ),
@@ -107,23 +93,21 @@ class OnboardingView extends GetView<OnboardingController> {
   /// Build individual onboarding page
   Widget _buildOnboardingPage(dynamic page) {
     return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
+        SizedBox(
+          height: Get.height * 0.2,
+        ),
         // Image
-        Expanded(
-          flex: 2,
-          child: Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Image.asset(
-                page.image,
-                fit: BoxFit.contain,
-              ),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Image.asset(
+              page.image,
+              fit: BoxFit.contain,
             ),
           ),
         ),
 
-        const SizedBox(height: 40),
 
         // Title
         Padding(
@@ -157,7 +141,6 @@ class OnboardingView extends GetView<OnboardingController> {
           ),
         ),
 
-        const SizedBox(height: 40),
       ],
     );
   }
