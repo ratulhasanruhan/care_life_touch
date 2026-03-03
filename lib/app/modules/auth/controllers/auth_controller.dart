@@ -65,13 +65,6 @@ class AuthController extends GetxController {
       await sendOTP();
 
       AppLogger.success('Registration successful, OTP sent');
-      Get.snackbar(
-        'Success',
-        'OTP sent to ${emailController.text}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
 
       // Show OTP bottom sheet
       _showOTPBottomSheet();
