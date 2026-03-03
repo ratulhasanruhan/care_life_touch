@@ -5,14 +5,7 @@ import '../controllers/home_controller.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    // Initialize dependencies
-    // Get.lazyPut(() => ApiProvider());
-    // Get.lazyPut(() => MedicineRepository(Get.find()));
-
-    // Initialize controller
-    Get.lazyPut<HomeController>(
-      () => HomeController(),
-    );
+    Get.put(HomeController());
   }
 }
 

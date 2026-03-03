@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
-import '../modules/home/bindings/home_binding.dart';
-import '../modules/home/views/home_view.dart';
+import '../modules/shell/bindings/shell_binding.dart';
+import '../modules/shell/views/shell_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
@@ -61,8 +61,8 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HOME,
-      page: () => const HomeView(),
-      binding: HomeBinding(),
+      page: () => const ShellView(),
+      binding: ShellBinding(),
     ),
     // Legal module routes
     ...LegalRoutes.pages,
