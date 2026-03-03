@@ -48,6 +48,7 @@ flutter:
      - assets/
      - assets/images/
      - assets/svg/
+     - assets/demo/
 
 
 flutter_launcher_icons:
