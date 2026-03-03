@@ -172,24 +172,24 @@ class OTPVerificationDialog extends StatelessWidget {
               controller: otpController,
               length: otpLength,
               defaultPinTheme: PinTheme(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 textStyle: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF01060F),
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  border: Border.all(color: AppColors.inner),
+                  border: Border.all(color: Color(0xFFE8EAE8), width: 1),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
               focusedPinTheme: PinTheme(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 textStyle: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF01060F),
                 ),
@@ -200,24 +200,24 @@ class OTPVerificationDialog extends StatelessWidget {
                 ),
               ),
               submittedPinTheme: PinTheme(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 textStyle: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF01060F),
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  border: Border.all(color: AppColors.inner),
+                  border: Border.all(color: Color(0xFFE8EAE8), width: 1),
                   borderRadius: BorderRadius.circular(4),
                 ),
               ),
               errorPinTheme: PinTheme(
-                width: 44,
-                height: 44,
+                width: 40,
+                height: 40,
                 textStyle: const TextStyle(
-                  fontSize: 20,
+                  fontSize: 18,
                   fontWeight: FontWeight.w600,
                   color: Color(0xFF01060F),
                 ),

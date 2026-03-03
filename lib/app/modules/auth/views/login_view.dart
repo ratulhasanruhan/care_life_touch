@@ -22,7 +22,7 @@ class LoginView extends GetView<AuthController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 20),
+                const SizedBox(height: 60),
 
                 // Title
                 const Text(
@@ -84,7 +84,7 @@ class LoginView extends GetView<AuthController> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {
-                      Get.snackbar('Info', 'Forgot password coming soon!');
+                      Get.toNamed(Routes.FORGOT_PASSWORD);
                     },
                     child: const Text(
                       'Forgot Password?',
@@ -104,7 +104,7 @@ class LoginView extends GetView<AuthController> {
                   onPressed: controller.isLoading.value ? null : () {
                     if(!controller.loginFormKey.currentState!.validate()) return;
                     // TODO: Implement login
-                    Get.snackbar('Info', 'Login functionality coming soon!');
+                    Get.offAllNamed(Routes.HOME);
 
                   },
                   isLoading: controller.isLoading.value,

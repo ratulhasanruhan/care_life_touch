@@ -6,8 +6,11 @@ import '../modules/splash/views/splash_view.dart';
 import '../modules/onboarding/bindings/onboarding_binding.dart';
 import '../modules/onboarding/views/onboarding_view.dart';
 import '../modules/auth/bindings/auth_binding.dart';
+import '../modules/auth/bindings/forgot_password_binding.dart';
 import '../modules/auth/views/login_view.dart';
 import '../modules/auth/views/register_view.dart';
+import '../modules/auth/views/forgot_password_view.dart';
+import '../modules/auth/views/reset_password_view.dart';
 import '../modules/profile_completion/bindings/profile_completion_binding.dart';
 import '../modules/profile_completion/views/profile_completion_view.dart';
 import '../modules/legal/routes.dart';
@@ -40,6 +43,16 @@ class AppPages {
       name: _Paths.REGISTER,
       page: () => const RegisterView(),
       binding: AuthBinding(),
+    ),
+    GetPage(
+      name: _Paths.FORGOT_PASSWORD,
+      page: () => const ForgotPasswordView(),
+      binding: ForgotPasswordBinding(),
+    ),
+    GetPage(
+      name: _Paths.FORGOT_PASSWORD_RESET,
+      page: () => const ResetPasswordView(),
+      binding: ForgotPasswordBinding(),
     ),
     GetPage(
       name: _Paths.PROFILE_COMPLETION,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../global_widgets/info_modal.dart';
 import '../../../routes/app_pages.dart';
 import '../models/profile_completion_model.dart';
 
@@ -163,54 +164,54 @@ class ProfileCompletionController extends GetxController {
 
   /// Submit profile completion
   Future<void> submitProfile() async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    // Check if all images are uploaded
-    if (drugLicenseImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please upload Drug License image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    if (tradeLicenseImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please upload Trade License image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    if (nidImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please upload NID image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
-    if (shopImage.value == null) {
-      Get.snackbar(
-        'Error',
-        'Please upload Shop image',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-      return;
-    }
+    // if (!formKey.currentState!.validate()) {
+    //   return;
+    // }
+    //
+    // // Check if all images are uploaded
+    // if (drugLicenseImage.value == null) {
+    //   Get.snackbar(
+    //     'Error',
+    //     'Please upload Drug License image',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //     backgroundColor: Colors.red,
+    //     colorText: Colors.white,
+    //   );
+    //   return;
+    // }
+    //
+    // if (tradeLicenseImage.value == null) {
+    //   Get.snackbar(
+    //     'Error',
+    //     'Please upload Trade License image',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //     backgroundColor: Colors.red,
+    //     colorText: Colors.white,
+    //   );
+    //   return;
+    // }
+    //
+    // if (nidImage.value == null) {
+    //   Get.snackbar(
+    //     'Error',
+    //     'Please upload NID image',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //     backgroundColor: Colors.red,
+    //     colorText: Colors.white,
+    //   );
+    //   return;
+    // }
+    //
+    // if (shopImage.value == null) {
+    //   Get.snackbar(
+    //     'Error',
+    //     'Please upload Shop image',
+    //     snackPosition: SnackPosition.BOTTOM,
+    //     backgroundColor: Colors.red,
+    //     colorText: Colors.white,
+    //   );
+    //   return;
+    // }
 
     try {
       isLoading.value = true;
@@ -235,17 +236,19 @@ class ProfileCompletionController extends GetxController {
 
       AppLogger.success('Profile completed successfully');
 
-      Get.snackbar(
-        'Success',
-        'Profile completed successfully! Your account is under review.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        duration: const Duration(seconds: 3),
+      InfoModal.show(
+        title: 'Congratulation',
+        description: 'Your account is reedy to use. You will be redirected to the home page in a few seconds',
+        buttonText: 'Go to Home',
+        imagePath: 'assets/images/ic_profile_success.png',
+        onPressed: () {
+          Get.back(); // Close modal
+          Get.offAllNamed(Routes.HOME); // Navigate to login
+        },
       );
 
       // Navigate to home
-      await Future.delayed(const Duration(milliseconds: 500));
+      await Future.delayed(const Duration(milliseconds: 1000));
       Get.offAllNamed(Routes.HOME);
 
     } catch (e, stackTrace) {

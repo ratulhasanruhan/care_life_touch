@@ -8,6 +8,8 @@ abstract class Routes {
   static const HOME = _Paths.HOME;
   static const LOGIN = _Paths.LOGIN;
   static const REGISTER = _Paths.REGISTER;
+  static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
+  static const FORGOT_PASSWORD_RESET = _Paths.FORGOT_PASSWORD_RESET;
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
@@ -27,6 +29,8 @@ abstract class _Paths {
   static const HOME = '/home';
   static const LOGIN = '/login';
   static const REGISTER = '/register';
+  static const FORGOT_PASSWORD = '/forgot-password';
+  static const FORGOT_PASSWORD_RESET = '/forgot-password-reset';
   static const PROFILE_COMPLETION = '/profile-completion';
   static const PRODUCT_DETAILS = '/product-details';
   static const CART = '/cart';

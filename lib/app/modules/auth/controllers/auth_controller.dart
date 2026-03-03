@@ -9,11 +9,13 @@ import '../../../global_widgets/otp_verification_dialog.dart';
 class AuthController extends GetxController {
   final isLoading = false.obs;
   final isPasswordVisible = false.obs;
+  final isConfirmPasswordVisible = false.obs;
 
   // Form controllers
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final confirmPasswordController = TextEditingController();
   final otpController = TextEditingController();
 
   // Form keys
@@ -32,6 +34,7 @@ class AuthController extends GetxController {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     otpController.dispose();
     super.onClose();
   }
@@ -39,6 +42,11 @@ class AuthController extends GetxController {
   /// Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
+  }
+
+  /// Toggle confirm password visibility
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
   }
 
   /// Register user
@@ -250,7 +258,7 @@ class AuthController extends GetxController {
     if (value == null || value.isEmpty) {
       return 'Please enter your email';
     }
-    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+    final emailRegex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(value)) {
       return 'Please enter a valid email';
     }
@@ -264,6 +272,17 @@ class AuthController extends GetxController {
     }
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
+    }
+    return null;
+  }
+
+  /// Validate confirm password
+  String? validateConfirmPassword(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Please confirm your password';
+    }
+    if (value != passwordController.text) {
+      return 'Passwords do not match';
     }
     return null;
   }
