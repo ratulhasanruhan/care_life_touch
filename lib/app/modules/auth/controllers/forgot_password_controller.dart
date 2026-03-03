@@ -223,13 +223,13 @@ class ForgotPasswordController extends GetxController {
       // );
 
       InfoModal.show(
-        title: 'Congratulation',
-        description: 'Your account is reedy to use. You will be redirected to the home page in a few seconds',
-        buttonText: 'Go to Home',
-        imagePath: 'assets/images/ic_profile_success.png',
+        title: 'Password Updated!',
+        description: 'Your password has been set up successfully.',
+        buttonText: 'Back to Log In',
+        imagePath: 'assets/images/ic_new_pass.png',
         onPressed: () {
           Get.back(); // Close modal
-          Get.offAllNamed(Routes.HOME); // Navigate to login
+          Get.offAllNamed(Routes.LOGIN); // Navigate to login
         },
       );
 
