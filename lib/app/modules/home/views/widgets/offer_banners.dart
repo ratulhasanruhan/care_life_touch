@@ -21,33 +21,37 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Carousel
-        CarouselSlider(
-          options: CarouselOptions(
-            height: 120,
-            viewportFraction: 0.88,
-            autoPlay: true,
-            enableInfiniteScroll: false,
-            autoPlayInterval: const Duration(seconds: 5),
-            autoPlayAnimationDuration: const Duration(milliseconds: 800),
-            scrollDirection: Axis.horizontal,
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentIndex = index;
-              });
-            },
-          ),
-          items: widget.banners.map((banner) {
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(4),
-                image: DecorationImage(
-                  image: AssetImage(banner),
-                  fit: BoxFit.cover,
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: CarouselSlider(
+            options: CarouselOptions(
+              height: 120,
+              viewportFraction: 0.84,
+              autoPlay: true,
+              enableInfiniteScroll: false,
+              autoPlayInterval: const Duration(seconds: 5),
+              autoPlayAnimationDuration: const Duration(milliseconds: 800),
+              scrollDirection: Axis.horizontal,
+              padEnds: false,
+              onPageChanged: (index, reason) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+            ),
+            items: widget.banners.map((banner) {
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(4),
+                  image: DecorationImage(
+                    image: AssetImage(banner),
+                    fit: BoxFit.cover,
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
+              );
+            }).toList(),
+          ),
         ),
 
         const SizedBox(height: 12),
@@ -62,6 +66,7 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
               dotHeight: 6,
               dotWidth: 6,
               spacing: 4,
+              expansionFactor: 3.5,
               activeDotColor: Color(0xFF064E36),
               dotColor: Color(0xFFDDDDDD),
             ),

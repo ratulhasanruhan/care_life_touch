@@ -48,6 +48,7 @@ class OnboardingView extends GetView<OnboardingController> {
                         dotHeight: 6,
                         dotWidth: 6,
                         spacing: 4,
+                        expansionFactor: 3.5,
                         activeDotColor: AppColors.primary,
                         dotColor: AppColors.lightGrey,
                         paintStyle: PaintingStyle.fill,

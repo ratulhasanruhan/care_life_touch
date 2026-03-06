@@ -20,23 +20,34 @@ class SectionHeader extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF01060F),
+          Expanded(
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF01060F),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                if (extra != null) ...[
+                  const SizedBox(width: 8),
+                  extra!,
+                ],
+              ],
             ),
           ),
-          if (extra != null)
-            extra!
-          else if (onViewAll != null)
+          if (onViewAll != null)
             GestureDetector(
               onTap: onViewAll,
               child: const Text(
                 'View All',
                 style: TextStyle(
-                  fontFamily: 'DM Sans',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
                   color: Color(0xFF064E36),
@@ -71,7 +82,6 @@ class OfferTimer extends StatelessWidget {
           Text(
             time,
             style: const TextStyle(
-              fontFamily: 'DM Sans',
               fontSize: 12,
               fontWeight: FontWeight.w400,
               color: Colors.white,

@@ -73,7 +73,9 @@ class HomeView extends GetView<HomeController> {
                           );
                         },
                       ),
-                      const SizedBox(height: 12),
+
+                      const SizedBox(height: 10),
+
                       _buildProductGrid(controller.trendingProducts),
 
                       const SizedBox(height: 16),
@@ -148,7 +150,8 @@ class HomeView extends GetView<HomeController> {
   Widget _buildOfferBanners() {
     final banners = [
       'assets/demo/banner_1.png',
-      'assets/demo/banner_2.png'
+      'assets/demo/banner_2.png',
+      'assets/demo/banner_1.png',
     ];
 
     return OfferBannersCarousel(banners: banners);
@@ -159,6 +162,8 @@ class HomeView extends GetView<HomeController> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: GridView.builder(
+        padding: EdgeInsets.zero,
+        primary: false,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
