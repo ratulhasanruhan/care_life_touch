@@ -38,7 +38,9 @@ class User extends BaseModel {
       address: json['address'],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
-          : (json['created_at'] != null ? DateTime.tryParse(json['created_at']) : null),
+          : (json['created_at'] != null
+                ? DateTime.tryParse(json['created_at'])
+                : null),
     );
   }
 
@@ -76,4 +78,3 @@ class User extends BaseModel {
     );
   }
 }
-

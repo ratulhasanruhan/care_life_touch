@@ -46,12 +46,17 @@ class Medicine extends BaseModel {
       price: (json['price'] ?? 0).toDouble(),
       category: json['category'] ?? '',
       imageUrl: json['imageUrl'] ?? json['image_url'] ?? '',
-      isPrescriptionRequired: json['isPrescriptionRequired'] ?? json['is_prescription_required'] ?? false,
+      isPrescriptionRequired:
+          json['isPrescriptionRequired'] ??
+          json['is_prescription_required'] ??
+          false,
       stockQuantity: json['stockQuantity'] ?? json['stock_quantity'] ?? 0,
       manufacturer: json['manufacturer'] ?? '',
       expiryDate: json['expiryDate'] != null
           ? DateTime.tryParse(json['expiryDate'])
-          : (json['expiry_date'] != null ? DateTime.tryParse(json['expiry_date']) : null),
+          : (json['expiry_date'] != null
+                ? DateTime.tryParse(json['expiry_date'])
+                : null),
       tags: json['tags'] != null ? List<String>.from(json['tags']) : null,
     );
   }
@@ -103,7 +108,8 @@ class Medicine extends BaseModel {
       price: price ?? this.price,
       category: category ?? this.category,
       imageUrl: imageUrl ?? this.imageUrl,
-      isPrescriptionRequired: isPrescriptionRequired ?? this.isPrescriptionRequired,
+      isPrescriptionRequired:
+          isPrescriptionRequired ?? this.isPrescriptionRequired,
       stockQuantity: stockQuantity ?? this.stockQuantity,
       manufacturer: manufacturer ?? this.manufacturer,
       expiryDate: expiryDate ?? this.expiryDate,
@@ -111,4 +117,3 @@ class Medicine extends BaseModel {
     );
   }
 }
-

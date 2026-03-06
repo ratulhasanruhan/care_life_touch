@@ -89,7 +89,9 @@ class CategoriesList extends StatelessWidget {
         itemBuilder: (context, index) {
           final category = categories[index];
           return Container(
-            margin: EdgeInsets.only(right: index < categories.length - 1 ? 10 : 0),
+            margin: EdgeInsets.only(
+              right: index < categories.length - 1 ? 10 : 0,
+            ),
             child: CategoryItem(
               name: category['name']!,
               imagePath: category['image']!,
@@ -101,4 +103,3 @@ class CategoriesList extends StatelessWidget {
     );
   }
 }
-

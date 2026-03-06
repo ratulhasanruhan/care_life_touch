@@ -159,7 +159,9 @@ class AuthController extends GetxController {
       // );
 
       // Save auth data
-      await _storage.saveToken('demo_token_${DateTime.now().millisecondsSinceEpoch}');
+      await _storage.saveToken(
+        'demo_token_${DateTime.now().millisecondsSinceEpoch}',
+      );
       await _storage.saveUser({
         'shopName': shopNameController.text,
         'ownerName': ownerNameController.text,
@@ -192,7 +194,6 @@ class AuthController extends GetxController {
         ),
         barrierDismissible: false,
       );
-
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
       Get.snackbar(
@@ -259,7 +260,9 @@ class AuthController extends GetxController {
         otpVerified.value = true;
 
         // Save auth token
-        await _storage.saveToken('demo_token_${DateTime.now().millisecondsSinceEpoch}');
+        await _storage.saveToken(
+          'demo_token_${DateTime.now().millisecondsSinceEpoch}',
+        );
 
         AppLogger.success('Registration OTP verified successfully');
 
@@ -268,7 +271,8 @@ class AuthController extends GetxController {
         // Show success modal
         InfoModal.show(
           title: 'Congratulations!',
-          description: 'Your registration is complete. Your account is now ready to use.',
+          description:
+              'Your registration is complete. Your account is now ready to use.',
           buttonText: 'Go to Home',
           imagePath: 'assets/images/ic_profile_success.png',
           onPressed: () {
@@ -279,7 +283,6 @@ class AuthController extends GetxController {
       } else {
         throw Exception('Invalid OTP');
       }
-
     } catch (e, stackTrace) {
       AppLogger.error('Registration OTP verification failed', e, stackTrace);
       Get.snackbar(
@@ -325,7 +328,9 @@ class AuthController extends GetxController {
         otpVerified.value = true;
 
         // Save auth data
-        await _storage.saveToken('demo_token_${DateTime.now().millisecondsSinceEpoch}');
+        await _storage.saveToken(
+          'demo_token_${DateTime.now().millisecondsSinceEpoch}',
+        );
         await _storage.saveUser({
           'name': nameController.text,
           'email': emailController.text,
@@ -349,7 +354,6 @@ class AuthController extends GetxController {
       } else {
         throw Exception('Invalid OTP');
       }
-
     } catch (e, stackTrace) {
       AppLogger.error('OTP verification failed', e, stackTrace);
       Get.snackbar(
@@ -540,7 +544,10 @@ class AuthController extends GetxController {
             ),
 
             ListTile(
-              leading: const Icon(Icons.photo_library, color: Color(0xFF064E36)),
+              leading: const Icon(
+                Icons.photo_library,
+                color: Color(0xFF064E36),
+              ),
               title: const Text('Gallery'),
               onTap: () => Get.back(result: ImageSource.gallery),
             ),
@@ -576,5 +583,3 @@ class AuthController extends GetxController {
     AppLogger.info('Image removed: $imageType');
   }
 }
-
-

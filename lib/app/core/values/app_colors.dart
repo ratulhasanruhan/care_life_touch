@@ -90,6 +90,3 @@ class AppColors {
   static const grey = secondary200; // 0xFF5A5B61
   static const lightGrey = line; // 0xFFE8EAEB
 }
-
-
-

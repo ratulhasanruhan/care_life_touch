@@ -4,10 +4,10 @@ import 'package:pinput/pinput.dart';
 import '../core/values/app_colors.dart';
 
 /// OTP Verification Dialog Widget
-/// 
+///
 /// A reusable dialog for OTP verification that can be used across different flows
 /// like registration, forgot password, phone verification, etc.
-/// 
+///
 /// Features:
 /// - Clean Material Design with rounded corners
 /// - Back button for navigation
@@ -15,7 +15,7 @@ import '../core/values/app_colors.dart';
 /// - 6-digit OTP input using Pinput package
 /// - Resend timer with countdown
 /// - Auto-submit on completion
-/// 
+///
 /// Example Usage:
 /// ```dart
 /// // In Registration Flow
@@ -33,7 +33,7 @@ import '../core/values/app_colors.dart';
 ///   isLoading: authController.isLoading,
 ///   otpLength: 6,
 /// );
-/// 
+///
 /// // In Forgot Password Flow
 /// OTPVerificationDialog.show(
 ///   email: forgotPasswordEmail,
@@ -70,9 +70,7 @@ class OTPVerificationDialog extends StatelessWidget {
     final otpController = TextEditingController();
 
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       child: Container(
         width: 358,
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -300,7 +298,3 @@ class OTPVerificationDialog extends StatelessWidget {
     );
   }
 }
-
-
-
-

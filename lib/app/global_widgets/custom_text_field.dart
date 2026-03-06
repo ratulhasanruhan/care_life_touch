@@ -54,12 +54,14 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: isRTL ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+      crossAxisAlignment: isRTL
+          ? CrossAxisAlignment.end
+          : CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
         // Label
         if (labelText != null)
-            Padding(
+          Padding(
             padding: const EdgeInsets.only(bottom: 8),
             child: Text(
               labelText!,
@@ -87,8 +89,27 @@ class CustomTextField extends StatelessWidget {
               height: 1.5,
               color: Color(0xFFA2A8AF),
             ),
-            prefixIcon: isRTL ? null : (prefixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: prefixIcon!) : null),
-            suffixIcon: isRTL ? (prefixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: prefixIcon!) : null) : (suffixIcon != null ? IconTheme(data: const IconThemeData(color: AppColors.inner), child: suffixIcon!) : null),
+            prefixIcon: isRTL
+                ? null
+                : (prefixIcon != null
+                      ? IconTheme(
+                          data: const IconThemeData(color: AppColors.inner),
+                          child: prefixIcon!,
+                        )
+                      : null),
+            suffixIcon: isRTL
+                ? (prefixIcon != null
+                      ? IconTheme(
+                          data: const IconThemeData(color: AppColors.inner),
+                          child: prefixIcon!,
+                        )
+                      : null)
+                : (suffixIcon != null
+                      ? IconTheme(
+                          data: const IconThemeData(color: AppColors.inner),
+                          child: suffixIcon!,
+                        )
+                      : null),
             filled: true,
             fillColor: AppColors.white,
 
@@ -107,7 +128,10 @@ class CustomTextField extends StatelessWidget {
             // Focused border (Active state)
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(2),
-              borderSide: const BorderSide(color: AppColors.primary500, width: 1),
+              borderSide: const BorderSide(
+                color: AppColors.primary500,
+                width: 1,
+              ),
             ),
 
             // Error border
@@ -119,11 +143,17 @@ class CustomTextField extends StatelessWidget {
             // Focused error border
             focusedErrorBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(2),
-              borderSide: const BorderSide(color: AppColors.primary500, width: 1),
+              borderSide: const BorderSide(
+                color: AppColors.primary500,
+                width: 1,
+              ),
               // Shadow for typing state with error
             ),
 
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
 
             // Remove helper text padding if not needed
             helperText: helperText,
@@ -181,4 +211,3 @@ class CustomTextField extends StatelessWidget {
     );
   }
 }
-

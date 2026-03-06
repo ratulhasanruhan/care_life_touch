@@ -33,9 +33,7 @@ class HomeView extends GetView<HomeController> {
             child: Obx(() {
               if (controller.isLoading.value) {
                 return const Center(
-                  child: CircularProgressIndicator(
-                    color: Color(0xFF064E36),
-                  ),
+                  child: CircularProgressIndicator(color: Color(0xFF064E36)),
                 );
               }
 
@@ -69,7 +67,10 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'Trending Products',
                         onViewAll: () {
-                          Get.snackbar('Trending', 'View all trending products');
+                          Get.snackbar(
+                            'Trending',
+                            'View all trending products',
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
@@ -142,14 +143,8 @@ class HomeView extends GetView<HomeController> {
   /// Offer banners carousel
   Widget _buildOfferBanners() {
     final banners = [
-      {
-        'image': 'assets/demo/banner_1.png',
-        'text': '30% Off',
-      },
-      {
-        'image': 'assets/demo/banner_2.png',
-        'text': '',
-      },
+      {'image': 'assets/demo/banner_1.png', 'text': '30% Off'},
+      {'image': 'assets/demo/banner_2.png', 'text': ''},
     ];
 
     return OfferBannersCarousel(banners: banners);
@@ -185,7 +180,10 @@ class HomeView extends GetView<HomeController> {
       {'name': 'Incepta\nPharmaceu...', 'image': 'assets/demo/company_1.png'},
       {'name': 'ACME\nPharmaceu...', 'image': 'assets/demo/company_2.png'},
       {'name': 'Opsonin\nPharmaceu...', 'image': 'assets/demo/company_3.png'},
-      {'name': 'Aristopharma\nPharmaceu...', 'image': 'assets/demo/company_4.png'},
+      {
+        'name': 'Aristopharma\nPharmaceu...',
+        'image': 'assets/demo/company_4.png',
+      },
     ];
 
     return SizedBox(
@@ -245,4 +243,3 @@ class HomeView extends GetView<HomeController> {
     );
   }
 }
-

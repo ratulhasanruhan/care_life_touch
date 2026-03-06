@@ -51,10 +51,7 @@ class OfferBanner extends StatelessWidget {
 class OfferBannersCarousel extends StatefulWidget {
   final List<Map<String, String>> banners;
 
-  const OfferBannersCarousel({
-    super.key,
-    required this.banners,
-  });
+  const OfferBannersCarousel({super.key, required this.banners});
 
   @override
   State<OfferBannersCarousel> createState() => _OfferBannersCarouselState();
@@ -125,4 +122,3 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
     );
   }
 }
-

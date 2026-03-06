@@ -46,8 +46,7 @@ class TermsRichText extends StatelessWidget {
               fontWeight: FontWeight.w600,
               decoration: TextDecoration.underline,
             ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = onTermsTapped,
+            recognizer: TapGestureRecognizer()..onTap = onTermsTapped,
           ),
           const TextSpan(text: ' and '),
           TextSpan(
@@ -57,12 +56,10 @@ class TermsRichText extends StatelessWidget {
               fontWeight: FontWeight.w600,
               decoration: TextDecoration.underline,
             ),
-            recognizer: TapGestureRecognizer()
-              ..onTap = onPrivacyTapped,
+            recognizer: TapGestureRecognizer()..onTap = onPrivacyTapped,
           ),
         ],
       ),
     );
   }
 }
-

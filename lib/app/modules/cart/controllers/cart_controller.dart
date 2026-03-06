@@ -11,7 +11,9 @@ class CartController extends GetxController {
   int get itemCount => cartItems.fold(0, (sum, item) => sum + item.quantity);
 
   double get subtotal => cartItems.fold(
-      0.0, (sum, item) => sum + (item.product.price * item.quantity));
+    0.0,
+    (sum, item) => sum + (item.product.price * item.quantity),
+  );
 
   double get deliveryFee => subtotal > 500 ? 0.0 : 50.0;
 
@@ -79,9 +81,7 @@ class CartController extends GetxController {
 
   /// Increase quantity
   void increaseQuantity(String productId) {
-    final index = cartItems.indexWhere(
-      (item) => item.product.id == productId,
-    );
+    final index = cartItems.indexWhere((item) => item.product.id == productId);
 
     if (index != -1) {
       cartItems[index].quantity++;
@@ -91,9 +91,7 @@ class CartController extends GetxController {
 
   /// Decrease quantity
   void decreaseQuantity(String productId) {
-    final index = cartItems.indexWhere(
-      (item) => item.product.id == productId,
-    );
+    final index = cartItems.indexWhere((item) => item.product.id == productId);
 
     if (index != -1) {
       if (cartItems[index].quantity > 1) {
@@ -130,10 +128,5 @@ class CartItem {
   final ProductModel product;
   int quantity;
 
-  CartItem({
-    required this.product,
-    required this.quantity,
-  });
+  CartItem({required this.product, required this.quantity});
 }
-
-

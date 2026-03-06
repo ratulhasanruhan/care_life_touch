@@ -16,9 +16,7 @@ class SplashView extends StatelessWidget {
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(40),
-                  child: Image.asset(
-                    'assets/images/splash_icon.png',
-                  ),
+                  child: Image.asset('assets/images/splash_icon.png'),
                 ),
               ),
             ),
@@ -42,4 +40,3 @@ class SplashView extends StatelessWidget {
     );
   }
 }
-

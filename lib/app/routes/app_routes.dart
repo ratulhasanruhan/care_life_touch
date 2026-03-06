@@ -37,4 +37,3 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   // Add more paths as needed
 }
-

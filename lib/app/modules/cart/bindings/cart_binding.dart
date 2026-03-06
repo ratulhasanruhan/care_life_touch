@@ -8,4 +8,3 @@ class CartBinding extends Bindings {
     Get.lazyPut<CartController>(() => CartController());
   }
 }
-

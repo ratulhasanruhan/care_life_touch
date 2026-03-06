@@ -88,5 +88,3 @@ class StorageService extends GetxService {
     await removeUser();
   }
 }
-
-

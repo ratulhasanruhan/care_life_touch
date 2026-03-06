@@ -44,26 +44,16 @@ class ShellView extends GetView<ShellController> {
   /// Placeholder for Products section
   Widget _buildProductsPlaceholder() {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Products'),
-      ),
-      body: const Center(
-        child: Text('Products Section'),
-      ),
+      appBar: AppBar(title: const Text('Products')),
+      body: const Center(child: Text('Products Section')),
     );
   }
-
 
   /// Placeholder for Profile section
   Widget _buildProfilePlaceholder() {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('More'),
-      ),
-      body: const Center(
-        child: Text('Profile Section'),
-      ),
+      appBar: AppBar(title: const Text('More')),
+      body: const Center(child: Text('Profile Section')),
     );
   }
 }
-

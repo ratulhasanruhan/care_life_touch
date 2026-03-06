@@ -10,9 +10,7 @@ class TermsView extends GetView<LegalController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PrimaryAppBar(
-        title: 'Terms of Service',
-      ),
+      appBar: PrimaryAppBar(title: 'Terms of Service'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -59,10 +57,7 @@ class TermsView extends GetView<LegalController> {
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required String content,
-  }) {
+  Widget _buildSection({required String title, required String content}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -91,4 +86,3 @@ class TermsView extends GetView<LegalController> {
     );
   }
 }
-

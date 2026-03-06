@@ -174,7 +174,8 @@ class CartView extends GetView<CartController> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => controller.decreaseQuantity(item.product.id),
+                      onPressed: () =>
+                          controller.decreaseQuantity(item.product.id),
                       icon: const Icon(Icons.remove, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -195,7 +196,8 @@ class CartView extends GetView<CartController> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () => controller.increaseQuantity(item.product.id),
+                      onPressed: () =>
+                          controller.increaseQuantity(item.product.id),
                       icon: const Icon(Icons.add, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -228,9 +230,7 @@ class CartView extends GetView<CartController> {
       padding: const EdgeInsets.all(20),
       decoration: const BoxDecoration(
         color: Colors.white,
-        border: Border(
-          top: BorderSide(color: Color(0xFFE8EAE8)),
-        ),
+        border: Border(top: BorderSide(color: Color(0xFFE8EAE8))),
       ),
       child: SafeArea(
         child: Column(
@@ -352,4 +352,3 @@ class CartView extends GetView<CartController> {
     );
   }
 }
-

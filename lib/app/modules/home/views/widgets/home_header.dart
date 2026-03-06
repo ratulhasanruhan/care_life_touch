@@ -33,13 +33,9 @@ class HomeHeader extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           child: Column(
             children: [
-              SvgPicture.asset(
-                'svg/ic_location.svg'
-              ),
-
               // Location and Notification Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -49,9 +45,16 @@ class HomeHeader extends StatelessWidget {
                     onTap: onLocationTap,
                     child: Row(
                       children: [
-                        Icon(
-                          Icons.location_on_outlined
+                        SvgPicture.asset(
+                          'assets/svg/ic_location.svg',
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                          width: 26,
+                          height: 26,
                         ),
+                        const SizedBox(width: 8),
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -60,22 +63,23 @@ class HomeHeader extends StatelessWidget {
                                 Text(
                                   'Deliver to',
                                   style: TextStyle(
-                                    fontFamily: 'DM Sans',
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.white,
                                   ),
                                 ),
                                 SizedBox(width: 4),
-                                Icon(Icons.keyboard_arrow_down,
-                                    color: Colors.white, size: 16),
+                                Icon(
+                                  Icons.keyboard_arrow_down,
+                                  color: Colors.white,
+                                  size: 16,
+                                ),
                               ],
                             ),
                             const SizedBox(height: 2),
                             const Text(
                               'Jessore Khulna, Bangladesh',
                               style: TextStyle(
-                                fontFamily: 'DM Sans',
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.white,
@@ -93,79 +97,65 @@ class HomeHeader extends StatelessWidget {
                     child: Container(
                       width: 40,
                       height: 40,
+                      padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.1),
+                        color: Colors.white.withValues(alpha: 0.1),
                         shape: BoxShape.circle,
                       ),
-                      child: Stack(
-                        children: [
-                          const Center(
-                            child: Icon(
-                              Icons.notifications_outlined,
-                              color: Colors.white,
-                              size: 24,
-                            ),
-                          ),
-                          // Notification Badge
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Container(
-                              width: 8,
-                              height: 8,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFEAB308),
-                                shape: BoxShape.circle,
-                                border: Border.fromBorderSide(
-                                  BorderSide(color: Colors.white, width: 1),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                      child: SvgPicture.asset('assets/svg/ic_notification.svg'),
                     ),
                   ),
                 ],
               ),
-
               const SizedBox(height: 16),
 
-              // Search Bar
-              Container(
-                height: 44,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
+              TextField(
+                onChanged: onSearch,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Colors.white,
                 ),
-                child: TextField(
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'DM Sans',
+                decoration: InputDecoration(
+                  isDense: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  filled: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  focusedErrorBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: BorderSide.none,
+                  ),
+                  hintText: 'Search Your Needs...',
+                  fillColor: Colors.white.withValues(alpha: 0.1),
+                  hintStyle: const TextStyle(
                     fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFFA2A8AF),
                   ),
-                  decoration: const InputDecoration(
-                    hintText: 'Search Your Needs...',
-                    hintStyle: TextStyle(
-                      color: Color(0xFFA2A8AF),
-                      fontFamily: 'DM Sans',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                    ),
-                    prefixIcon: Icon(
-                      Icons.search,
-                      color: Color(0xFFA2A8AF),
-                      size: 20,
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: Color(0xFFA2A8AF),
+                    size: 20,
                   ),
-                  onSubmitted: onSearch,
                 ),
               ),
-              const SizedBox(height: 22),
+
+              const SizedBox(height: 18),
             ],
           ),
         ),
@@ -173,4 +163,3 @@ class HomeHeader extends StatelessWidget {
     );
   }
 }
-

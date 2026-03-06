@@ -61,39 +61,45 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 const SizedBox(height: 32),
 
                 // Confirm button
-                Obx(() => CustomButton(
-                  text: 'Confirm',
-                  onPressed: controller.isLoading.value
-                    ? null
-                    : () {
-                      if (!controller.emailFormKey.currentState!.validate()) {
-                        return;
-                      }
-                      controller.sendPasswordResetOTP();
-                      // Show OTP dialog
-                      Future.delayed(const Duration(milliseconds: 500), () {
-                        OTPVerificationDialog.show(
-                          email: controller.emailController.text,
-                          onVerify: (pin) {
-                            controller.verifyPasswordResetOTP(pin);
+                Obx(
+                  () => CustomButton(
+                    text: 'Confirm',
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            if (!controller.emailFormKey.currentState!
+                                .validate()) {
+                              return;
+                            }
+                            controller.sendPasswordResetOTP();
+                            // Show OTP dialog
+                            Future.delayed(
+                              const Duration(milliseconds: 500),
+                              () {
+                                OTPVerificationDialog.show(
+                                  email: controller.emailController.text,
+                                  onVerify: (pin) {
+                                    controller.verifyPasswordResetOTP(pin);
+                                  },
+                                  onResend: () {
+                                    controller.resendPasswordResetOTP();
+                                  },
+                                  onEdit: () {
+                                    Get.back();
+                                    controller.otpSent.value = false;
+                                  },
+                                  resendTimer: controller.resendTimer,
+                                  isLoading: controller.isLoading,
+                                  otpLength: 6,
+                                );
+                              },
+                            );
                           },
-                          onResend: () {
-                            controller.resendPasswordResetOTP();
-                          },
-                          onEdit: () {
-                            Get.back();
-                            controller.otpSent.value = false;
-                          },
-                          resendTimer: controller.resendTimer,
-                          isLoading: controller.isLoading,
-                          otpLength: 6,
-                        );
-                      });
-                    },
-                  isLoading: controller.isLoading.value,
-                  fullWidth: true,
-                  size: ButtonSize.large,
-                )),
+                    isLoading: controller.isLoading.value,
+                    fullWidth: true,
+                    size: ButtonSize.large,
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Back to login
@@ -116,6 +122,3 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
     );
   }
 }
-
-
-

@@ -93,43 +93,47 @@ class RegisterView extends GetView<AuthController> {
                 const SizedBox(height: 16),
 
                 // Password field
-                Obx(() => CustomTextField(
-                  controller: controller.passwordController,
-                  hintText: 'Enter Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  obscureText: !controller.isPasswordVisible.value,
-                  validator: controller.validatePassword,
-                  textInputAction: TextInputAction.next,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.passwordController,
+                    hintText: 'Enter Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible.value,
+                    validator: controller.validatePassword,
+                    textInputAction: TextInputAction.next,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                      ),
+                      onPressed: controller.togglePasswordVisibility,
                     ),
-                    onPressed: controller.togglePasswordVisibility,
                   ),
-                )),
+                ),
                 const SizedBox(height: 16),
 
                 // Confirm Password field
-                Obx(() => CustomTextField(
-                  controller: controller.confirmPasswordController,
-                  hintText: 'Retype your Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  obscureText: !controller.isConfirmPasswordVisible.value,
-                  validator: controller.validateConfirmPassword,
-                  textInputAction: TextInputAction.done,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isConfirmPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      size: 20,
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.confirmPasswordController,
+                    hintText: 'Retype your Password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isConfirmPasswordVisible.value,
+                    validator: controller.validateConfirmPassword,
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isConfirmPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        size: 20,
+                      ),
+                      onPressed: controller.toggleConfirmPasswordVisibility,
                     ),
-                    onPressed: controller.toggleConfirmPasswordVisibility,
                   ),
-                )),
+                ),
                 const SizedBox(height: 24),
 
                 // Drug License Upload
@@ -165,13 +169,17 @@ class RegisterView extends GetView<AuthController> {
                 const SizedBox(height: 24),
 
                 // Register button (inside scrollable content)
-                Obx(() => CustomButton(
-                  text: 'Confirm',
-                  onPressed: controller.isLoading.value ? null : controller.register,
-                  isLoading: controller.isLoading.value,
-                  fullWidth: true,
-                  size: ButtonSize.large,
-                )),
+                Obx(
+                  () => CustomButton(
+                    text: 'Confirm',
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : controller.register,
+                    isLoading: controller.isLoading.value,
+                    fullWidth: true,
+                    size: ButtonSize.large,
+                  ),
+                ),
                 const SizedBox(height: 16),
 
                 // Login link
@@ -318,4 +326,3 @@ class RegisterView extends GetView<AuthController> {
     );
   }
 }
-

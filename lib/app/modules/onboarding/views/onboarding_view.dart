@@ -33,7 +33,10 @@ class OnboardingView extends GetView<OnboardingController> {
               left: 0,
               right: 0,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 24,
+                ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -94,20 +97,14 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildOnboardingPage(dynamic page) {
     return Column(
       children: [
-        SizedBox(
-          height: Get.height * 0.2,
-        ),
+        SizedBox(height: Get.height * 0.2),
         // Image
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: Image.asset(
-              page.image,
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset(page.image, fit: BoxFit.contain),
           ),
         ),
-
 
         // Title
         Padding(
@@ -140,9 +137,7 @@ class OnboardingView extends GetView<OnboardingController> {
             ),
           ),
         ),
-
       ],
     );
   }
 }
-

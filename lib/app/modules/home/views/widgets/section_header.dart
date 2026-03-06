@@ -53,10 +53,7 @@ class SectionHeader extends StatelessWidget {
 class OfferTimer extends StatelessWidget {
   final String time;
 
-  const OfferTimer({
-    super.key,
-    this.time = '12:12:30',
-  });
+  const OfferTimer({super.key, this.time = '12:12:30'});
 
   @override
   Widget build(BuildContext context) {
@@ -85,4 +82,3 @@ class OfferTimer extends StatelessWidget {
     );
   }
 }
-

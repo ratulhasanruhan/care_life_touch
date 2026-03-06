@@ -27,4 +27,3 @@ class LegalController extends GetxController {
     super.onClose();
   }
 }
-

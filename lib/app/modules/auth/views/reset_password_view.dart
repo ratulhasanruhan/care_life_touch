@@ -51,70 +51,79 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
                 const SizedBox(height: 40),
 
                 // New Password field
-                Obx(() => CustomTextField(
-                  controller: controller.newPasswordController,
-                  hintText: 'Enter your new password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  obscureText: !controller.isPasswordVisible.value,
-                  validator: controller.validatePassword,
-                  textInputAction: TextInputAction.next,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.inner,
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.newPasswordController,
+                    hintText: 'Enter your new password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible.value,
+                    validator: controller.validatePassword,
+                    textInputAction: TextInputAction.next,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AppColors.inner,
+                      ),
+                      onPressed: controller.togglePasswordVisibility,
                     ),
-                    onPressed: controller.togglePasswordVisibility,
                   ),
-                )),
+                ),
                 const SizedBox(height: 20),
 
                 // Confirm Password field
-                Obx(() => CustomTextField(
-                  controller: controller.confirmPasswordController,
-                  hintText: 'Confirm your password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  obscureText: !controller.isConfirmPasswordVisible.value,
-                  validator: controller.validateConfirmPassword,
-                  textInputAction: TextInputAction.done,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isConfirmPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.inner,
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.confirmPasswordController,
+                    hintText: 'Confirm your password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isConfirmPasswordVisible.value,
+                    validator: controller.validateConfirmPassword,
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isConfirmPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AppColors.inner,
+                      ),
+                      onPressed: controller.toggleConfirmPasswordVisibility,
                     ),
-                    onPressed: controller.toggleConfirmPasswordVisibility,
                   ),
-                )),
+                ),
                 const SizedBox(height: 32),
 
                 // Reset Password button
-                Obx(() => CustomButton(
-                  text: 'Save',
-                  onPressed: controller.isLoading.value
-                    ? null
-                    : () async {
-                      await controller.resetPassword();
-                      // Show success modal
-                      if (!controller.isLoading.value) {
-                        await InfoModal.show(
-                          title: 'Password Updated!',
-                          description: 'Your password has been set up successfully.',
-                          buttonText: 'Back to Log In',
-                          imagePath: 'assets/images/ic_new_pass.png',
-                          onPressed: () {
-                            Get.back(); // Close modal
-                            Get.offAllNamed(Routes.LOGIN); // Navigate to login
+                Obx(
+                  () => CustomButton(
+                    text: 'Save',
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () async {
+                            await controller.resetPassword();
+                            // Show success modal
+                            if (!controller.isLoading.value) {
+                              await InfoModal.show(
+                                title: 'Password Updated!',
+                                description:
+                                    'Your password has been set up successfully.',
+                                buttonText: 'Back to Log In',
+                                imagePath: 'assets/images/ic_new_pass.png',
+                                onPressed: () {
+                                  Get.back(); // Close modal
+                                  Get.offAllNamed(
+                                    Routes.LOGIN,
+                                  ); // Navigate to login
+                                },
+                              );
+                            }
                           },
-                        );
-                      }
-                    },
-                  isLoading: controller.isLoading.value,
-                  fullWidth: true,
-                  size: ButtonSize.large,
-                )),
+                    isLoading: controller.isLoading.value,
+                    fullWidth: true,
+                    size: ButtonSize.large,
+                  ),
+                ),
               ],
             ),
           ),
@@ -123,4 +132,3 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
     );
   }
 }
-

@@ -28,7 +28,6 @@ class ForgotPasswordController extends GetxController {
   // Current email for password reset
   final resetEmail = ''.obs;
 
-
   @override
   void onInit() {
     super.onInit();
@@ -110,8 +109,6 @@ class ForgotPasswordController extends GetxController {
       _startResendTimer();
 
       AppLogger.success('Password reset OTP sent successfully');
-
-
     } catch (e, stackTrace) {
       AppLogger.error('Failed to send OTP', e, stackTrace);
       Get.snackbar(
@@ -148,10 +145,10 @@ class ForgotPasswordController extends GetxController {
 
       // Close OTP dialog and navigate to new password screen
       Get.back(); // Close dialog
-      Get.toNamed(Routes.FORGOT_PASSWORD_RESET, arguments: {
-        'email': resetEmail.value,
-      });
-
+      Get.toNamed(
+        Routes.FORGOT_PASSWORD_RESET,
+        arguments: {'email': resetEmail.value},
+      );
     } catch (e, stackTrace) {
       AppLogger.error('OTP verification failed', e, stackTrace);
       Get.snackbar(
@@ -189,7 +186,6 @@ class ForgotPasswordController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-
     } catch (e, stackTrace) {
       AppLogger.error('Failed to resend OTP', e, stackTrace);
       Get.snackbar(
@@ -234,8 +230,6 @@ class ForgotPasswordController extends GetxController {
       );
 
       AppLogger.success('Password reset successfully');
-
-
     } catch (e, stackTrace) {
       AppLogger.error('Password reset failed', e, stackTrace);
       Get.snackbar(
@@ -260,4 +254,3 @@ class ForgotPasswordController extends GetxController {
     });
   }
 }
-

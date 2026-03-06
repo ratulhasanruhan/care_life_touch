@@ -100,4 +100,3 @@ class ApiProvider extends GetConnect {
     }
   }
 }
-

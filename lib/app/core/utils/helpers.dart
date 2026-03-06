@@ -134,4 +134,3 @@ class AppHelpers {
     return result ?? false;
   }
 }
-

@@ -17,5 +17,3 @@ class SplashController extends GetxController {
     Get.offNamed(Routes.ONBOARDING);
   }
 }
-
-

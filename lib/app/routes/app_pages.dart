@@ -62,4 +62,3 @@ class AppPages {
     // Add more routes here as you create modules
   ];
 }
-

@@ -16,17 +16,19 @@ final List<OnboardingPage> onboardingPages = [
   OnboardingPage(
     image: 'assets/images/onboard_1.png',
     title: 'Trusted Medical Knowledge',
-    subtitle: 'Access accurate, evidence based health information anytime, anywhere.',
+    subtitle:
+        'Access accurate, evidence based health information anytime, anywhere.',
   ),
   OnboardingPage(
     image: 'assets/images/onboard_2.png',
     title: 'Authentic Medicines Delivered',
-    subtitle: 'Order verified medicines and healthcare products with secure, reliable delivery.',
+    subtitle:
+        'Order verified medicines and healthcare products with secure, reliable delivery.',
   ),
   OnboardingPage(
     image: 'assets/images/onboard_3.png',
     title: 'Your Complete Health Platform',
-    subtitle: 'Manage your health with trusted information and seamless medical shopping.',
+    subtitle:
+        'Manage your health with trusted information and seamless medical shopping.',
   ),
 ];
-

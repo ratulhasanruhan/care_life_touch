@@ -37,7 +37,7 @@ class HomeController extends GetxController {
 
       // Simulate API call
       await Future.delayed(const Duration(seconds: 1));
-      
+
       // TODO: Replace with actual API call
       // final products = await productRepository.getTrendingProducts();
       // trendingProducts.value = products;
@@ -67,7 +67,9 @@ class HomeController extends GetxController {
         maxPrice: 150,
         moq: '20 Box',
         rating: 4.9,
-        imagePath: isEven ? 'assets/demo/product_1.png' : 'assets/demo/product_2.png',
+        imagePath: isEven
+            ? 'assets/demo/product_1.png'
+            : 'assets/demo/product_2.png',
         hasOffer: hasOffer && isEven,
         offerLabel: 'SALE',
       );
@@ -96,7 +98,8 @@ class HomeController extends GetxController {
   void _showLocationSettingsModal() {
     InfoModal.show(
       title: 'Enable Location Access',
-      description: 'Location access has been disabled. Please enable it in app settings to provide better delivery estimates.',
+      description:
+          'Location access has been disabled. Please enable it in app settings to provide better delivery estimates.',
       buttonText: 'Open Settings',
       imagePath: 'assets/images/ic_location_access.png',
       onPressed: () {

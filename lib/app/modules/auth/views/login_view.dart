@@ -60,23 +60,25 @@ class LoginView extends GetView<AuthController> {
                 const SizedBox(height: 20),
 
                 // Password field
-                Obx(() => CustomTextField(
-                  controller: controller.passwordController,
-                  hintText: 'Enter your password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  obscureText: !controller.isPasswordVisible.value,
-                  validator: controller.validatePassword,
-                  textInputAction: TextInputAction.done,
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      controller.isPasswordVisible.value
-                          ? Icons.visibility_outlined
-                          : Icons.visibility_off_outlined,
-                      color: AppColors.inner,
+                Obx(
+                  () => CustomTextField(
+                    controller: controller.passwordController,
+                    hintText: 'Enter your password',
+                    prefixIcon: const Icon(Icons.lock_outline),
+                    obscureText: !controller.isPasswordVisible.value,
+                    validator: controller.validatePassword,
+                    textInputAction: TextInputAction.done,
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        controller.isPasswordVisible.value
+                            ? Icons.visibility_outlined
+                            : Icons.visibility_off_outlined,
+                        color: AppColors.inner,
+                      ),
+                      onPressed: controller.togglePasswordVisibility,
                     ),
-                    onPressed: controller.togglePasswordVisibility,
                   ),
-                )),
+                ),
                 const SizedBox(height: 16),
 
                 // Forgot password
@@ -99,28 +101,30 @@ class LoginView extends GetView<AuthController> {
                 const SizedBox(height: 24),
 
                 // Login button
-                Obx(() => CustomButton(
-                  text: 'Sign in',
-                  onPressed: controller.isLoading.value ? null : () {
-                    if(!controller.loginFormKey.currentState!.validate()) return;
-                    // TODO: Implement login
-                    Get.offAllNamed(Routes.HOME);
-
-                  },
-                  isLoading: controller.isLoading.value,
-                  fullWidth: true,
-                  size: ButtonSize.large,
-                )),
+                Obx(
+                  () => CustomButton(
+                    text: 'Sign in',
+                    onPressed: controller.isLoading.value
+                        ? null
+                        : () {
+                            if (!controller.loginFormKey.currentState!
+                                .validate())
+                              return;
+                            // TODO: Implement login
+                            Get.offAllNamed(Routes.HOME);
+                          },
+                    isLoading: controller.isLoading.value,
+                    fullWidth: true,
+                    size: ButtonSize.large,
+                  ),
+                ),
                 const SizedBox(height: 24),
 
                 // Divider
                 Row(
                   children: [
                     Expanded(
-                      child: Divider(
-                        color: AppColors.line,
-                        thickness: 1,
-                      ),
+                      child: Divider(color: AppColors.line, thickness: 1),
                     ),
                     const Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
@@ -134,10 +138,7 @@ class LoginView extends GetView<AuthController> {
                       ),
                     ),
                     Expanded(
-                      child: Divider(
-                        color: AppColors.line,
-                        thickness: 1,
-                      ),
+                      child: Divider(color: AppColors.line, thickness: 1),
                     ),
                   ],
                 ),
@@ -201,5 +202,3 @@ class LoginView extends GetView<AuthController> {
     );
   }
 }
-
-

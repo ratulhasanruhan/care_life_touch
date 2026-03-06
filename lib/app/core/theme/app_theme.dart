@@ -32,9 +32,7 @@ class AppTheme {
       // Card
       cardTheme: CardThemeData(
         elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         color: AppColors.white,
       ),
 
@@ -47,9 +45,7 @@ class AppTheme {
           disabledForegroundColor: AppColors.textDisabled,
           elevation: 0,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
 
@@ -67,9 +63,7 @@ class AppTheme {
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.border),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         ),
       ),
 
@@ -220,13 +214,7 @@ class AppTheme {
       ),
 
       // Divider
-      dividerTheme: const DividerThemeData(
-        color: AppColors.line,
-        thickness: 1,
-      ),
+      dividerTheme: const DividerThemeData(color: AppColors.line, thickness: 1),
     );
   }
 }
-
-
-

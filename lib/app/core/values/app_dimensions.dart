@@ -48,4 +48,3 @@ class AppDimensions {
   // Bottom Nav Bar
   static const double bottomNavBarHeight = 60.0;
 }
-

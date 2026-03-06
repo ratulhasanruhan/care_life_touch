@@ -5,10 +5,7 @@ class CartItem {
   final Medicine medicine;
   int quantity;
 
-  CartItem({
-    required this.medicine,
-    this.quantity = 1,
-  });
+  CartItem({required this.medicine, this.quantity = 1});
 
   /// Calculate total price for this item
   double get totalPrice => medicine.price * quantity;
@@ -23,17 +20,11 @@ class CartItem {
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'medicine': medicine.toJson(),
-      'quantity': quantity,
-    };
+    return {'medicine': medicine.toJson(), 'quantity': quantity};
   }
 
   /// Copy with method
-  CartItem copyWith({
-    Medicine? medicine,
-    int? quantity,
-  }) {
+  CartItem copyWith({Medicine? medicine, int? quantity}) {
     return CartItem(
       medicine: medicine ?? this.medicine,
       quantity: quantity ?? this.quantity,
@@ -51,7 +42,8 @@ class Cart {
   int get itemCount => items.fold(0, (sum, item) => sum + item.quantity);
 
   /// Get total price
-  double get totalPrice => items.fold(0.0, (sum, item) => sum + item.totalPrice);
+  double get totalPrice =>
+      items.fold(0.0, (sum, item) => sum + item.totalPrice);
 
   /// Get total unique items
   int get uniqueItemCount => items.length;
@@ -66,16 +58,15 @@ class Cart {
   factory Cart.fromJson(Map<String, dynamic> json) {
     return Cart(
       items: json['items'] != null
-          ? (json['items'] as List).map((item) => CartItem.fromJson(item)).toList()
+          ? (json['items'] as List)
+                .map((item) => CartItem.fromJson(item))
+                .toList()
           : [],
     );
   }
 
   /// Convert to JSON
   Map<String, dynamic> toJson() {
-    return {
-      'items': items.map((item) => item.toJson()).toList(),
-    };
+    return {'items': items.map((item) => item.toJson()).toList()};
   }
 }
-

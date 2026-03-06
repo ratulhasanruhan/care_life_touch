@@ -68,9 +68,7 @@ class InfoModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       alignment: Alignment.bottomCenter,
       insetAnimationDuration: const Duration(milliseconds: 300),
       child: Container(
@@ -89,10 +87,7 @@ class InfoModal extends StatelessWidget {
               SizedBox(
                 width: 157,
                 height: 183,
-                child: Image.asset(
-                  imagePath!,
-                  fit: BoxFit.contain,
-                ),
+                child: Image.asset(imagePath!, fit: BoxFit.contain),
               ),
             ] else if (icon != null) ...[
               SizedBox(
@@ -115,12 +110,14 @@ class InfoModal extends StatelessWidget {
             // Title
             Text(
               title,
-              style: titleStyle ?? const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w700,
-                height: 1.4,
-                color: Color(0xFF01060F),
-              ),
+              style:
+                  titleStyle ??
+                  const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    height: 1.4,
+                    color: Color(0xFF01060F),
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
@@ -130,12 +127,14 @@ class InfoModal extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Text(
                 description,
-                style: descriptionStyle ?? const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  height: 1.43,
-                  color: Color(0xFF191930),
-                ),
+                style:
+                    descriptionStyle ??
+                    const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      height: 1.43,
+                      color: Color(0xFF191930),
+                    ),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -157,11 +156,13 @@ class InfoModal extends StatelessWidget {
                   ),
                   child: Text(
                     buttonText,
-                    style: buttonStyle ?? const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.white,
-                    ),
+                    style:
+                        buttonStyle ??
+                        const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.white,
+                        ),
                   ),
                 ),
               ),
@@ -208,4 +209,3 @@ class InfoModal extends StatelessWidget {
     );
   }
 }
-

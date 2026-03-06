@@ -10,9 +10,7 @@ class AboutView extends GetView<LegalController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PrimaryAppBar(
-        title: 'About Us',
-      ),
+      appBar: PrimaryAppBar(title: 'About Us'),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -65,10 +63,7 @@ class AboutView extends GetView<LegalController> {
     );
   }
 
-  Widget _buildSection({
-    required String title,
-    required String content,
-  }) {
+  Widget _buildSection({required String title, required String content}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 24),
       child: Column(
@@ -97,4 +92,3 @@ class AboutView extends GetView<LegalController> {
     );
   }
 }
-

@@ -59,10 +59,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.white,
         border: const Border(
-          top: BorderSide(
-            color: Color(0xFFE8EAE8),
-            width: 1.5,
-          ),
+          top: BorderSide(color: Color(0xFFE8EAE8), width: 1.5),
         ),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(20),
@@ -123,10 +120,7 @@ class BottomNavigationBarWidget extends StatelessWidget {
                 config.icon,
                 width: 20,
                 height: 20,
-                colorFilter: ColorFilter.mode(
-                  iconColor,
-                  BlendMode.srcIn,
-                ),
+                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
               ),
             ),
           ),
@@ -153,10 +147,5 @@ class _TabConfig {
   final String label;
   final String icon;
 
-  const _TabConfig({
-    required this.label,
-    required this.icon,
-  });
+  const _TabConfig({required this.label, required this.icon});
 }
-
-

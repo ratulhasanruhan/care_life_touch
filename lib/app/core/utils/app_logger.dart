@@ -48,4 +48,3 @@ class AppLogger {
     _logger.d('🧭 Navigating to: $route', error: arguments);
   }
 }
-

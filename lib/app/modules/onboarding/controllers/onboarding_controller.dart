@@ -53,4 +53,3 @@ class OnboardingController extends GetxController {
     Get.offNamed(Routes.REGISTER);
   }
 }
-

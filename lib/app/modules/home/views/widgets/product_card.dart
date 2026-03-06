@@ -8,11 +8,7 @@ class ProductCard extends StatelessWidget {
   final ProductModel product;
   final VoidCallback? onTap;
 
-  const ProductCard({
-    super.key,
-    required this.product,
-    this.onTap,
-  });
+  const ProductCard({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -230,11 +226,7 @@ class ProductCard extends StatelessWidget {
               ),
             ),
             SizedBox(width: 4),
-            Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.white,
-              size: 10,
-            ),
+            Icon(Icons.shopping_bag_outlined, color: Colors.white, size: 10),
           ],
         ),
       ),
@@ -256,11 +248,7 @@ class ProductCard extends StatelessWidget {
             onTap: () => cartController.decreaseQuantity(product.id),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: const Icon(
-                Icons.remove,
-                color: Colors.white,
-                size: 12,
-              ),
+              child: const Icon(Icons.remove, color: Colors.white, size: 12),
             ),
           ),
           Container(
@@ -279,11 +267,7 @@ class ProductCard extends StatelessWidget {
             onTap: () => cartController.increaseQuantity(product.id),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: const Icon(
-                Icons.add,
-                color: Colors.white,
-                size: 12,
-              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 12),
             ),
           ),
         ],
@@ -291,4 +275,3 @@ class ProductCard extends StatelessWidget {
     );
   }
 }
-

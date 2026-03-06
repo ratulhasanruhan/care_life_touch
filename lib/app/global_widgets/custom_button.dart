@@ -45,32 +45,33 @@ class CustomButton extends StatelessWidget {
       height: sizeProps.height,
       child: ElevatedButton(
         onPressed: isDisabled ? null : onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorProps.backgroundColor,
-          foregroundColor: colorProps.foregroundColor,
-          disabledBackgroundColor: colorProps.disabledBackgroundColor,
-          disabledForegroundColor: colorProps.disabledForegroundColor,
-          side: colorProps.borderSide,
-          elevation: 0,
-          padding: sizeProps.padding,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(sizeProps.borderRadius),
-          ),
-        ).copyWith(
-          // Custom colors for hover/pressed states
-          backgroundColor: WidgetStateProperty.resolveWith((states) {
-            if (states.contains(WidgetState.disabled)) {
-              return colorProps.disabledBackgroundColor;
-            }
-            if (states.contains(WidgetState.pressed)) {
-              return colorProps.pressedBackgroundColor;
-            }
-            if (states.contains(WidgetState.hovered)) {
-              return colorProps.hoverBackgroundColor;
-            }
-            return colorProps.backgroundColor;
-          }),
-        ),
+        style:
+            ElevatedButton.styleFrom(
+              backgroundColor: colorProps.backgroundColor,
+              foregroundColor: colorProps.foregroundColor,
+              disabledBackgroundColor: colorProps.disabledBackgroundColor,
+              disabledForegroundColor: colorProps.disabledForegroundColor,
+              side: colorProps.borderSide,
+              elevation: 0,
+              padding: sizeProps.padding,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(sizeProps.borderRadius),
+              ),
+            ).copyWith(
+              // Custom colors for hover/pressed states
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return colorProps.disabledBackgroundColor;
+                }
+                if (states.contains(WidgetState.pressed)) {
+                  return colorProps.pressedBackgroundColor;
+                }
+                if (states.contains(WidgetState.hovered)) {
+                  return colorProps.hoverBackgroundColor;
+                }
+                return colorProps.backgroundColor;
+              }),
+            ),
         child: isLoading
             ? SizedBox(
                 width: sizeProps.iconSize,
