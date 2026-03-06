@@ -139,9 +139,7 @@ class HomeController extends GetxController {
   void onSearch(String query) {
     AppLogger.debug('Search query: $query');
     // TODO: Navigate to search results
-    if (query.isNotEmpty) {
-      Get.snackbar('Search', 'Searching for: $query');
-    }
+
   }
 
   @override

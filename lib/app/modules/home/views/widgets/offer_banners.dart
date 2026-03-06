@@ -1,55 +1,10 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-
-/// Offer Banner Widget
-class OfferBanner extends StatelessWidget {
-  final String imagePath;
-  final String? text;
-  final VoidCallback? onTap;
-
-  const OfferBanner({
-    super.key,
-    required this.imagePath,
-    this.text,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 300,
-        height: 120,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          image: DecorationImage(
-            image: AssetImage(imagePath),
-            fit: BoxFit.cover,
-          ),
-        ),
-        child: text != null
-            ? Center(
-                child: Text(
-                  text!,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 28,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                    height: 1.3,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              )
-            : null,
-      ),
-    );
-  }
-}
+import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 /// Offer Banners Carousel Widget
 class OfferBannersCarousel extends StatefulWidget {
-  final List<Map<String, String>> banners;
+  final List<String> banners;
 
   const OfferBannersCarousel({super.key, required this.banners});
 
@@ -58,63 +13,57 @@ class OfferBannersCarousel extends StatefulWidget {
 }
 
 class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
-  int _currentPage = 0;
-  final PageController _pageController = PageController(viewportFraction: 0.85);
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
+  int _currentIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Banners
-        SizedBox(
-          height: 120,
-          child: PageView.builder(
-            controller: _pageController,
-            onPageChanged: (index) {
+        // Carousel
+        CarouselSlider(
+          options: CarouselOptions(
+            height: 120,
+            viewportFraction: 0.88,
+            autoPlay: true,
+            enableInfiniteScroll: false,
+            autoPlayInterval: const Duration(seconds: 5),
+            autoPlayAnimationDuration: const Duration(milliseconds: 800),
+            scrollDirection: Axis.horizontal,
+            onPageChanged: (index, reason) {
               setState(() {
-                _currentPage = index;
+                _currentIndex = index;
               });
             },
-            itemCount: widget.banners.length,
-            itemBuilder: (context, index) {
-              final banner = widget.banners[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: OfferBanner(
-                  imagePath: banner['image']!,
-                  text: banner['text'],
-                  onTap: () {
-                    // Handle banner tap
-                  },
-                ),
-              );
-            },
           ),
+          items: widget.banners.map((banner) {
+            return Container(
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(4),
+                image: DecorationImage(
+                  image: AssetImage(banner),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            );
+          }).toList(),
         ),
 
-        const SizedBox(height: 10),
+        const SizedBox(height: 12),
 
         // Dots Indicator
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(
-            widget.banners.length,
-            (index) => Container(
-              width: index == _currentPage ? 20 : 5,
-              height: 5,
-              margin: const EdgeInsets.symmetric(horizontal: 2),
-              decoration: BoxDecoration(
-                color: index == _currentPage
-                    ? const Color(0xFF064E36)
-                    : const Color(0xFFDDDDDD),
-                borderRadius: BorderRadius.circular(15),
-              ),
+        Padding(
+          padding: const EdgeInsets.only(left: 20),
+          child: SmoothPageIndicator(
+            controller: PageController(initialPage: _currentIndex),
+            count: widget.banners.length,
+            effect: const ExpandingDotsEffect(
+              dotHeight: 6,
+              dotWidth: 6,
+              spacing: 4,
+              activeDotColor: Color(0xFF064E36),
+              dotColor: Color(0xFFDDDDDD),
             ),
           ),
         ),

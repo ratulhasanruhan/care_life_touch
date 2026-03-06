@@ -132,6 +132,10 @@ class HomeView extends GetView<HomeController> {
       {'name': 'Unani', 'image': 'assets/demo/cat__2.png'},
       {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
       {'name': 'Capsule', 'image': 'assets/demo/cat_4.png'},
+      {'name': 'Pharma', 'image': 'assets/demo/cat_1.png'},
+      {'name': 'Unani', 'image': 'assets/demo/cat__2.png'},
+      {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
+      {'name': 'Capsule', 'image': 'assets/demo/cat_4.png'},
     ];
 
     return CategoriesList(
@@ -143,8 +147,8 @@ class HomeView extends GetView<HomeController> {
   /// Offer banners carousel
   Widget _buildOfferBanners() {
     final banners = [
-      {'image': 'assets/demo/banner_1.png', 'text': '30% Off'},
-      {'image': 'assets/demo/banner_2.png', 'text': ''},
+      'assets/demo/banner_1.png',
+      'assets/demo/banner_2.png'
     ];
 
     return OfferBannersCarousel(banners: banners);

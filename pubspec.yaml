@@ -26,6 +26,7 @@ dependencies:
   permission_handler: ^11.3.0
   pinput: ^6.0.2
   flutter_svg: ^2.0.10
+  carousel_slider: ^5.1.2
 
 
 dev_dependencies:
