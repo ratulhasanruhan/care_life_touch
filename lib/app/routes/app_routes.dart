@@ -18,7 +18,6 @@ abstract class Routes {
   static const TERMS = LegalRoutes.terms;
   static const PRIVACY = LegalRoutes.privacy;
   static const ABOUT = LegalRoutes.about;
-  static const PROFILE_COMPLETION = _Paths.PROFILE_COMPLETION;
   // Add more routes as needed
 }
 
@@ -31,7 +30,6 @@ abstract class _Paths {
   static const REGISTER = '/register';
   static const FORGOT_PASSWORD = '/forgot-password';
   static const FORGOT_PASSWORD_RESET = '/forgot-password-reset';
-  static const PROFILE_COMPLETION = '/profile-completion';
   static const PRODUCT_DETAILS = '/product-details';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';

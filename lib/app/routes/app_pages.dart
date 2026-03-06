@@ -11,8 +11,6 @@ import '../modules/auth/views/login_view.dart';
 import '../modules/auth/views/register_view.dart';
 import '../modules/auth/views/forgot_password_view.dart';
 import '../modules/auth/views/reset_password_view.dart';
-import '../modules/profile_completion/bindings/profile_completion_binding.dart';
-import '../modules/profile_completion/views/profile_completion_view.dart';
 import '../modules/legal/routes.dart';
 
 part 'app_routes.dart';
@@ -21,7 +19,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
     GetPage(
@@ -53,11 +51,6 @@ class AppPages {
       name: _Paths.FORGOT_PASSWORD_RESET,
       page: () => const ResetPasswordView(),
       binding: ForgotPasswordBinding(),
-    ),
-    GetPage(
-      name: _Paths.PROFILE_COMPLETION,
-      page: () => const ProfileCompletionView(),
-      binding: ProfileCompletionBinding(),
     ),
     GetPage(
       name: _Paths.HOME,
