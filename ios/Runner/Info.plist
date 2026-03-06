@@ -72,5 +72,7 @@
 	<string>We need access to your photo library to select images of your documents and shop.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>We need access to save photos to your library.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>We need access to your location to provide better delivery estimates.</string>
 </dict>
 </plist>

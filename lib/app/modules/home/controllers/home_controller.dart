@@ -1,5 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../global_widgets/info_modal.dart';
 
 /// Home Controller - Manages home screen state and logic
 class HomeController extends GetxController {
@@ -22,6 +25,7 @@ class HomeController extends GetxController {
   void onInit() {
     super.onInit();
     loadData();
+    _requestLocationPermission();
   }
 
   /// Load initial data
@@ -50,6 +54,38 @@ class HomeController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Request location permission (approximate location)
+  Future<void> _requestLocationPermission() async {
+    try {
+      final status = await Permission.location.request();
+
+      if (status.isGranted) {
+        AppLogger.success('Location permission granted');
+      } else if (status.isDenied) {
+        AppLogger.info('Location permission denied');
+      } else if (status.isPermanentlyDenied) {
+        AppLogger.warning('Location permission permanently denied');
+        _showLocationSettingsModal();
+      }
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to request location permission', e, stackTrace);
+    }
+  }
+
+  /// Show info modal to open settings when permission is permanently denied
+  void _showLocationSettingsModal() {
+    InfoModal.show(
+      title: 'Enable Location Access',
+      description: 'Location access has been disabled. Please enable it in app settings to provide better delivery estimates.',
+      buttonText: 'Open Settings',
+      imagePath: 'assets/images/ic_location_access.png',
+      onPressed: () {
+        Get.back();
+        openAppSettings();
+      },
+    );
   }
 
   /// Refresh data
