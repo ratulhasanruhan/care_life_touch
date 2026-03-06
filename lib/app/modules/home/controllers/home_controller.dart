@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../global_widgets/info_modal.dart';
+import '../models/product_model.dart';
+import '../../cart/controllers/cart_controller.dart';
 
 /// Home Controller - Manages home screen state and logic
 class HomeController extends GetxController {
@@ -10,20 +12,19 @@ class HomeController extends GetxController {
   final isLoading = false.obs;
   final selectedIndex = 0.obs;
 
-  // Example data
-  final featuredMedicines = <String>[].obs;
-  final categories = <String>[
-    'Pain Relief',
-    'Cold & Flu',
-    'Vitamins',
-    'First Aid',
-    'Baby Care',
-    'Personal Care',
-  ].obs;
+  // Product data
+  final trendingProducts = <ProductModel>[].obs;
+  final newProducts = <ProductModel>[].obs;
+  final offerProducts = <ProductModel>[].obs;
+
+  // Cart controller
+  late CartController cartController;
 
   @override
   void onInit() {
     super.onInit();
+    // Initialize cart controller
+    cartController = Get.put(CartController());
     loadData();
     _requestLocationPermission();
   }
@@ -38,15 +39,13 @@ class HomeController extends GetxController {
       await Future.delayed(const Duration(seconds: 1));
       
       // TODO: Replace with actual API call
-      // final medicines = await medicineRepository.getFeaturedMedicines();
-      // featuredMedicines.value = medicines;
-      
-      featuredMedicines.value = [
-        'Paracetamol',
-        'Ibuprofen',
-        'Vitamin C',
-        'Cough Syrup',
-      ];
+      // final products = await productRepository.getTrendingProducts();
+      // trendingProducts.value = products;
+
+      // Load sample product data
+      trendingProducts.value = _getSampleProducts(4);
+      newProducts.value = _getSampleProducts(4);
+      offerProducts.value = _getSampleProducts(4, hasOffer: true);
 
       AppLogger.success('Home data loaded successfully');
     } catch (e, stackTrace) {
@@ -54,6 +53,25 @@ class HomeController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /// Generate sample products
+  List<ProductModel> _getSampleProducts(int count, {bool hasOffer = false}) {
+    return List.generate(count, (index) {
+      final isEven = index % 2 == 0;
+      return ProductModel(
+        id: 'product_${DateTime.now().millisecondsSinceEpoch}_$index',
+        name: isEven ? 'Paracetamol' : 'Ibuprofen',
+        brand: 'ACME Pharmaceuticals',
+        price: 100,
+        maxPrice: 150,
+        moq: '20 Box',
+        rating: 4.9,
+        imagePath: isEven ? 'assets/demo/product_1.png' : 'assets/demo/product_2.png',
+        hasOffer: hasOffer && isEven,
+        offerLabel: 'SALE',
+      );
+    });
   }
 
   /// Request location permission (approximate location)
@@ -93,6 +111,13 @@ class HomeController extends GetxController {
     await loadData();
   }
 
+  /// Navigate to product details
+  void onProductTap(ProductModel product) {
+    AppLogger.debug('Product tapped: ${product.name}');
+    // TODO: Navigate to product details page
+    Get.snackbar('Product', 'Selected ${product.name}');
+  }
+
   /// Navigate to category
   void onCategoryTap(String category) {
     AppLogger.debug('Category tapped: $category');
@@ -100,11 +125,20 @@ class HomeController extends GetxController {
     Get.snackbar('Category', 'Navigating to $category');
   }
 
-  /// Navigate to medicine details
-  void onMedicineTap(String medicine) {
-    AppLogger.debug('Medicine tapped: $medicine');
-    // TODO: Navigate to medicine details page
-    Get.snackbar('Medicine', 'Selected $medicine');
+  /// Navigate to brand
+  void onBrandTap(String brand) {
+    AppLogger.debug('Brand tapped: $brand');
+    // TODO: Navigate to brand page
+    Get.snackbar('Brand', 'Navigating to $brand');
+  }
+
+  /// Handle search
+  void onSearch(String query) {
+    AppLogger.debug('Search query: $query');
+    // TODO: Navigate to search results
+    if (query.isNotEmpty) {
+      Get.snackbar('Search', 'Searching for: $query');
+    }
   }
 
   @override
@@ -113,4 +147,3 @@ class HomeController extends GetxController {
     super.onClose();
   }
 }
-

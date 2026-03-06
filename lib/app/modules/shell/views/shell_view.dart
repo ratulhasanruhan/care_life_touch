@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/shell_controller.dart';
 import 'widgets/bottom_navigation_bar.dart';
 import '../../home/views/home_view.dart';
+import '../../cart/views/cart_view.dart';
 
 /// Shell View - Main container with bottom navigation
 ///
@@ -32,7 +33,7 @@ class ShellView extends GetView<ShellController> {
       case 1:
         return _buildProductsPlaceholder();
       case 2:
-        return _buildCartPlaceholder();
+        return const CartView();
       case 3:
         return _buildProfilePlaceholder();
       default:
@@ -52,17 +53,6 @@ class ShellView extends GetView<ShellController> {
     );
   }
 
-  /// Placeholder for Cart section
-  Widget _buildCartPlaceholder() {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Bag'),
-      ),
-      body: const Center(
-        child: Text('Cart Section'),
-      ),
-    );
-  }
 
   /// Placeholder for Profile section
   Widget _buildProfilePlaceholder() {
