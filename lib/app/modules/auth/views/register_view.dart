@@ -170,7 +170,7 @@ class RegisterView extends GetView<AuthController> {
                   onPressed: controller.isLoading.value ? null : controller.register,
                   isLoading: controller.isLoading.value,
                   fullWidth: true,
-                  size: ButtonSize.medium,
+                  size: ButtonSize.large,
                 )),
                 const SizedBox(height: 16),
 
@@ -183,7 +183,6 @@ class RegisterView extends GetView<AuthController> {
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          height: 1.43,
                           color: Color(0xFF01060F),
                         ),
                       ),
@@ -192,7 +191,6 @@ class RegisterView extends GetView<AuthController> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
-                          height: 1.43,
                           color: Color(0xFF064E36),
                         ),
                         recognizer: TapGestureRecognizer()

@@ -138,7 +138,7 @@ class CustomButton extends StatelessWidget {
         );
       case ButtonSize.medium:
         return _SizeProperties(
-          height: 44,
+          height: 48,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           fontSize: 14,
           lineHeight: 20,

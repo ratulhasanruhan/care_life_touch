@@ -6,6 +6,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../routes/app_pages.dart';
 import '../../../global_widgets/info_modal.dart';
+import '../../../global_widgets/otp_verification_dialog.dart';
 
 /// Auth Controller - Handles authentication logic
 class AuthController extends GetxController {
@@ -170,16 +171,26 @@ class AuthController extends GetxController {
 
       isLoading.value = false;
 
-      // Show success modal
-      InfoModal.show(
-        title: 'Congratulation',
-        description: 'Your account is ready to use. You will be redirected to the home page in a few seconds',
-        buttonText: 'Go to Home',
-        imagePath: 'assets/images/ic_profile_success.png',
-        onPressed: () {
-          Get.back(); // Close modal
-          Get.offAllNamed(Routes.HOME); // Navigate to home
-        },
+      // Send OTP
+      await sendOTP();
+
+      // Show OTP verification dialog
+      Get.dialog(
+        OTPVerificationDialog(
+          email: emailController.text,
+          onVerify: (pin) async {
+            otpController.text = pin;
+            await verifyRegistrationOTP();
+          },
+          onResend: () async {
+            otpController.clear();
+            await resendOTP();
+          },
+          resendTimer: resendTimer,
+          isLoading: isLoading,
+          otpLength: 6,
+        ),
+        barrierDismissible: false,
       );
 
     } catch (e, stackTrace) {
@@ -214,6 +225,72 @@ class AuthController extends GetxController {
     } catch (e, stackTrace) {
       AppLogger.error('Failed to send OTP', e, stackTrace);
       rethrow;
+    }
+  }
+
+  /// Verify Registration OTP and show success modal
+  Future<void> verifyRegistrationOTP() async {
+    if (otpController.text.isEmpty || otpController.text.length < 6) {
+      Get.snackbar(
+        'Error',
+        'Please enter valid 6-digit OTP',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      AppLogger.info('Verifying registration OTP: ${otpController.text}');
+
+      // Simulate API call
+      await Future.delayed(const Duration(seconds: 1));
+
+      // TODO: Replace with actual API call
+      // final response = await authRepository.verifyOTP(
+      //   email: emailController.text,
+      //   otp: otpController.text,
+      // );
+
+      // For demo, accept any 6-digit OTP
+      if (otpController.text.length == 6) {
+        otpVerified.value = true;
+
+        // Save auth token
+        await _storage.saveToken('demo_token_${DateTime.now().millisecondsSinceEpoch}');
+
+        AppLogger.success('Registration OTP verified successfully');
+
+        Get.back(); // Close OTP dialog
+
+        // Show success modal
+        InfoModal.show(
+          title: 'Congratulations!',
+          description: 'Your registration is complete. Your account is now ready to use.',
+          buttonText: 'Go to Home',
+          imagePath: 'assets/images/ic_profile_success.png',
+          onPressed: () {
+            Get.back(); // Close modal
+            Get.offAllNamed(Routes.HOME); // Navigate to home
+          },
+        );
+      } else {
+        throw Exception('Invalid OTP');
+      }
+
+    } catch (e, stackTrace) {
+      AppLogger.error('Registration OTP verification failed', e, stackTrace);
+      Get.snackbar(
+        'Error',
+        'Invalid OTP. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 
