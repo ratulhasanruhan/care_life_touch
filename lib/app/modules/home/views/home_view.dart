@@ -6,6 +6,8 @@ import 'widgets/section_header.dart';
 import 'widgets/categories_list.dart';
 import 'widgets/offer_banners.dart';
 import 'widgets/product_card.dart';
+import 'all_categories_view.dart';
+import 'all_brands_view.dart';
 
 /// Home View - Optimized main screen with separated widgets
 class HomeView extends GetView<HomeController> {
@@ -50,7 +52,12 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'All You Need Categories',
                         onViewAll: () {
-                          Get.snackbar('Categories', 'View all categories');
+                          Get.to(
+                            () => AllCategoriesView(
+                              categories: _getCategoriesData(),
+                              onCategoryTap: controller.onCategoryTap,
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 10),
@@ -84,7 +91,12 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'Brands',
                         onViewAll: () {
-                          Get.snackbar('Brands', 'View all brands');
+                          Get.to(
+                            () => AllBrandsView(
+                              brands: _getBrandsData(),
+                              onBrandTap: controller.onBrandTap,
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 10),
@@ -129,7 +141,16 @@ class HomeView extends GetView<HomeController> {
 
   /// Categories horizontal list
   Widget _buildCategories() {
-    final categories = [
+    final categories = _getCategoriesData();
+
+    return CategoriesList(
+      categories: categories,
+      onCategoryTap: controller.onCategoryTap,
+    );
+  }
+
+  List<Map<String, String>> _getCategoriesData() {
+    return [
       {'name': 'Pharma', 'image': 'assets/demo/cat_1.png'},
       {'name': 'Unani', 'image': 'assets/demo/cat__2.png'},
       {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
@@ -139,11 +160,6 @@ class HomeView extends GetView<HomeController> {
       {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
       {'name': 'Capsule', 'image': 'assets/demo/cat_4.png'},
     ];
-
-    return CategoriesList(
-      categories: categories,
-      onCategoryTap: controller.onCategoryTap,
-    );
   }
 
   /// Offer banners carousel
@@ -185,15 +201,7 @@ class HomeView extends GetView<HomeController> {
 
   /// Brands horizontal list
   Widget _buildBrands() {
-    final brands = [
-      {'name': 'Incepta\nPharmaceu...', 'image': 'assets/demo/company_1.png'},
-      {'name': 'ACME\nPharmaceu...', 'image': 'assets/demo/company_2.png'},
-      {'name': 'Opsonin\nPharmaceu...', 'image': 'assets/demo/company_3.png'},
-      {
-        'name': 'Aristopharma\nPharmaceu...',
-        'image': 'assets/demo/company_4.png',
-      },
-    ];
+    final brands = _getBrandsData();
 
     return SizedBox(
       height: 120,
@@ -250,5 +258,17 @@ class HomeView extends GetView<HomeController> {
         },
       ),
     );
+  }
+
+  List<Map<String, String>> _getBrandsData() {
+    return [
+      {'name': 'Incepta\nPharmaceu...', 'image': 'assets/demo/company_1.png'},
+      {'name': 'ACME\nPharmaceu...', 'image': 'assets/demo/company_2.png'},
+      {'name': 'Opsonin\nPharmaceu...', 'image': 'assets/demo/company_3.png'},
+      {
+        'name': 'Aristopharma\nPharmaceu...',
+        'image': 'assets/demo/company_4.png',
+      },
+    ];
   }
 }

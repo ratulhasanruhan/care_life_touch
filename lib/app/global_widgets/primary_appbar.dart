@@ -31,7 +31,6 @@ class PrimaryAppBar extends AppBar {
          ),
          actions: actions,
          titleTextStyle: const TextStyle(
-           fontFamily: 'DM Sans',
            fontWeight: FontWeight.w600,
            fontSize: 18,
            color: Color(0xFF01060F),

@@ -36,13 +36,6 @@ class CartController extends GetxController {
       }
 
       AppLogger.success('Added ${product.name} to cart');
-
-      Get.snackbar(
-        'Added to Cart',
-        '${product.name} has been added to your cart',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 2),
-      );
     } catch (e, stackTrace) {
       AppLogger.error('Failed to add to cart', e, stackTrace);
     }
