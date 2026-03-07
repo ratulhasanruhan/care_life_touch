@@ -4,6 +4,7 @@ import '../controllers/shell_controller.dart';
 import 'widgets/bottom_navigation_bar.dart';
 import '../../home/views/home_view.dart';
 import '../../cart/views/cart_view.dart';
+import '../../products/views/products_view.dart';
 
 /// Shell View - Main container with bottom navigation
 ///
@@ -31,7 +32,7 @@ class ShellView extends GetView<ShellController> {
       case 0:
         return const HomeView();
       case 1:
-        return _buildProductsPlaceholder();
+        return const ProductsView();
       case 2:
         return const CartView();
       case 3:
@@ -39,14 +40,6 @@ class ShellView extends GetView<ShellController> {
       default:
         return const HomeView();
     }
-  }
-
-  /// Placeholder for Products section
-  Widget _buildProductsPlaceholder() {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Products')),
-      body: const Center(child: Text('Products Section')),
-    );
   }
 
   /// Placeholder for Profile section

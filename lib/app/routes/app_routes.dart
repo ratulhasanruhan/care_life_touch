@@ -11,6 +11,7 @@ abstract class Routes {
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const FORGOT_PASSWORD_RESET = _Paths.FORGOT_PASSWORD_RESET;
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
+  static const PRODUCTS = _Paths.PRODUCTS;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
   static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
@@ -31,6 +32,7 @@ abstract class _Paths {
   static const FORGOT_PASSWORD = '/forgot-password';
   static const FORGOT_PASSWORD_RESET = '/forgot-password-reset';
   static const PRODUCT_DETAILS = '/product-details';
+  static const PRODUCTS = '/products';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
   static const ORDER_HISTORY = '/order-history';

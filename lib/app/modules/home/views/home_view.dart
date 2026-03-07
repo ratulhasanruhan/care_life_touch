@@ -8,6 +8,8 @@ import 'widgets/offer_banners.dart';
 import 'widgets/product_card.dart';
 import 'all_categories_view.dart';
 import 'all_brands_view.dart';
+import '../../products/models/products_query.dart';
+import '../../../routes/app_pages.dart';
 
 /// Home View - Optimized main screen with separated widgets
 class HomeView extends GetView<HomeController> {
@@ -55,7 +57,16 @@ class HomeView extends GetView<HomeController> {
                           Get.to(
                             () => AllCategoriesView(
                               categories: _getCategoriesData(),
-                              onCategoryTap: controller.onCategoryTap,
+                              onCategoryTap: (category) {
+                                Get.toNamed(
+                                  Routes.PRODUCTS,
+                                  arguments: ProductsQuery(
+                                    type: ProductListingType.category,
+                                    title: '$category Products',
+                                    keyword: category,
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -74,9 +85,12 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'Trending Products',
                         onViewAll: () {
-                          Get.snackbar(
-                            'Trending',
-                            'View all trending products',
+                          Get.toNamed(
+                            Routes.PRODUCTS,
+                            arguments: const ProductsQuery(
+                              type: ProductListingType.trending,
+                              title: 'Trending Products',
+                            ),
                           );
                         },
                       ),
@@ -94,7 +108,16 @@ class HomeView extends GetView<HomeController> {
                           Get.to(
                             () => AllBrandsView(
                               brands: _getBrandsData(),
-                              onBrandTap: controller.onBrandTap,
+                              onBrandTap: (brand) {
+                                Get.toNamed(
+                                  Routes.PRODUCTS,
+                                  arguments: ProductsQuery(
+                                    type: ProductListingType.brand,
+                                    title: 'Brand Products',
+                                    keyword: brand,
+                                  ),
+                                );
+                              },
                             ),
                           );
                         },
@@ -108,7 +131,13 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'New Products',
                         onViewAll: () {
-                          Get.snackbar('New', 'View all new products');
+                          Get.toNamed(
+                            Routes.PRODUCTS,
+                            arguments: const ProductsQuery(
+                              type: ProductListingType.newArrival,
+                              title: 'New Products',
+                            ),
+                          );
                         },
                       ),
                       const SizedBox(height: 12),
@@ -120,7 +149,13 @@ class HomeView extends GetView<HomeController> {
                       SectionHeader(
                         title: 'Offers Product',
                         onViewAll: () {
-                          Get.snackbar('Offers', 'View all offer products');
+                          Get.toNamed(
+                            Routes.PRODUCTS,
+                            arguments: const ProductsQuery(
+                              type: ProductListingType.offers,
+                              title: 'Offer Products',
+                            ),
+                          );
                         },
                         extra: const OfferTimer(),
                       ),
@@ -145,7 +180,16 @@ class HomeView extends GetView<HomeController> {
 
     return CategoriesList(
       categories: categories,
-      onCategoryTap: controller.onCategoryTap,
+      onCategoryTap: (category) {
+        Get.toNamed(
+          Routes.PRODUCTS,
+          arguments: ProductsQuery(
+            type: ProductListingType.category,
+            title: '$category Products',
+            keyword: category,
+          ),
+        );
+      },
     );
   }
 
@@ -215,7 +259,17 @@ class HomeView extends GetView<HomeController> {
             width: 80,
             margin: EdgeInsets.only(right: index < brands.length - 1 ? 10 : 0),
             child: GestureDetector(
-              onTap: () => controller.onBrandTap(brand['name']!),
+              onTap: () {
+                final brandName = brand['name']!;
+                Get.toNamed(
+                  Routes.PRODUCTS,
+                  arguments: ProductsQuery(
+                    type: ProductListingType.brand,
+                    title: 'Brand Products',
+                    keyword: brandName,
+                  ),
+                );
+              },
               child: Column(
                 children: [
                   // Brand Logo

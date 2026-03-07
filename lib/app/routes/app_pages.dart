@@ -12,6 +12,8 @@ import '../modules/auth/views/register_view.dart';
 import '../modules/auth/views/forgot_password_view.dart';
 import '../modules/auth/views/reset_password_view.dart';
 import '../modules/legal/routes.dart';
+import '../modules/products/bindings/products_binding.dart';
+import '../modules/products/views/products_view.dart';
 
 part 'app_routes.dart';
 
@@ -56,6 +58,11 @@ class AppPages {
       name: _Paths.HOME,
       page: () => const ShellView(),
       binding: ShellBinding(),
+    ),
+    GetPage(
+      name: _Paths.PRODUCTS,
+      page: () => const ProductsView(),
+      binding: ProductsBinding(),
     ),
     // Legal module routes
     ...LegalRoutes.pages,
