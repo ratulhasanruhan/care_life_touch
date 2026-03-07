@@ -139,7 +139,6 @@ class HomeController extends GetxController {
   void onSearch(String query) {
     AppLogger.debug('Search query: $query');
     // TODO: Navigate to search results
-
   }
 
   @override

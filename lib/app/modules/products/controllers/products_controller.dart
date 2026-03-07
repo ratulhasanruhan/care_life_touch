@@ -7,10 +7,8 @@ class ProductsController extends GetxController {
   final ProductsQuery query;
   final ProductRepository _productRepository;
 
-  ProductsController(
-    this.query, {
-    ProductRepository? productRepository,
-  }) : _productRepository = productRepository ?? Get.find<ProductRepository>();
+  ProductsController(this.query, {ProductRepository? productRepository})
+    : _productRepository = productRepository ?? Get.find<ProductRepository>();
 
   final isLoading = false.obs;
   final searchText = ''.obs;
@@ -61,7 +59,9 @@ class ProductsController extends GetxController {
         final category = (query.keyword ?? '').toLowerCase();
         if (category.contains('capsule')) {
           final items = allProducts
-              .where((product) => product.name.toLowerCase().contains('capsule'))
+              .where(
+                (product) => product.name.toLowerCase().contains('capsule'),
+              )
               .toList();
           return items.isEmpty ? allProducts : items;
         }
@@ -73,7 +73,9 @@ class ProductsController extends GetxController {
         }
         if (category.contains('unani')) {
           final items = allProducts
-              .where((product) => product.brand.toLowerCase().contains('incepta'))
+              .where(
+                (product) => product.brand.toLowerCase().contains('incepta'),
+              )
               .toList();
           return items.isEmpty ? allProducts : items;
         }

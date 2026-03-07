@@ -5,11 +5,7 @@ class AllBrandsView extends StatelessWidget {
   final List<Map<String, String>> brands;
   final ValueChanged<String>? onBrandTap;
 
-  const AllBrandsView({
-    super.key,
-    required this.brands,
-    this.onBrandTap,
-  });
+  const AllBrandsView({super.key, required this.brands, this.onBrandTap});
 
   @override
   Widget build(BuildContext context) {
@@ -23,4 +19,3 @@ class AllBrandsView extends StatelessWidget {
     );
   }
 }
-

@@ -7,11 +7,7 @@ class OfferProductTile extends StatelessWidget {
   final ProductModel product;
   final VoidCallback? onTap;
 
-  const OfferProductTile({
-    super.key,
-    required this.product,
-    this.onTap,
-  });
+  const OfferProductTile({super.key, required this.product, this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +55,11 @@ class OfferProductTile extends StatelessWidget {
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      const Icon(Icons.star, size: 14, color: Color(0xFFF1B71B)),
+                      const Icon(
+                        Icons.star,
+                        size: 14,
+                        color: Color(0xFFF1B71B),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         product.rating.toStringAsFixed(1),

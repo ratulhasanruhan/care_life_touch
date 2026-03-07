@@ -35,10 +35,7 @@ class SectionHeader extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (extra != null) ...[
-                  const SizedBox(width: 8),
-                  extra!,
-                ],
+                if (extra != null) ...[const SizedBox(width: 8), extra!],
               ],
             ),
           ),

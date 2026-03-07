@@ -27,7 +27,9 @@ class ViewAllGridScreen extends StatelessWidget {
     const mainSpacing = 12.0;
     const crossAxisCount = 4;
     final itemWidth =
-        (MediaQuery.of(context).size.width - (horizontalPadding * 2) - (crossSpacing * 3)) /
+        (MediaQuery.of(context).size.width -
+            (horizontalPadding * 2) -
+            (crossSpacing * 3)) /
         crossAxisCount;
 
     return Scaffold(
@@ -94,4 +96,3 @@ class ViewAllGridScreen extends StatelessWidget {
     );
   }
 }
-

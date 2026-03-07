@@ -1,11 +1,4 @@
-enum ProductListingType {
-  all,
-  category,
-  brand,
-  trending,
-  newArrival,
-  offers,
-}
+enum ProductListingType { all, category, brand, trending, newArrival, offers }
 
 class ProductsQuery {
   final ProductListingType type;
@@ -26,4 +19,3 @@ class ProductsQuery {
       keyword = null,
       showBackButton = false;
 }
-

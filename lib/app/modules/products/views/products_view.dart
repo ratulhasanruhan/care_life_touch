@@ -13,10 +13,7 @@ import '../../../data/repositories/product_repository.dart';
 class ProductsView extends StatefulWidget {
   final ProductsQuery query;
 
-  const ProductsView({
-    super.key,
-    this.query = const ProductsQuery.main(),
-  });
+  const ProductsView({super.key, this.query = const ProductsQuery.main()});
 
   @override
   State<ProductsView> createState() => _ProductsViewState();
@@ -33,7 +30,8 @@ class _ProductsViewState extends State<ProductsView> {
     _query = Get.arguments is ProductsQuery
         ? Get.arguments as ProductsQuery
         : widget.query;
-    _tag = 'products_${_query.type.name}_${_query.title}_${_query.keyword ?? ''}';
+    _tag =
+        'products_${_query.type.name}_${_query.title}_${_query.keyword ?? ''}';
     if (!Get.isRegistered<ProductRepository>()) {
       Get.put(ProductRepository(), permanent: true);
     }
@@ -163,10 +161,9 @@ class _ProductsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: nested,
-      physics:
-          nested
-              ? const NeverScrollableScrollPhysics()
-              : const AlwaysScrollableScrollPhysics(),
+      physics: nested
+          ? const NeverScrollableScrollPhysics()
+          : const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       itemCount: products.length,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -201,16 +198,15 @@ class _BrandProductsBody extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Column(
-            children:
-                controller.brandOfferProducts
-                    .take(3)
-                    .map(
-                      (product) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: OfferProductTile(product: product),
-                      ),
-                    )
-                    .toList(),
+            children: controller.brandOfferProducts
+                .take(3)
+                .map(
+                  (product) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: OfferProductTile(product: product),
+                  ),
+                )
+                .toList(),
           ),
         ),
         const SizedBox(height: 4),
