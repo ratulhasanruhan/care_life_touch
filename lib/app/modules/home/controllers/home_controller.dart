@@ -114,13 +114,6 @@ class HomeController extends GetxController {
     await loadData();
   }
 
-  /// Navigate to product details
-  void onProductTap(ProductModel product) {
-    AppLogger.debug('Product tapped: ${product.name}');
-    // TODO: Navigate to product details page
-    Get.snackbar('Product', 'Selected ${product.name}');
-  }
-
   /// Navigate to category
   void onCategoryTap(String category) {
     AppLogger.debug('Category tapped: $category');

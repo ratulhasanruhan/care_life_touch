@@ -17,6 +17,7 @@ class CustomButton extends StatelessWidget {
   final Widget? suffixIcon;
   final bool isLoading;
   final bool fullWidth;
+  final Color? textColor;
 
   const CustomButton({
     super.key,
@@ -28,6 +29,7 @@ class CustomButton extends StatelessWidget {
     this.suffixIcon,
     this.isLoading = false,
     this.fullWidth = false,
+    this.textColor,
   });
 
   @override
@@ -98,6 +100,7 @@ class CustomButton extends StatelessWidget {
                   Text(
                     text,
                     style: TextStyle(
+                      color: textColor,
                       fontSize: sizeProps.fontSize,
                       fontWeight: FontWeight.w500,
                       height: sizeProps.lineHeight / sizeProps.fontSize,
@@ -139,12 +142,12 @@ class CustomButton extends StatelessWidget {
         );
       case ButtonSize.medium:
         return _SizeProperties(
-          height: 48,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          height: 46,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           fontSize: 14,
           lineHeight: 20,
           iconSize: 18,
-          borderRadius: 2,
+          borderRadius: 4,
         );
       case ButtonSize.small:
         return _SizeProperties(

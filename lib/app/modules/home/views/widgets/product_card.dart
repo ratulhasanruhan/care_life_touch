@@ -15,7 +15,9 @@ class ProductCard extends StatelessWidget {
     final cartController = Get.find<CartController>();
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap ?? () {
+        Get.toNamed('/product-details', arguments: product);
+      },
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(

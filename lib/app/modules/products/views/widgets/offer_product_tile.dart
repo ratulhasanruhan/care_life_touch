@@ -14,7 +14,9 @@ class OfferProductTile extends StatelessWidget {
     final cartController = Get.find<CartController>();
 
     return GestureDetector(
-      onTap: onTap,
+      onTap: onTap ?? () {
+        Get.toNamed('/product-details', arguments: product);
+      },
       child: Container(
         height: 100,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),

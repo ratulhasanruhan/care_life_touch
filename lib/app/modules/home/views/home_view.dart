@@ -62,7 +62,7 @@ class HomeView extends GetView<HomeController> {
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
                                     type: ProductListingType.category,
-                                    title: '$category Products',
+                                    title: '$category',
                                     keyword: category,
                                   ),
                                 );
@@ -113,7 +113,7 @@ class HomeView extends GetView<HomeController> {
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
                                     type: ProductListingType.brand,
-                                    title: 'Brand Products',
+                                    title: brand,
                                     keyword: brand,
                                   ),
                                 );
@@ -236,7 +236,6 @@ class HomeView extends GetView<HomeController> {
         itemBuilder: (context, index) {
           return ProductCard(
             product: products[index],
-            onTap: () => controller.onProductTap(products[index]),
           );
         },
       ),
@@ -265,7 +264,7 @@ class HomeView extends GetView<HomeController> {
                   Routes.PRODUCTS,
                   arguments: ProductsQuery(
                     type: ProductListingType.brand,
-                    title: 'Brand Products',
+                    title: brand['name']!,
                     keyword: brandName,
                   ),
                 );
@@ -295,7 +294,6 @@ class HomeView extends GetView<HomeController> {
                   Text(
                     brand['name']!,
                     style: const TextStyle(
-                      fontFamily: 'DM Sans',
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF01060F),

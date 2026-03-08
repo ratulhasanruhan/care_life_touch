@@ -9,6 +9,7 @@ import '../../home/views/widgets/section_header.dart';
 import '../controllers/products_controller.dart';
 import '../models/products_query.dart';
 import 'widgets/offer_product_tile.dart';
+import 'widgets/product_filter_modal.dart';
 import '../../../data/repositories/product_repository.dart';
 
 class ProductsView extends StatefulWidget {
@@ -50,6 +51,15 @@ class _ProductsViewState extends State<ProductsView> {
     super.dispose();
   }
 
+  Future<void> _openFilterModal() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ProductFilterModal(controller: _controller),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,7 +71,10 @@ class _ProductsViewState extends State<ProductsView> {
       body: Column(
         children: [
           const SizedBox(height: 16),
-          _SearchAndFilterBar(onSearch: _controller.onSearchChanged),
+          _SearchAndFilterBar(
+            onSearch: _controller.onSearchChanged,
+            onFilterTap: _openFilterModal,
+          ),
           const SizedBox(height: 16),
           Expanded(
             child: Obx(() {
@@ -86,8 +99,9 @@ class _ProductsViewState extends State<ProductsView> {
 
 class _SearchAndFilterBar extends StatelessWidget {
   final ValueChanged<String> onSearch;
+  final VoidCallback onFilterTap;
 
-  const _SearchAndFilterBar({required this.onSearch});
+  const _SearchAndFilterBar({required this.onSearch, required this.onFilterTap});
 
   @override
   Widget build(BuildContext context) {
@@ -151,9 +165,7 @@ class _SearchAndFilterBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           GestureDetector(
-            onTap: () {
-              // TODO: Implement filter functionality
-            },
+            onTap: onFilterTap,
             child: Container(
               width: 44,
               height: 44,
@@ -254,3 +266,4 @@ class _BrandProductsBody extends StatelessWidget {
     );
   }
 }
+

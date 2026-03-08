@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/primary_appbar.dart';
+import '../../../routes/app_pages.dart';
 import '../../cart/controllers/cart_controller.dart';
 import '../../home/views/widgets/product_card.dart';
+import '../../products/models/products_query.dart';
 import '../../products/views/widgets/offer_product_tile.dart';
 import '../controllers/product_details_controller.dart';
 
@@ -64,26 +66,24 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
       child: Stack(
         children: [
           // Carousel
-          Obx(
-            () => CarouselSlider(
-              options: CarouselOptions(
-                height: 434,
-                viewportFraction: 1.0,
-                enableInfiniteScroll: controller.images.length > 1,
-                onPageChanged: (index, reason) {
-                  controller.currentImageIndex.value = index;
-                },
-              ),
-              items: controller.images.map((imagePath) {
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 61.5),
-                  child: Image.asset(
-                    imagePath,
-                    fit: BoxFit.contain,
-                  ),
-                );
-              }).toList(),
+          CarouselSlider(
+            options: CarouselOptions(
+              height: 434,
+              viewportFraction: 1.0,
+              enableInfiniteScroll: controller.images.length > 1,
+              onPageChanged: (index, reason) {
+                controller.currentImageIndex.value = index;
+              },
             ),
+            items: controller.images.map((imagePath) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 61.5),
+                child: Image.asset(
+                  imagePath,
+                  fit: BoxFit.contain,
+                ),
+              );
+            }).toList(),
           ),
 
           // Page Indicator
@@ -300,8 +300,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   ),
                 ),
                 const Icon(
-                  Icons.keyboard_arrow_down,
-                  size: 24,
+                  Icons.arrow_forward_ios_outlined,
+                  size: 18,
                   color: Color(0xFF01060F),
                 ),
               ],
@@ -364,7 +364,14 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               ),
               GestureDetector(
                 onTap: () {
-                  // Navigate to brand products
+                  Get.toNamed(
+                    Routes.PRODUCTS,
+                    arguments: ProductsQuery(
+                      type: ProductListingType.brand,
+                      title: controller.product.brand,
+                      keyword: controller.product.brand
+                    ),
+                  );
                 },
                 child: const Text(
                   'View All',
@@ -404,7 +411,6 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     final cartController = Get.find<CartController>();
 
     return Container(
-      height: 68,
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
