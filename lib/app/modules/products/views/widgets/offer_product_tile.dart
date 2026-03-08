@@ -72,59 +72,110 @@ class OfferProductTile extends StatelessWidget {
                     ],
                   ),
                   const Spacer(),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.priceDisplay,
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF064E36),
-                              ),
-                            ),
-                            Text(
-                              product.moqDisplay,
-                              style: const TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w400,
-                                color: Color(0xB301060F),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () => cartController.addToCart(product),
-                        child: Container(
-                          width: 68,
-                          height: 22,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF064E36),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Add to Bag',
-                              style: TextStyle(
-                                fontSize: 8,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  Obx(() => _buildBottomRow(cartController)),
                 ],
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomRow(CartController cartController) {
+    final isInCart = cartController.isInCart(product.id);
+    final quantity = cartController.getQuantity(product.id);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product.priceDisplay,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF064E36),
+                ),
+              ),
+              Text(
+                product.moqDisplay,
+                style: const TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xB301060F),
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (isInCart && quantity > 0)
+          _buildQuantityControls(cartController, quantity)
+        else
+          _buildAddToCartButton(cartController),
+      ],
+    );
+  }
+
+  Widget _buildAddToCartButton(CartController cartController) {
+    return GestureDetector(
+      onTap: () => cartController.addToCart(product),
+      child: Container(
+        width: 68,
+        height: 22,
+        decoration: BoxDecoration(
+          color: const Color(0xFF064E36),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: const Center(
+          child: Text(
+            'Add to Bag',
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w500,
+              color: Colors.white,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuantityControls(CartController cartController, int quantity) {
+    return Container(
+      height: 22,
+      decoration: BoxDecoration(
+        color: const Color(0xFF064E36),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () => cartController.decreaseQuantity(product.id),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.remove, color: Colors.white, size: 12),
+            ),
+          ),
+          Text(
+            quantity.toString(),
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          GestureDetector(
+            onTap: () => cartController.increaseQuantity(product.id),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 6),
+              child: Icon(Icons.add, color: Colors.white, size: 12),
+            ),
+          ),
+        ],
       ),
     );
   }
