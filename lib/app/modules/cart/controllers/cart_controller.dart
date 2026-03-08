@@ -20,7 +20,7 @@ class CartController extends GetxController {
   double get total => subtotal + deliveryFee;
 
   /// Add product to cart
-  void addToCart(ProductModel product) {
+  void addToCart(ProductModel product, {int quantity = 1}) {
     try {
       final existingIndex = cartItems.indexWhere(
         (item) => item.product.id == product.id,
@@ -28,11 +28,11 @@ class CartController extends GetxController {
 
       if (existingIndex != -1) {
         // Update quantity
-        cartItems[existingIndex].quantity++;
+        cartItems[existingIndex].quantity += quantity;
         cartItems.refresh();
       } else {
         // Add new item
-        cartItems.add(CartItem(product: product, quantity: 1));
+        cartItems.add(CartItem(product: product, quantity: quantity));
       }
 
       AppLogger.success('Added ${product.name} to cart');

@@ -2,6 +2,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../../../global_widgets/add_to_cart_modal.dart';
 import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/primary_appbar.dart';
 import '../../../routes/app_pages.dart';
@@ -471,7 +472,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   if (isInCart) {
                     Get.toNamed('/cart');
                   } else {
-                    cartController.addToCart(controller.product);
+                    // Show modal to select quantity before adding
+                    AddToCartModal.show(controller.product);
                   }
                 },
               ),
