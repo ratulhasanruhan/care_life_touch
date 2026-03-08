@@ -1,4 +1,6 @@
+import 'package:care_life_touch/app/global_widgets/primary_appbar.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import '../../cart/controllers/cart_controller.dart';
 import '../../home/models/product_model.dart';
@@ -7,7 +9,6 @@ import '../../home/views/widgets/section_header.dart';
 import '../controllers/products_controller.dart';
 import '../models/products_query.dart';
 import 'widgets/offer_product_tile.dart';
-import 'widgets/products_header.dart';
 import '../../../data/repositories/product_repository.dart';
 
 class ProductsView extends StatefulWidget {
@@ -53,12 +54,12 @@ class _ProductsViewState extends State<ProductsView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCFC),
+      appBar: PrimaryAppBar(
+        title: _query.title,
+        showBackButton: _query.showBackButton,
+      ),
       body: Column(
         children: [
-          ProductsHeader(
-            title: _query.title,
-            showBackButton: _query.showBackButton,
-          ),
           const SizedBox(height: 16),
           _SearchAndFilterBar(onSearch: _controller.onSearchChanged),
           const SizedBox(height: 16),
@@ -97,53 +98,79 @@ class _SearchAndFilterBar extends StatelessWidget {
           Expanded(
             child: SizedBox(
               height: 44,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(4),
-                  border: Border.all(color: const Color(0xFFE8EAE8)),
+              child: TextField(
+                onChanged: onSearch,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF01060F),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Row(
-                    children: [
-                      const Icon(
-                        Icons.search,
-                        size: 20,
-                        color: Color(0xFFA2A8AF),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: TextField(
-                          onChanged: onSearch,
-                          decoration: const InputDecoration(
-                            border: InputBorder.none,
-                            isDense: true,
-                            hintText: 'Search Your Needs...',
-                            hintStyle: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFFA2A8AF),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                decoration: InputDecoration(
+                  hintText: 'Search Your Needs...',
+                  hintStyle: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xFFA2A8AF),
+                  ),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    size: 20,
+                    color: Color(0xFFA2A8AF),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE8EAE8),
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(
+                      color: Color(0xFFE8EAE8),
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: const BorderSide(
+                      color: Color(0xFF064E36),
+                      width: 1,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(4),
-              border: Border.all(color: const Color(0xFFE8EAE8)),
+          GestureDetector(
+            onTap: () {
+              // TODO: Implement filter functionality
+            },
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(color: const Color(0xFFE8EAE8)),
+              ),
+              padding: const EdgeInsets.all(10),
+              child: SvgPicture.asset(
+                'assets/svg/ic_filter.svg',
+                colorFilter: const ColorFilter.mode(
+                  Color(0xFF01060F),
+                  BlendMode.srcIn,
+                ),
+              ),
             ),
-            child: const Icon(Icons.tune_rounded, color: Color(0xFF01060F)),
           ),
         ],
       ),
