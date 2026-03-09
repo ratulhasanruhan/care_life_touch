@@ -1,3 +1,4 @@
+import 'package:care_life_touch/app/core/values/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../modules/cart/controllers/cart_controller.dart';
@@ -26,6 +27,7 @@ class AddToCartModal extends StatefulWidget {
 
 class _AddToCartModalState extends State<AddToCartModal> {
   int selectedQuantity = 1;
+  bool showCustomInput = false;
   final TextEditingController customQuantityController = TextEditingController();
 
   @override
@@ -144,8 +146,10 @@ class _AddToCartModalState extends State<AddToCartModal> {
                 ),
                 const SizedBox(height: 8),
                 _buildQuantitySelector(),
-                const SizedBox(height: 12),
-                _buildCustomQuantityInput(),
+                if (showCustomInput) ...[
+                  const SizedBox(height: 12),
+                  _buildCustomQuantityInput(),
+                ],
               ],
             ),
           ),
@@ -163,6 +167,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
                     text: 'Continue',
                     variant: ButtonVariant.secondary,
                     size: ButtonSize.medium,
+                    textColor: AppColors.textPrimary,
                     fullWidth: true,
                     onPressed: () {
                       Get.back();
@@ -210,43 +215,83 @@ class _AddToCartModalState extends State<AddToCartModal> {
 
   Widget _buildQuantitySelector() {
     // Pre-defined quantities
-    final quantities = [1, 5, 10, 20, 50];
+    final quantities = [1, 5, 10, 20];
 
     return Wrap(
       spacing: 9,
-      children: quantities.map((qty) {
-        final isSelected = selectedQuantity == qty;
+      children: [
+        // Quantity buttons
+        ...quantities.map((qty) {
+          final isSelected = selectedQuantity == qty && !showCustomInput;
 
-        return GestureDetector(
+          return GestureDetector(
+            onTap: () {
+              setState(() {
+                selectedQuantity = qty;
+                showCustomInput = false;
+                customQuantityController.clear();
+              });
+            },
+            child: Container(
+              width: 57.5,
+              height: 24,
+              decoration: BoxDecoration(
+                color: isSelected ? const Color(0xFF064E36) : const Color(0xFFFAFAFA),
+                border: Border.all(
+                  color: isSelected ? const Color(0xFF064E36) : const Color(0xFFE8EAE8),
+                  width: 0.75,
+                ),
+                borderRadius: BorderRadius.circular(2),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                qty.toString(),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? Colors.white : const Color(0xFF01060F),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
+
+        // Custom button
+        GestureDetector(
           onTap: () {
             setState(() {
-              selectedQuantity = qty;
-              customQuantityController.clear();
+              showCustomInput = !showCustomInput;
+              if (showCustomInput) {
+                // Focus on the text field when showing it
+                Future.delayed(const Duration(milliseconds: 100), () {
+                  FocusScope.of(context).requestFocus(FocusNode());
+                });
+              }
             });
           },
           child: Container(
             width: 57.5,
             height: 24,
             decoration: BoxDecoration(
-              color: isSelected ? const Color(0xFF064E36) : const Color(0xFFFAFAFA),
+              color: showCustomInput ? const Color(0xFF064E36) : const Color(0xFFFAFAFA),
               border: Border.all(
-                color: isSelected ? const Color(0xFF064E36) : const Color(0xFFE8EAE8),
+                color: showCustomInput ? const Color(0xFF064E36) : const Color(0xFFE8EAE8),
                 width: 0.75,
               ),
               borderRadius: BorderRadius.circular(2),
             ),
             alignment: Alignment.center,
             child: Text(
-              qty.toString(),
+              'Custom',
               style: TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.w500,
-                color: isSelected ? Colors.white : const Color(0xFF01060F),
+                color: showCustomInput ? Colors.white : const Color(0xFF01060F),
               ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      ],
     );
   }
 
@@ -261,6 +306,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
       child: TextField(
         controller: customQuantityController,
         keyboardType: TextInputType.number,
+        autofocus: true,
         style: const TextStyle(
           fontSize: 14,
           fontWeight: FontWeight.w400,
@@ -277,7 +323,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           suffixIcon: customQuantityController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.check, color: Color(0xFF064E36)),
+                  icon: const Icon(Icons.check, color: Color(0xFF064E36), size: 20),
                   onPressed: () {
                     final customQty = int.tryParse(customQuantityController.text);
                     if (customQty != null && customQty > 0) {
