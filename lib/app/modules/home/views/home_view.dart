@@ -27,7 +27,7 @@ class HomeView extends GetView<HomeController> {
               Get.snackbar('Location', 'Location picker coming soon');
             },
             onNotificationTap: () {
-              Get.snackbar('Notifications', 'No new notifications');
+              Get.toNamed(Routes.NOTIFICATION);
             },
             onSearch: controller.onSearch,
           ),

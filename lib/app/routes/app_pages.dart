@@ -19,6 +19,8 @@ import '../modules/product_details/bindings/product_reviews_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
 import '../modules/product_details/views/medicine_overview_view.dart';
 import '../modules/product_details/views/product_reviews_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
 
 part 'app_routes.dart';
 
@@ -83,6 +85,11 @@ class AppPages {
       name: _Paths.PRODUCT_REVIEWS,
       page: () => const ProductReviewsView(),
       binding: ProductReviewsBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATION,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
     ),
     // Legal module routes
     ...LegalRoutes.pages,

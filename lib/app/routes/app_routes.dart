@@ -17,6 +17,7 @@ abstract class Routes {
   static const CHECKOUT = _Paths.CHECKOUT;
   static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
   static const PROFILE = _Paths.PROFILE;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
   static const TERMS = LegalRoutes.terms;
   static const PRIVACY = LegalRoutes.privacy;
   static const ABOUT = LegalRoutes.about;
@@ -40,5 +41,6 @@ abstract class _Paths {
   static const CHECKOUT = '/checkout';
   static const ORDER_HISTORY = '/order-history';
   static const PROFILE = '/profile';
+  static const NOTIFICATION = '/notification';
   // Add more paths as needed
 }
