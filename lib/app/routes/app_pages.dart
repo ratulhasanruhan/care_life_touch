@@ -16,6 +16,7 @@ import '../modules/products/bindings/products_binding.dart';
 import '../modules/products/views/products_view.dart';
 import '../modules/product_details/bindings/product_details_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
+import '../modules/product_details/views/medicine_overview_view.dart';
 
 part 'app_routes.dart';
 
@@ -69,6 +70,11 @@ class AppPages {
     GetPage(
       name: _Paths.PRODUCT_DETAILS,
       page: () => const ProductDetailsView(),
+      binding: ProductDetailsBinding(),
+    ),
+    GetPage(
+      name: _Paths.MEDICINE_OVERVIEW,
+      page: () => const MedicineOverviewView(),
       binding: ProductDetailsBinding(),
     ),
     // Legal module routes

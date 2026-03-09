@@ -278,7 +278,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            // Handle tap - could expand to show more info
+            // Navigate to medicine overview screen
+            Get.toNamed(Routes.MEDICINE_OVERVIEW, arguments: controller.product);
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),

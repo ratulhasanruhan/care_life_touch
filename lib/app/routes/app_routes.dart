@@ -1,6 +1,5 @@
 part of 'app_pages.dart';
 
-/// App Routes - Define all route names here
 abstract class Routes {
   Routes._();
   static const SPLASH = _Paths.SPLASH;
@@ -11,6 +10,7 @@ abstract class Routes {
   static const FORGOT_PASSWORD = _Paths.FORGOT_PASSWORD;
   static const FORGOT_PASSWORD_RESET = _Paths.FORGOT_PASSWORD_RESET;
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
+  static const MEDICINE_OVERVIEW = _Paths.MEDICINE_OVERVIEW;
   static const PRODUCTS = _Paths.PRODUCTS;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
@@ -32,6 +32,7 @@ abstract class _Paths {
   static const FORGOT_PASSWORD = '/forgot-password';
   static const FORGOT_PASSWORD_RESET = '/forgot-password-reset';
   static const PRODUCT_DETAILS = '/product-details';
+  static const MEDICINE_OVERVIEW = '/medicine-overview';
   static const PRODUCTS = '/products';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
