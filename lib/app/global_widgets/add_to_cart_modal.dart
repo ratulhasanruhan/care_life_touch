@@ -165,7 +165,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
                 Expanded(
                   child: CustomButton(
                     text: 'Continue',
-                    variant: ButtonVariant.secondary,
+                    variant: ButtonVariant.tertiary,
                     size: ButtonSize.medium,
                     textColor: AppColors.textPrimary,
                     fullWidth: true,
