@@ -137,29 +137,34 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               ),
 
               // Rating with arrow
-              Row(
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star, color: Color(0xFFF1B71B), size: 14),
-                      const SizedBox(width: 4),
-                      Text(
-                        controller.product.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Color(0xFF01060F),
+              InkWell(
+                onTap: () {
+                  Get.toNamed(Routes.PRODUCT_REVIEWS);
+                },
+                child: Row(
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.star, color: Color(0xFFF1B71B), size: 14),
+                        const SizedBox(width: 4),
+                        Text(
+                          controller.product.rating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color(0xFF01060F),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 4),
-                  const Icon(
-                    Icons.chevron_right,
-                    size: 20,
-                    color: Color(0xB301060F),
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(width: 4),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: Color(0xB301060F),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),

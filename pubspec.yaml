@@ -27,6 +27,7 @@ dependencies:
   pinput: ^6.0.2
   flutter_svg: ^2.0.10
   carousel_slider: ^5.1.2
+  flutter_rating_bar: ^4.0.1
 
 
 dev_dependencies:
