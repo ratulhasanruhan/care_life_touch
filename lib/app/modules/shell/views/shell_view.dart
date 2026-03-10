@@ -5,6 +5,7 @@ import 'widgets/bottom_navigation_bar.dart';
 import '../../home/views/home_view.dart';
 import '../../cart/views/cart_view.dart';
 import '../../products/views/products_view.dart';
+import '../../more/views/more_view.dart';
 
 /// Shell View - Main container with bottom navigation
 ///
@@ -36,17 +37,9 @@ class ShellView extends GetView<ShellController> {
       case 2:
         return const CartView();
       case 3:
-        return _buildProfilePlaceholder();
+        return const MoreView();
       default:
         return const HomeView();
     }
-  }
-
-  /// Placeholder for Profile section
-  Widget _buildProfilePlaceholder() {
-    return Scaffold(
-      appBar: AppBar(title: const Text('More')),
-      body: const Center(child: Text('Profile Section')),
-    );
   }
 }
