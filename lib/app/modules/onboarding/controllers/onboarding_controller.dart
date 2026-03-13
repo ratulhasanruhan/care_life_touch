@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../routes/app_pages.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/providers/storage_provider.dart';
 import '../models/onboarding_model.dart';
 
 class OnboardingController extends GetxController {
   final currentIndex = 0.obs;
+  final StorageService _storage = Get.find<StorageService>();
   late PageController pageController;
   final pages = onboardingPages;
 
@@ -34,22 +36,22 @@ class OnboardingController extends GetxController {
         curve: Curves.easeInOut,
       );
     } else {
-      // Last page - navigate to register
-      _navigateToRegister();
+      _completeOnboarding();
     }
   }
 
-  /// Navigate to register
-  void _navigateToRegister() {
+  void _completeOnboarding() {
     AppLogger.info('Onboarding completed');
-    AppLogger.navigation(Routes.REGISTER);
-    Get.offNamed(Routes.REGISTER);
+    _storage.setOnboardingCompleted(true);
+    AppLogger.navigation(Routes.LOGIN);
+    Get.offNamed(Routes.LOGIN);
   }
 
   /// Skip onboarding
   void skipOnboarding() {
     AppLogger.info('Onboarding skipped');
-    AppLogger.navigation(Routes.REGISTER);
-    Get.offNamed(Routes.REGISTER);
+    _storage.setOnboardingCompleted(true);
+    AppLogger.navigation(Routes.LOGIN);
+    Get.offNamed(Routes.LOGIN);
   }
 }

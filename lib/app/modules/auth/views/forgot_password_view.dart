@@ -66,33 +66,31 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                     text: 'Confirm',
                     onPressed: controller.isLoading.value
                         ? null
-                        : () {
+                        : () async {
                             if (!controller.emailFormKey.currentState!
                                 .validate()) {
                               return;
                             }
-                            controller.sendPasswordResetOTP();
-                            // Show OTP dialog
-                            Future.delayed(
-                              const Duration(milliseconds: 500),
-                              () {
-                                OTPVerificationDialog.show(
-                                  email: controller.emailController.text,
-                                  onVerify: (pin) {
-                                    controller.verifyPasswordResetOTP(pin);
-                                  },
-                                  onResend: () {
-                                    controller.resendPasswordResetOTP();
-                                  },
-                                  onEdit: () {
-                                    Get.back();
-                                    controller.otpSent.value = false;
-                                  },
-                                  resendTimer: controller.resendTimer,
-                                  isLoading: controller.isLoading,
-                                  otpLength: 6,
-                                );
+                            await controller.sendPasswordResetOTP();
+                            if (!controller.otpSent.value) {
+                              return;
+                            }
+
+                            OTPVerificationDialog.show(
+                              email: controller.emailController.text,
+                              onVerify: (pin) {
+                                controller.verifyPasswordResetOTP(pin);
                               },
+                              onResend: () {
+                                controller.resendPasswordResetOTP();
+                              },
+                              onEdit: () {
+                                Get.back();
+                                controller.otpSent.value = false;
+                              },
+                              resendTimer: controller.resendTimer,
+                              isLoading: controller.isLoading,
+                              otpLength: 6,
                             );
                           },
                     isLoading: controller.isLoading.value,

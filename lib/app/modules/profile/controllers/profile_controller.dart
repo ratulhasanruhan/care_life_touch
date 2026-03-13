@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
+import '../../../data/repositories/auth_repository.dart';
 
 class ProfileController extends GetxController {
   final isLoading = false.obs;
@@ -28,11 +30,13 @@ class ProfileController extends GetxController {
 
   final ImagePicker _picker = ImagePicker();
   final _storage = Get.find<StorageService>();
+  final _authRepository = Get.find<AuthRepository>();
 
   @override
   void onInit() {
     super.onInit();
     _loadProfile();
+    _refreshProfileFromServer();
   }
 
   void _loadProfile() {
@@ -150,22 +154,26 @@ class ProfileController extends GetxController {
 
       final existingUser = _storage.getUser() ?? <String, dynamic>{};
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      final uploadedNid = await _resolveUpload(nidImage.value);
+      final uploadedShop = await _resolveUpload(shopImage.value);
 
+      await _authRepository.updateBuyerProfile(
+        shopName: shopNameController.text.trim(),
+        fullName: ownerNameController.text.trim(),
+        nidImage: uploadedNid,
+        shopImages: uploadedShop == null ? null : [uploadedShop],
+      );
+
+      final latestUser = await _authRepository.accessMe();
       await _storage.saveUser({
         ...existingUser,
-        'id': (existingUser['id'] ?? DateTime.now().millisecondsSinceEpoch)
-            .toString(),
-        'name': ownerNameController.text.trim(),
+        ...latestUser,
         'shopName': shopNameController.text.trim(),
         'ownerName': ownerNameController.text.trim(),
         'phone': phoneController.text.trim(),
         'email': emailController.text.trim(),
-        'profileImage': shopImage.value?.path,
-        'drugLicenseImage': drugLicenseImage.value?.path,
-        'tradeLicenseImage': tradeLicenseImage.value?.path,
-        'nidImage': nidImage.value?.path,
-        'shopImage': shopImage.value?.path,
+        'nidImage': uploadedNid ?? existingUser['nidImage'],
+        'shopImage': uploadedShop ?? existingUser['shopImage'],
         'updatedAt': DateTime.now().toIso8601String(),
       });
 
@@ -184,7 +192,9 @@ class ProfileController extends GetxController {
       AppLogger.error('Profile update failed', e, stackTrace);
       Get.snackbar(
         'Error',
-        'Failed to update profile. Please try again.',
+        e is ApiException && e.message.trim().isNotEmpty
+            ? e.message
+            : 'Failed to update profile. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -192,6 +202,31 @@ class ProfileController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> _refreshProfileFromServer() async {
+    if (!_storage.isLoggedIn) {
+      return;
+    }
+
+    try {
+      final profile = await _authRepository.accessMe();
+      final existing = _storage.getUser() ?? <String, dynamic>{};
+      await _storage.saveUser({...existing, ...profile});
+      _loadProfile();
+    } catch (_) {
+      // Keep local cached profile when refresh fails.
+    }
+  }
+
+  Future<String?> _resolveUpload(File? file) async {
+    if (file == null) {
+      return null;
+    }
+    if (file.path.startsWith('http://') || file.path.startsWith('https://')) {
+      return file.path;
+    }
+    return _authRepository.uploadImage(file);
   }
 
   Future<void> pickImage(String imageType) async {

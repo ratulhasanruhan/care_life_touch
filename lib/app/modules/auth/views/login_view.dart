@@ -110,8 +110,7 @@ class LoginView extends GetView<AuthController> {
                             if (!controller.loginFormKey.currentState!
                                 .validate())
                               return;
-                            // TODO: Implement login
-                            Get.offAllNamed(Routes.HOME);
+                            controller.login();
                           },
                     isLoading: controller.isLoading.value,
                     fullWidth: true,

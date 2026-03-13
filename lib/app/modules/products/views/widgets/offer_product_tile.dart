@@ -36,7 +36,23 @@ class OfferProductTile extends StatelessWidget {
               ),
               child: Padding(
                 padding: const EdgeInsets.all(6),
-                child: Image.asset(product.imagePath, fit: BoxFit.contain),
+                child: product.hasRemoteImage
+                    ? Image.network(
+                        product.imagePath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.image_not_supported,
+                          color: Color(0xFFE8EAE8),
+                        ),
+                      )
+                    : Image.asset(
+                        product.imagePath,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => const Icon(
+                          Icons.image_not_supported,
+                          color: Color(0xFFE8EAE8),
+                        ),
+                      ),
               ),
             ),
             const SizedBox(width: 12),

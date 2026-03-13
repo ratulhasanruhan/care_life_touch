@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widgets/custom_text_field.dart';
 import '../../../global_widgets/custom_button.dart';
-import '../../../global_widgets/info_modal.dart';
-import '../../../routes/app_pages.dart';
 import '../controllers/forgot_password_controller.dart';
 
 /// Reset Password View - New password entry screen
@@ -100,25 +98,7 @@ class ResetPasswordView extends GetView<ForgotPasswordController> {
                     text: 'Save',
                     onPressed: controller.isLoading.value
                         ? null
-                        : () async {
-                            await controller.resetPassword();
-                            // Show success modal
-                            if (!controller.isLoading.value) {
-                              await InfoModal.show(
-                                title: 'Password Updated!',
-                                description:
-                                    'Your password has been set up successfully.',
-                                buttonText: 'Back to Log In',
-                                imagePath: 'assets/images/ic_new_pass.png',
-                                onPressed: () {
-                                  Get.back(); // Close modal
-                                  Get.offAllNamed(
-                                    Routes.LOGIN,
-                                  ); // Navigate to login
-                                },
-                              );
-                            }
-                          },
+                        : controller.resetPassword,
                     isLoading: controller.isLoading.value,
                     fullWidth: true,
                     size: ButtonSize.large,

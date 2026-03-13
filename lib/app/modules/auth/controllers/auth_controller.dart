@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_pages.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../../../global_widgets/otp_verification_dialog.dart';
@@ -45,6 +47,8 @@ class AuthController extends GetxController {
   final resendTimer = 60.obs;
 
   final _storage = Get.find<StorageService>();
+  final _authRepository = Get.find<AuthRepository>();
+  String? _pendingAccountId;
 
   @override
   void onClose() {
@@ -142,40 +146,26 @@ class AuthController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Registering user: ${emailController.text}');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+      final uploadedNid = nidImage.value == null
+          ? null
+          : await _authRepository.uploadImage(nidImage.value!);
+      final uploadedShop = shopImage.value == null
+          ? null
+          : await _authRepository.uploadImage(shopImage.value!);
 
-      // TODO: Replace with actual API call
-      // final response = await authRepository.register(
-      //   shopName: shopNameController.text,
-      //   ownerName: ownerNameController.text,
-      //   phone: phoneController.text,
-      //   email: emailController.text,
-      //   password: passwordController.text,
-      //   drugLicense: drugLicenseImage.value,
-      //   tradeLicense: tradeLicenseImage.value,
-      //   nid: nidImage.value,
-      //   shopImage: shopImage.value,
-      // );
-
-      // Save auth data
-      await _storage.saveToken(
-        'demo_token_${DateTime.now().millisecondsSinceEpoch}',
+      final response = await _authRepository.registerBuyer(
+        shopName: shopNameController.text,
+        fullName: ownerNameController.text,
+        phone: phoneController.text,
+        password: passwordController.text,
+        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        drugLicense: null,
+        tradeLicense: null,
+        nidImage: uploadedNid,
+        shopImages: uploadedShop == null ? null : [uploadedShop],
       );
-      await _storage.saveUser({
-        'id': DateTime.now().millisecondsSinceEpoch.toString(),
-        'name': ownerNameController.text,
-        'shopName': shopNameController.text,
-        'ownerName': ownerNameController.text,
-        'phone': phoneController.text,
-        'email': emailController.text.trim(),
-        'profileImage': shopImage.value?.path,
-        'drugLicenseImage': drugLicenseImage.value?.path,
-        'tradeLicenseImage': tradeLicenseImage.value?.path,
-        'nidImage': nidImage.value?.path,
-        'shopImage': shopImage.value?.path,
-        'updatedAt': DateTime.now().toIso8601String(),
-      });
+
+      _pendingAccountId = _extractAccountId(response);
 
       AppLogger.success('Registration successful');
 
@@ -204,13 +194,42 @@ class AuthController extends GetxController {
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Registration failed. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      _showError(_resolveErrorMessage(e, fallback: 'Registration failed. Please try again.'));
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> login() async {
+    if (!loginFormKey.currentState!.validate()) {
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final identifier = emailController.text.trim();
+      final password = passwordController.text;
+
+      final session = await _authRepository.login(
+        identifier: identifier,
+        password: password,
       );
+
+      final token = (session['token'] ?? '').toString();
+      final user = (session['user'] is Map<String, dynamic>)
+          ? session['user'] as Map<String, dynamic>
+          : <String, dynamic>{
+              'name': identifier,
+              'phone': identifier,
+            };
+
+      await _storage.saveSession(token: token, user: user);
+      await _storage.saveLastLoginIdentifier(identifier);
+
+      Get.offAllNamed(Routes.HOME);
+    } catch (e, stackTrace) {
+      AppLogger.error('Login failed', e, stackTrace);
+      _showError(_resolveErrorMessage(e, fallback: 'Login failed. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -221,11 +240,9 @@ class AuthController extends GetxController {
     try {
       AppLogger.info('Sending OTP to: ${emailController.text}');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // await authRepository.sendOTP(email: emailController.text);
+      if (_pendingAccountId == null || _pendingAccountId!.isEmpty) {
+        throw const ApiException('Missing account id for OTP verification.');
+      }
 
       otpSent.value = true;
       startResendTimer();
@@ -254,52 +271,37 @@ class AuthController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Verifying registration OTP: ${otpController.text}');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // final response = await authRepository.verifyOTP(
-      //   email: emailController.text,
-      //   otp: otpController.text,
-      // );
-
-      // For demo, accept any 6-digit OTP
-      if (otpController.text.length == 6) {
-        otpVerified.value = true;
-
-        // Save auth token
-        await _storage.saveToken(
-          'demo_token_${DateTime.now().millisecondsSinceEpoch}',
-        );
-
-        AppLogger.success('Registration OTP verified successfully');
-
-        Get.back(); // Close OTP dialog
-
-        // Show success modal
-        InfoModal.show(
-          title: 'Congratulations!',
-          description:
-              'Your registration is complete. Your account is now ready to use.',
-          buttonText: 'Go to Home',
-          imagePath: 'assets/images/ic_profile_success.png',
-          onPressed: () {
-            Get.back(); // Close modal
-            Get.offAllNamed(Routes.HOME); // Navigate to home
-          },
-        );
-      } else {
-        throw Exception('Invalid OTP');
+      final accountId = _pendingAccountId;
+      if (accountId == null || accountId.isEmpty) {
+        throw const ApiException('Unable to verify OTP. Please register again.');
       }
+
+      await _authRepository.verifyOtp(
+        accountId: accountId,
+        otp: otpController.text.trim(),
+      );
+
+      otpVerified.value = true;
+      await _storage.setOnboardingCompleted(true);
+
+      AppLogger.success('Registration OTP verified successfully');
+
+      Get.back();
+
+      InfoModal.show(
+        title: 'Congratulations!',
+        description:
+            'Your registration is complete. Your account is now ready to use.',
+        buttonText: 'Go to Sign In',
+        imagePath: 'assets/images/ic_profile_success.png',
+        onPressed: () {
+          Get.back();
+          Get.offAllNamed(Routes.LOGIN);
+        },
+      );
     } catch (e, stackTrace) {
       AppLogger.error('Registration OTP verification failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Invalid OTP. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -322,55 +324,10 @@ class AuthController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Verifying OTP: ${otpController.text}');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // final response = await authRepository.verifyOTP(
-      //   email: emailController.text,
-      //   otp: otpController.text,
-      // );
-
-      // For demo, accept any 6-digit OTP
-      if (otpController.text.length == 6) {
-        otpVerified.value = true;
-
-        // Save auth data
-        await _storage.saveToken(
-          'demo_token_${DateTime.now().millisecondsSinceEpoch}',
-        );
-        await _storage.saveUser({
-          'name': nameController.text,
-          'email': emailController.text,
-        });
-
-        AppLogger.success('OTP verified successfully');
-
-        Get.back(); // Close OTP bottom sheet
-
-        Get.snackbar(
-          'Success',
-          'Registration completed successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
-
-        // Navigate to home
-        await Future.delayed(const Duration(milliseconds: 500));
-        Get.offAllNamed(Routes.HOME);
-      } else {
-        throw Exception('Invalid OTP');
-      }
+      await verifyRegistrationOTP();
     } catch (e, stackTrace) {
       AppLogger.error('OTP verification failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Invalid OTP. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -394,14 +351,46 @@ class AuthController extends GetxController {
         colorText: Colors.white,
       );
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to resend OTP',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Failed to resend OTP'));
     }
+  }
+
+  String? _extractAccountId(Map<String, dynamic> response) {
+    final candidates = <dynamic>[
+      response['accountId'],
+      response['id'],
+      response['_id'],
+      (response['data'] is Map) ? response['data']['accountId'] : null,
+      (response['data'] is Map) ? response['data']['id'] : null,
+      (response['data'] is Map) ? response['data']['_id'] : null,
+      (response['buyer'] is Map) ? response['buyer']['_id'] : null,
+      (response['buyer'] is Map) ? response['buyer']['id'] : null,
+    ];
+
+    for (final candidate in candidates) {
+      if (candidate != null && candidate.toString().trim().isNotEmpty) {
+        return candidate.toString().trim();
+      }
+    }
+
+    return null;
+  }
+
+  String _resolveErrorMessage(Object error, {required String fallback}) {
+    if (error is ApiException && error.message.trim().isNotEmpty) {
+      return error.message;
+    }
+    return fallback;
+  }
+
+  void _showError(String message) {
+    Get.snackbar(
+      'Error',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 
   /// Start resend timer

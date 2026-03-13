@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 // import 'package:get_storage/get_storage.dart'; // TODO: Run: flutter pub add get_storage
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../core/constants/app_constants.dart';
+
 /// Local storage service using SharedPreferences
 /// TODO: Replace with GetStorage after adding the package
 class StorageService extends GetxService {
@@ -53,38 +55,51 @@ class StorageService extends GetxService {
 
   /// Save auth token
   Future<void> saveToken(String token) async {
-    await write('auth_token', token);
+    await write(AppConstants.keyToken, token);
   }
 
   /// Get auth token
   String? getToken() {
-    return read<String>('auth_token');
+    return read<String>(AppConstants.keyToken);
   }
 
   /// Remove auth token
   Future<void> removeToken() async {
-    await remove('auth_token');
+    await remove(AppConstants.keyToken);
   }
 
   /// Check if user is logged in
-  bool get isLoggedIn => hasData('auth_token');
+  bool get isLoggedIn {
+    final token = getToken();
+    return token != null && token.trim().isNotEmpty;
+  }
 
   /// Save user data
   Future<void> saveUser(Map<String, dynamic> user) async {
-    await write('user_data', jsonEncode(user));
+    await write(AppConstants.keyUser, jsonEncode(user));
   }
 
   /// Get user data
   Map<String, dynamic>? getUser() {
-    final userJson = read<String>('user_data');
+    final userJson = read<String>(AppConstants.keyUser);
 
     if (userJson == null || userJson.isEmpty) {
       return null;
     }
 
-    final decoded = jsonDecode(userJson);
-    if (decoded is Map<String, dynamic>) {
-      return decoded;
+    try {
+      final decoded = jsonDecode(userJson);
+      if (decoded is Map<String, dynamic>) {
+        return decoded;
+      }
+
+      if (decoded is Map) {
+        return decoded.map(
+          (key, value) => MapEntry(key.toString(), value),
+        );
+      }
+    } catch (_) {
+      return null;
     }
 
     return null;
@@ -92,8 +107,31 @@ class StorageService extends GetxService {
 
   /// Remove user data
   Future<void> removeUser() async {
-    await remove('user_data');
+    await remove(AppConstants.keyUser);
   }
+
+  Future<void> saveSession({
+    required String token,
+    required Map<String, dynamic> user,
+  }) async {
+    await saveToken(token);
+    await saveUser(user);
+  }
+
+  Future<void> saveLastLoginIdentifier(String identifier) async {
+    await write(AppConstants.keyLastLoginIdentifier, identifier);
+  }
+
+  String? getLastLoginIdentifier() {
+    return read<String>(AppConstants.keyLastLoginIdentifier);
+  }
+
+  Future<void> setOnboardingCompleted(bool completed) async {
+    await write(AppConstants.keyOnboardingCompleted, completed);
+  }
+
+  bool get isOnboardingCompleted =>
+      read<bool>(AppConstants.keyOnboardingCompleted) ?? false;
 
   /// Logout - Clear auth data
   Future<void> logout() async {

@@ -3,7 +3,10 @@ import 'package:get/get.dart';
 import 'app/core/theme/app_theme.dart';
 import 'app/core/constants/app_constants.dart';
 import 'app/core/utils/app_logger.dart';
+import 'app/data/providers/api_provider.dart';
 import 'app/data/providers/storage_provider.dart';
+import 'app/data/repositories/auth_repository.dart';
+import 'app/data/repositories/product_repository.dart';
 import 'app/routes/app_pages.dart';
 
 void main() async {
@@ -14,6 +17,9 @@ void main() async {
   final storage = StorageService();
   await storage.init();
   Get.put(storage);
+  Get.put(ApiProvider(), permanent: true);
+  Get.put(AuthRepository(), permanent: true);
+  Get.put(ProductRepository(), permanent: true);
 
   runApp(const MyApp());
 }

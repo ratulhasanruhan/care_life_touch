@@ -6,13 +6,17 @@ class AppConstants {
   static const String appName = 'Care Life Touch';
   static const String appVersion = '1.0.0';
 
-  // API Configuration (Update with your actual API)
-  static const String baseUrl = 'https://api.example.com';
-  static const String apiVersion = '/api/v1';
+  // API Configuration
+  static const String baseUrl = String.fromEnvironment(
+    'BASE_URL',
+    defaultValue: 'https://carelifetouch.startupmindweb.com/api',
+  );
+  static const String uploadEndpoint = '/upload-image';
 
   // Timeouts
   static const int connectionTimeout = 30000; // 30 seconds
   static const int receiveTimeout = 30000;
+  static const int maxRequestRetries = 2;
 
   // Pagination
   static const int defaultPageSize = 20;
@@ -20,6 +24,8 @@ class AppConstants {
   // Storage Keys
   static const String keyToken = 'auth_token';
   static const String keyUser = 'user_data';
+  static const String keyOnboardingCompleted = 'onboarding_completed';
+  static const String keyLastLoginIdentifier = 'last_login_identifier';
   static const String keyLanguage = 'language';
   static const String keyTheme = 'theme_mode';
   static const String keyCart = 'cart_data';

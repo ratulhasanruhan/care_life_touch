@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/repositories/product_repository.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../models/product_model.dart';
 import '../../cart/controllers/cart_controller.dart';
@@ -19,6 +19,7 @@ class HomeController extends GetxController {
 
   // Cart controller
   late CartController cartController;
+  final ProductRepository _productRepository = Get.find<ProductRepository>();
 
   @override
   void onInit() {
@@ -35,17 +36,14 @@ class HomeController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Loading home data...');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
+      final allProducts = await _productRepository.getProducts();
+      trendingProducts.value = allProducts.take(6).toList();
+      newProducts.value = allProducts.reversed.take(6).toList();
 
-      // TODO: Replace with actual API call
-      // final products = await productRepository.getTrendingProducts();
-      // trendingProducts.value = products;
-
-      // Load sample product data
-      trendingProducts.value = _getSampleProducts(4);
-      newProducts.value = _getSampleProducts(4);
-      offerProducts.value = _getSampleProducts(4, hasOffer: true);
+      final discounted = await _productRepository.getDiscountedProducts();
+      offerProducts.value = discounted.isNotEmpty
+          ? discounted.take(6).toList()
+          : allProducts.where((product) => product.hasOffer).take(6).toList();
 
       AppLogger.success('Home data loaded successfully');
     } catch (e, stackTrace) {
@@ -55,26 +53,6 @@ class HomeController extends GetxController {
     }
   }
 
-  /// Generate sample products
-  List<ProductModel> _getSampleProducts(int count, {bool hasOffer = false}) {
-    return List.generate(count, (index) {
-      final isEven = index % 2 == 0;
-      return ProductModel(
-        id: 'product_${DateTime.now().millisecondsSinceEpoch}_$index',
-        name: isEven ? 'Paracetamol' : 'Ibuprofen',
-        brand: 'ACME Pharmaceuticals',
-        price: 100,
-        maxPrice: 150,
-        moq: '20 Box',
-        rating: 4.9,
-        imagePath: isEven
-            ? 'assets/demo/product_1.png'
-            : 'assets/demo/product_2.png',
-        hasOffer: hasOffer && isEven,
-        offerLabel: 'SALE',
-      );
-    });
-  }
 
   /// Request location permission (approximate location)
   Future<void> _requestLocationPermission() async {

@@ -18,17 +18,18 @@ class ProductDetailsController extends GetxController {
   final brandProducts = <ProductModel>[].obs;
 
   // Product images (carousel)
-  List<String> get images => [
-        product.imagePath,
-        product.imagePath, // Demo - same image
-        product.imagePath, // Demo - same image
-      ];
+  List<String> get images =>
+      product.imageUrls.isNotEmpty ? product.imageUrls : [product.imagePath];
 
   // Description management
-  String get fullDescription =>
-      'Paracetamol for fast, reliable relief from fever and everyday pain. '
-      'Safe and effective when used as directed. '
-      'Suitable for adults and children over 12 years.';
+  String get fullDescription {
+    final description = product.description?.trim();
+    if (description != null && description.isNotEmpty) {
+      return description;
+    }
+
+    return 'Medicine information is not available for this product right now.';
+  }
 
   String get truncatedDescription {
     if (fullDescription.length <= 100) return fullDescription;

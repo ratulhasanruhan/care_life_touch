@@ -1,28 +1,36 @@
 /// Product Model
 class ProductModel {
   final String id;
+  final String? slug;
   final String name;
   final String brand;
+  final String? description;
   final double price;
   final double? maxPrice;
   final String moq;
   final double rating;
   final String imagePath;
+  final List<String> imageUrls;
   final bool hasOffer;
   final String? offerLabel;
 
   ProductModel({
     required this.id,
+    this.slug,
     required this.name,
     required this.brand,
+    this.description,
     required this.price,
     this.maxPrice,
     required this.moq,
     this.rating = 4.9,
     required this.imagePath,
+    this.imageUrls = const [],
     this.hasOffer = false,
     this.offerLabel,
   });
+
+  bool get hasRemoteImage => imagePath.startsWith('http://') || imagePath.startsWith('https://');
 
   /// Get price display string
   String get priceDisplay {
@@ -37,17 +45,53 @@ class ProductModel {
 
   /// Factory method to create from JSON
   factory ProductModel.fromJson(Map<String, dynamic> json) {
+    final id = (json['_id'] ?? json['id'] ?? '').toString();
+    final categoryName = (json['category'] is Map)
+        ? (json['category']['name'] ?? '').toString()
+        : '';
+    final imageList = <String>[];
+    final images = json['images'];
+    if (images is List) {
+      for (final image in images) {
+        if (image is Map && image['url'] is String && (image['url'] as String).trim().isNotEmpty) {
+          imageList.add((image['url'] as String).trim());
+        }
+      }
+    }
+
+    final thumbnail = (json['thumbnail'] ?? json['imagePath'] ?? '').toString();
+    final primaryImage = imageList.isNotEmpty
+        ? imageList.first
+        : (thumbnail.isNotEmpty ? thumbnail : 'assets/demo/product_1.png');
+
+    final finalPrice = (json['finalPrice'] ?? json['price'] ?? 0);
+    final comparePrice = json['comparePrice'];
+    final ratingValue = (json['ratings'] is Map)
+        ? json['ratings']['average']
+        : json['rating'];
+    final discount = json['discount'];
+    final discountValue = discount is Map ? (discount['value'] ?? 0) : 0;
+
     return ProductModel(
-      id: json['id'] ?? '',
+      id: id,
+      slug: (json['slug'] ?? '').toString().isEmpty ? null : json['slug'].toString(),
       name: json['name'] ?? '',
-      brand: json['brand'] ?? '',
-      price: (json['price'] ?? 0).toDouble(),
-      maxPrice: json['maxPrice'] != null ? (json['maxPrice']).toDouble() : null,
-      moq: json['moq'] ?? '',
-      rating: (json['rating'] ?? 4.9).toDouble(),
-      imagePath: json['imagePath'] ?? '',
-      hasOffer: json['hasOffer'] ?? false,
-      offerLabel: json['offerLabel'],
+      brand: (json['brand'] is Map)
+          ? (json['brand']['name'] ?? '').toString()
+          : (json['brand'] ?? '').toString(),
+      description: (json['description'] ?? json['shortDescription'])?.toString(),
+      price: (finalPrice is num) ? finalPrice.toDouble() : 0,
+      maxPrice: comparePrice is num ? comparePrice.toDouble() : null,
+      moq: (json['variants'] is List && (json['variants'] as List).isNotEmpty)
+          ? ((json['variants'] as List).first['unit'] ?? '1 unit').toString()
+          : (categoryName.isNotEmpty ? categoryName : '1 unit'),
+      rating: (ratingValue is num) ? ratingValue.toDouble() : 4.9,
+      imagePath: primaryImage,
+      imageUrls: imageList,
+      hasOffer: (discountValue is num ? discountValue > 0 : false) || (comparePrice is num && comparePrice > (finalPrice is num ? finalPrice : 0)),
+      offerLabel: (discountValue is num && discountValue > 0)
+          ? '${discountValue.toInt()} OFF'
+          : json['offerLabel'],
     );
   }
 
@@ -55,13 +99,16 @@ class ProductModel {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'slug': slug,
       'name': name,
       'brand': brand,
+      'description': description,
       'price': price,
       'maxPrice': maxPrice,
       'moq': moq,
       'rating': rating,
       'imagePath': imagePath,
+      'imageUrls': imageUrls,
       'hasOffer': hasOffer,
       'offerLabel': offerLabel,
     };

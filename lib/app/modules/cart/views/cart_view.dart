@@ -110,17 +110,29 @@ class CartView extends GetView<CartController> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: Image.asset(
-                item.product.imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Icon(
-                    Icons.image_not_supported,
-                    size: 32,
-                    color: Color(0xFFE8EAE8),
-                  );
-                },
-              ),
+              child: item.product.hasRemoteImage
+                  ? Image.network(
+                      item.product.imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.image_not_supported,
+                          size: 32,
+                          color: Color(0xFFE8EAE8),
+                        );
+                      },
+                    )
+                  : Image.asset(
+                      item.product.imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.image_not_supported,
+                          size: 32,
+                          color: Color(0xFFE8EAE8),
+                        );
+                      },
+                    ),
             ),
           ),
 

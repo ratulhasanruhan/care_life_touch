@@ -86,18 +86,31 @@ class ProductCard extends StatelessWidget {
             Positioned.fill(
               child: Padding(
                 padding: const EdgeInsets.all(6),
-                child: Image.asset(
-                  product.imagePath,
-                  alignment: Alignment.topCenter,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.image_not_supported,
-                      size: 48,
-                      color: Color(0xFFE8EAE8),
-                    );
-                  },
-                ),
+                child: product.hasRemoteImage
+                    ? Image.network(
+                        product.imagePath,
+                        alignment: Alignment.topCenter,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Color(0xFFE8EAE8),
+                          );
+                        },
+                      )
+                    : Image.asset(
+                        product.imagePath,
+                        alignment: Alignment.topCenter,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.image_not_supported,
+                            size: 48,
+                            color: Color(0xFFE8EAE8),
+                          );
+                        },
+                      ),
               ),
             ),
             if (product.hasOffer)

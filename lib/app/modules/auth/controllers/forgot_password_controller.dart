@@ -1,6 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/api_exception.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../../../routes/app_pages.dart';
 
@@ -27,15 +31,23 @@ class ForgotPasswordController extends GetxController {
 
   // Current email for password reset
   final resetEmail = ''.obs;
+  final _authRepository = Get.find<AuthRepository>();
+  Timer? _resendTimerTicker;
 
   @override
   void onInit() {
     super.onInit();
-    _startResendTimer();
+    final args = Get.arguments;
+    if (args is Map && args['email'] != null) {
+      final value = args['email'].toString();
+      resetEmail.value = value;
+      emailController.text = value;
+    }
   }
 
   @override
   void onClose() {
+    _resendTimerTicker?.cancel();
     emailController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
@@ -98,11 +110,9 @@ class ForgotPasswordController extends GetxController {
 
       AppLogger.info('Sending password reset OTP to: ${emailController.text}');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // await passwordRepository.sendResetOTP(email: emailController.text);
+      await _authRepository.sendForgotPasswordOtp(
+        identifier: emailController.text.trim(),
+      );
 
       otpSent.value = true;
       resendTimer.value = 60;
@@ -111,13 +121,7 @@ class ForgotPasswordController extends GetxController {
       AppLogger.success('Password reset OTP sent successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to send OTP', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Failed to send OTP. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Failed to send OTP. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -129,15 +133,7 @@ class ForgotPasswordController extends GetxController {
       isLoading.value = true;
 
       AppLogger.info('Verifying password reset OTP');
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // await passwordRepository.verifyResetOTP(
-      //   email: resetEmail.value,
-      //   otp: pin,
-      // );
+      otpController.text = pin;
 
       otpVerified.value = true;
 
@@ -151,13 +147,7 @@ class ForgotPasswordController extends GetxController {
       );
     } catch (e, stackTrace) {
       AppLogger.error('OTP verification failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Invalid OTP. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -168,11 +158,9 @@ class ForgotPasswordController extends GetxController {
     try {
       AppLogger.info('Resending password reset OTP');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
-      // await passwordRepository.sendResetOTP(email: resetEmail.value);
+      await _authRepository.sendForgotPasswordOtp(
+        identifier: resetEmail.value,
+      );
 
       resendTimer.value = 60;
       _startResendTimer();
@@ -188,13 +176,7 @@ class ForgotPasswordController extends GetxController {
       );
     } catch (e, stackTrace) {
       AppLogger.error('Failed to resend OTP', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Failed to resend OTP. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Failed to resend OTP. Please try again.'));
     }
   }
 
@@ -209,14 +191,12 @@ class ForgotPasswordController extends GetxController {
 
       AppLogger.info('Resetting password');
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // TODO: Replace with actual API call
-      // await passwordRepository.resetPassword(
-      //   email: resetEmail.value,
-      //   newPassword: newPasswordController.text,
-      // );
+      await _authRepository.resetPasswordWithOtp(
+        identifier: resetEmail.value,
+        otp: otpController.text.trim(),
+        newPassword: newPasswordController.text,
+        confirmPassword: confirmPasswordController.text,
+      );
 
       InfoModal.show(
         title: 'Password Updated!',
@@ -232,13 +212,7 @@ class ForgotPasswordController extends GetxController {
       AppLogger.success('Password reset successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Password reset failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Password reset failed. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _showError(_resolveErrorMessage(e, fallback: 'Password reset failed. Please try again.'));
     } finally {
       isLoading.value = false;
     }
@@ -246,11 +220,30 @@ class ForgotPasswordController extends GetxController {
 
   /// Start resend timer
   void _startResendTimer() {
-    Future.delayed(const Duration(seconds: 1)).then((_) {
-      if (resendTimer.value > 0) {
-        resendTimer.value--;
-        _startResendTimer();
+    _resendTimerTicker?.cancel();
+    _resendTimerTicker = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (resendTimer.value <= 0) {
+        timer.cancel();
+        return;
       }
+      resendTimer.value--;
     });
+  }
+
+  String _resolveErrorMessage(Object error, {required String fallback}) {
+    if (error is ApiException && error.message.trim().isNotEmpty) {
+      return error.message;
+    }
+    return fallback;
+  }
+
+  void _showError(String message) {
+    Get.snackbar(
+      'Error',
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 }

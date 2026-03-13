@@ -3,8 +3,12 @@ import 'package:get/get.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/validators.dart';
+import '../../../data/models/api_exception.dart';
+import '../../../data/repositories/auth_repository.dart';
 
 class ChangePasswordController extends GetxController {
+  final _authRepository = Get.find<AuthRepository>();
+
   final formKey = GlobalKey<FormState>();
 
   final currentPasswordController = TextEditingController();
@@ -68,7 +72,10 @@ class ChangePasswordController extends GetxController {
 
     try {
       isLoading.value = true;
-      await Future.delayed(const Duration(milliseconds: 800));
+      await _authRepository.changePassword(
+        oldPassword: currentPasswordController.text.trim(),
+        newPassword: newPasswordController.text.trim(),
+      );
 
       AppLogger.success('Password changed successfully');
 
@@ -85,7 +92,9 @@ class ChangePasswordController extends GetxController {
       AppLogger.error('Failed to change password', e, stackTrace);
       Get.snackbar(
         'Error',
-        'Failed to change password. Please try again.',
+        e is ApiException && e.message.trim().isNotEmpty
+            ? e.message
+            : 'Failed to change password. Please try again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,

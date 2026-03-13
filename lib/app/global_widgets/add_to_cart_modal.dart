@@ -78,10 +78,23 @@ class _AddToCartModalState extends State<AddToCartModal> {
                     borderRadius: BorderRadius.circular(2),
                   ),
                   padding: const EdgeInsets.all(5.29),
-                  child: Image.asset(
-                    widget.product.imagePath,
-                    fit: BoxFit.contain,
-                  ),
+                  child: widget.product.hasRemoteImage
+                      ? Image.network(
+                          widget.product.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.image_not_supported,
+                            color: Color(0xFFE8EAE8),
+                          ),
+                        )
+                      : Image.asset(
+                          widget.product.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (_, __, ___) => const Icon(
+                            Icons.image_not_supported,
+                            color: Color(0xFFE8EAE8),
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 12),
 
