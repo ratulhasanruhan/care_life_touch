@@ -19,8 +19,16 @@ import '../modules/product_details/bindings/product_reviews_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
 import '../modules/product_details/views/medicine_overview_view.dart';
 import '../modules/product_details/views/product_reviews_view.dart';
+import '../modules/checkout/bindings/checkout_binding.dart';
+import '../modules/checkout/views/checkout_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
+import '../modules/settings/bindings/change_password_binding.dart';
+import '../modules/settings/views/change_password_view.dart';
+import '../modules/settings/views/settings_view.dart';
 
 part 'app_routes.dart';
 
@@ -87,9 +95,29 @@ class AppPages {
       binding: ProductReviewsBinding(),
     ),
     GetPage(
+      name: _Paths.CHECKOUT,
+      page: () => const CheckoutView(),
+      binding: CheckoutBinding(),
+    ),
+    GetPage(
       name: _Paths.NOTIFICATION,
       page: () => const NotificationView(),
       binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: _Paths.PROFILE,
+      page: () => const ProfileView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.CHANGE_PASSWORD,
+      page: () => const ChangePasswordView(),
+      binding: ChangePasswordBinding(),
     ),
     // Legal module routes
     ...LegalRoutes.pages,

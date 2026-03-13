@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
@@ -59,10 +61,7 @@ class MoreView extends GetView<MoreController> {
                             color: Color(0xFF064E36),
                           ),
                         )
-                      : Image.asset(
-                          controller.userImage.value,
-                          fit: BoxFit.cover,
-                        ),
+                      : _buildProfileImage(controller.userImage.value),
                 ),
               ),
             ),
@@ -127,7 +126,7 @@ class MoreView extends GetView<MoreController> {
           _buildDivider(),
           MenuItem(
             icon: Icons.settings_outlined,
-            title: 'Setting',
+            title: 'Settings',
             onTap: controller.navigateToSettings,
           ),
           _buildDivider(),
@@ -165,6 +164,26 @@ class MoreView extends GetView<MoreController> {
       margin: const EdgeInsets.symmetric(horizontal: 16),
       height: 1,
       color: AppColors.border,
+    );
+  }
+
+  Widget _buildProfileImage(String imagePath) {
+    if (imagePath.startsWith('assets/')) {
+      return Image.asset(imagePath, fit: BoxFit.cover);
+    }
+
+    final file = File(imagePath);
+    if (file.existsSync()) {
+      return Image.file(file, fit: BoxFit.cover);
+    }
+
+    return Container(
+      color: const Color(0xFFF6F6F6),
+      child: const Icon(
+        Icons.person_outline,
+        size: 60,
+        color: Color(0xFF064E36),
+      ),
     );
   }
 }

@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../data/providers/storage_provider.dart';
 import '../../../routes/app_pages.dart';
 
 class MoreController extends GetxController {
   // User information
-  final userName = 'John Deo'.obs;
+  final userName = 'Guest User'.obs;
   final userImage = ''.obs;
 
   // Loading states
   final isLoading = false.obs;
+
+  final _storage = Get.find<StorageService>();
 
   @override
   void onInit() {
@@ -18,12 +21,20 @@ class MoreController extends GetxController {
   }
 
   void _loadUserData() {
-    // TODO: Load user data from storage/API
+    final user = _storage.getUser();
+
+    userName.value =
+        (user?['ownerName'] ?? user?['name'] ?? 'Guest User').toString();
+    userImage.value =
+        (user?['profileImage'] ?? user?['shopImage'] ?? '').toString();
   }
 
   // Navigation methods
-  void navigateToProfile() {
-    Get.toNamed(Routes.PROFILE);
+  Future<void> navigateToProfile() async {
+    final result = await Get.toNamed(Routes.PROFILE);
+    if (result == true) {
+      _loadUserData();
+    }
   }
 
   void navigateToAddress() {
@@ -37,8 +48,7 @@ class MoreController extends GetxController {
   }
 
   void navigateToSettings() {
-    // TODO: Add settings route
-    Get.snackbar('Coming Soon', 'Settings feature');
+    Get.toNamed(Routes.SETTINGS);
   }
 
   void navigateToAbout() {
@@ -64,8 +74,8 @@ class MoreController extends GetxController {
             child: const Text('Cancel'),
           ),
           TextButton(
-            onPressed: () {
-              // Clear user data
+            onPressed: () async {
+              await _storage.logout();
               Get.back();
               Get.offAllNamed(Routes.LOGIN);
             },
@@ -77,13 +87,7 @@ class MoreController extends GetxController {
   }
 
   void changePhoto() {
-    // TODO: Implement photo picker
-    Get.snackbar('Coming Soon', 'Photo upload feature');
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
+    navigateToProfile();
   }
 }
 

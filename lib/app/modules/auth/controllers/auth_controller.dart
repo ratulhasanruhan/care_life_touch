@@ -163,10 +163,18 @@ class AuthController extends GetxController {
         'demo_token_${DateTime.now().millisecondsSinceEpoch}',
       );
       await _storage.saveUser({
+        'id': DateTime.now().millisecondsSinceEpoch.toString(),
+        'name': ownerNameController.text,
         'shopName': shopNameController.text,
         'ownerName': ownerNameController.text,
         'phone': phoneController.text,
-        'email': emailController.text,
+        'email': emailController.text.trim(),
+        'profileImage': shopImage.value?.path,
+        'drugLicenseImage': drugLicenseImage.value?.path,
+        'tradeLicenseImage': tradeLicenseImage.value?.path,
+        'nidImage': nidImage.value?.path,
+        'shopImage': shopImage.value?.path,
+        'updatedAt': DateTime.now().toIso8601String(),
       });
 
       AppLogger.success('Registration successful');

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../routes/app_pages.dart';
 import '../controllers/cart_controller.dart';
 
 /// Cart View - Shopping cart screen
@@ -327,7 +328,7 @@ class CartView extends GetView<CartController> {
               height: 48,
               child: ElevatedButton(
                 onPressed: () {
-                  Get.snackbar('Checkout', 'Checkout feature coming soon');
+                  Get.toNamed(Routes.CHECKOUT);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF064E36),

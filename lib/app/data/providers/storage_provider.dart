@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 // import 'package:get_storage/get_storage.dart'; // TODO: Run: flutter pub add get_storage
 import 'package:shared_preferences/shared_preferences.dart';
@@ -69,12 +71,23 @@ class StorageService extends GetxService {
 
   /// Save user data
   Future<void> saveUser(Map<String, dynamic> user) async {
-    await write('user_data', user);
+    await write('user_data', jsonEncode(user));
   }
 
   /// Get user data
   Map<String, dynamic>? getUser() {
-    return read<Map<String, dynamic>>('user_data');
+    final userJson = read<String>('user_data');
+
+    if (userJson == null || userJson.isEmpty) {
+      return null;
+    }
+
+    final decoded = jsonDecode(userJson);
+    if (decoded is Map<String, dynamic>) {
+      return decoded;
+    }
+
+    return null;
   }
 
   /// Remove user data
