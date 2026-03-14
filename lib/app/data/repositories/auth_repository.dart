@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
@@ -7,6 +8,9 @@ import '../models/api_exception.dart';
 import '../providers/api_provider.dart';
 
 class AuthRepository {
+  static const int _maxUploadBytes = 1024 * 1024;
+  static const List<int> _uploadQualities = <int>[75, 65, 55, 45, 35];
+
   AuthRepository({ApiProvider? apiProvider})
     : _api = apiProvider ??
           (Get.isRegistered<ApiProvider>()
@@ -161,48 +165,110 @@ class AuthRepository {
   }
 
   Future<String> uploadImage(File file) async {
-    final response = await _api.uploadFile(
-      AppConstants.uploadEndpoint,
-      file: file,
-    );
+    try {
+      final preparedFile = await _prepareFileForUpload(file);
+      final response = await _api.uploadFile(
+        AppConstants.uploadEndpoint,
+        file: preparedFile,
+      );
 
-    final map = _asMap(response);
-    final imageUrl = _extractString(
-      map,
-      const [
-        'url',
-        'image',
-        'path',
-        'imageUrl',
-        'secureUrl',
-        'location',
-      ],
-    );
+      final map = _asMap(response);
+      final imageUrl = _extractString(
+        map,
+        const [
+          'url',
+          'image',
+          'path',
+          'imageUrl',
+          'secureUrl',
+          'location',
+        ],
+      );
 
-    if (imageUrl != null && imageUrl.isNotEmpty) {
-      return imageUrl;
+      if (imageUrl != null && imageUrl.isNotEmpty) {
+        return imageUrl;
+      }
+
+      final nestedData = _firstNestedMap(map, const ['data', 'result', 'file']);
+      final nestedUrl = nestedData == null
+          ? null
+          : _extractString(
+              nestedData,
+              const [
+                'url',
+                'image',
+                'path',
+                'imageUrl',
+                'secureUrl',
+                'location',
+              ],
+            );
+
+      if (nestedUrl != null && nestedUrl.isNotEmpty) {
+        return nestedUrl;
+      }
+
+      throw const ApiException('Image upload succeeded but no image URL was returned.');
+    } on ApiException catch (error) {
+      if (error.statusCode == 413) {
+        throw const ApiException(
+          'Selected image is too large. Please choose a smaller image.',
+          statusCode: 413,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<File> _prepareFileForUpload(File originalFile) async {
+    if (!originalFile.existsSync()) {
+      throw const ApiException('Selected image could not be found. Please pick again.');
     }
 
-    final nestedData = _firstNestedMap(map, const ['data', 'result', 'file']);
-    final nestedUrl = nestedData == null
-        ? null
-        : _extractString(
-            nestedData,
-            const [
-              'url',
-              'image',
-              'path',
-              'imageUrl',
-              'secureUrl',
-              'location',
-            ],
-          );
-
-    if (nestedUrl != null && nestedUrl.isNotEmpty) {
-      return nestedUrl;
+    final originalSize = await originalFile.length();
+    if (originalSize <= _maxUploadBytes) {
+      return originalFile;
     }
 
-    throw const ApiException('Image upload succeeded but no image URL was returned.');
+    final tempDirectory = await Directory.systemTemp.createTemp('care_life_upload_');
+
+    File? bestCandidate;
+    var bestSize = originalSize;
+
+    for (final quality in _uploadQualities) {
+      final targetPath =
+          '${tempDirectory.path}/upload_${DateTime.now().microsecondsSinceEpoch}_$quality.jpg';
+      final compressedFile = await FlutterImageCompress.compressAndGetFile(
+        originalFile.path,
+        targetPath,
+        format: CompressFormat.jpeg,
+        quality: quality,
+        minWidth: 1280,
+        minHeight: 720,
+        keepExif: false,
+      );
+
+      if (compressedFile == null) {
+        continue;
+      }
+
+      final candidate = File(compressedFile.path);
+      final candidateSize = await candidate.length();
+      if (candidateSize < bestSize) {
+        bestCandidate = candidate;
+        bestSize = candidateSize;
+      }
+
+      if (candidateSize <= _maxUploadBytes) {
+        return candidate;
+      }
+    }
+
+    if (bestCandidate != null) {
+      return bestCandidate;
+    }
+
+    return originalFile;
   }
 
   Map<String, dynamic> _normalizeSession(dynamic response) {
