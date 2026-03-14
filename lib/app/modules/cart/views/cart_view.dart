@@ -15,7 +15,6 @@ class CartView extends GetView<CartController> {
         title: const Text(
           'My Bag',
           style: TextStyle(
-            fontFamily: 'DM Sans',
             fontSize: 18,
             fontWeight: FontWeight.w600,
             color: Color(0xFF01060F),
@@ -67,7 +66,6 @@ class CartView extends GetView<CartController> {
           const Text(
             'Your cart is empty',
             style: TextStyle(
-              fontFamily: 'DM Sans',
               fontSize: 18,
               fontWeight: FontWeight.w600,
               color: Color(0xFF01060F),
@@ -77,7 +75,6 @@ class CartView extends GetView<CartController> {
           const Text(
             'Add products to your cart to see them here',
             style: TextStyle(
-              fontFamily: 'DM Sans',
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Color(0xFF727379),
@@ -146,7 +143,6 @@ class CartView extends GetView<CartController> {
                 Text(
                   item.product.name,
                   style: const TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF01060F),
@@ -156,7 +152,6 @@ class CartView extends GetView<CartController> {
                 Text(
                   item.product.brand,
                   style: const TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF727379),
@@ -166,7 +161,6 @@ class CartView extends GetView<CartController> {
                 Text(
                   item.product.priceDisplay,
                   style: const TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF064E36),
@@ -256,7 +250,6 @@ class CartView extends GetView<CartController> {
                 const Text(
                   'Subtotal',
                   style: TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF727379),
@@ -265,7 +258,6 @@ class CartView extends GetView<CartController> {
                 Text(
                   '৳${controller.subtotal.toStringAsFixed(0)}',
                   style: const TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF01060F),
@@ -283,7 +275,6 @@ class CartView extends GetView<CartController> {
                 const Text(
                   'Delivery Fee',
                   style: TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xFF727379),
@@ -294,7 +285,6 @@ class CartView extends GetView<CartController> {
                       ? 'FREE'
                       : '৳${controller.deliveryFee.toStringAsFixed(0)}',
                   style: TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: controller.deliveryFee == 0
@@ -314,7 +304,6 @@ class CartView extends GetView<CartController> {
                 const Text(
                   'Total',
                   style: TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF01060F),
@@ -323,7 +312,6 @@ class CartView extends GetView<CartController> {
                 Text(
                   '৳${controller.total.toStringAsFixed(0)}',
                   style: const TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF064E36),
@@ -351,7 +339,6 @@ class CartView extends GetView<CartController> {
                 child: const Text(
                   'Proceed to Checkout',
                   style: TextStyle(
-                    fontFamily: 'DM Sans',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
