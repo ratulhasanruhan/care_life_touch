@@ -13,6 +13,8 @@ class User extends BaseModel {
   final String name;
   final String email;
   final String? phone;
+  final String? shopName;
+  final String? ownerName;
   final String? profileImage;
   final String? address;
   final DateTime? createdAt;
@@ -22,6 +24,8 @@ class User extends BaseModel {
     required this.name,
     required this.email,
     this.phone,
+    this.shopName,
+    this.ownerName,
     this.profileImage,
     this.address,
     this.createdAt,
@@ -29,13 +33,20 @@ class User extends BaseModel {
 
   /// Create User from JSON
   factory User.fromJson(Map<String, dynamic> json) {
+    final name = (json['ownerName'] ?? json['fullName'] ?? json['name'] ?? '').toString();
     return User(
-      id: json['id'] ?? '',
-      name: json['name'] ?? '',
-      email: json['email'] ?? '',
-      phone: json['phone'],
-      profileImage: json['profileImage'] ?? json['profile_image'],
-      address: json['address'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      name: name,
+      email: (json['email'] ?? '').toString(),
+      phone: json['phone']?.toString(),
+      shopName: json['shopName']?.toString(),
+      ownerName: json['ownerName']?.toString() ?? (name.isEmpty ? null : name),
+      profileImage: (json['profileImage'] ??
+              json['profile_image'] ??
+              json['shopImage'] ??
+              json['shop_image'])
+          ?.toString(),
+      address: (json['address'] ?? json['fullAddress'])?.toString(),
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : (json['created_at'] != null
@@ -51,6 +62,8 @@ class User extends BaseModel {
       'name': name,
       'email': email,
       'phone': phone,
+      'shopName': shopName,
+      'ownerName': ownerName,
       'profileImage': profileImage,
       'address': address,
       'createdAt': createdAt?.toIso8601String(),
@@ -63,6 +76,8 @@ class User extends BaseModel {
     String? name,
     String? email,
     String? phone,
+    String? shopName,
+    String? ownerName,
     String? profileImage,
     String? address,
     DateTime? createdAt,
@@ -72,6 +87,8 @@ class User extends BaseModel {
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
+      shopName: shopName ?? this.shopName,
+      ownerName: ownerName ?? this.ownerName,
       profileImage: profileImage ?? this.profileImage,
       address: address ?? this.address,
       createdAt: createdAt ?? this.createdAt,

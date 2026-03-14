@@ -38,9 +38,7 @@ class _ProductsViewState extends State<ProductsView> {
       Get.put(ProductRepository(), permanent: true);
     }
     _controller = Get.put(ProductsController(_query), tag: _tag);
-    if (!Get.isRegistered<CartController>()) {
-      Get.put(CartController());
-    }
+    Get.find<CartController>();
   }
 
   @override

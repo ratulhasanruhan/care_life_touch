@@ -1,46 +1,77 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/app_logger.dart';
+import '../../../data/models/address_model.dart';
+import '../../../data/models/api_exception.dart';
+import '../../../data/repositories/address_repository.dart';
+import '../../../data/repositories/order_repository.dart';
 import '../../cart/controllers/cart_controller.dart';
 
 class CheckoutController extends GetxController {
-  late final CartController cartController;
+  CheckoutController({
+    AddressRepository? addressRepository,
+    OrderRepository? orderRepository,
+  })  : _addressRepository = addressRepository ?? Get.find<AddressRepository>(),
+        _orderRepository = orderRepository ?? Get.find<OrderRepository>();
 
+  late final CartController cartController;
+  final AddressRepository _addressRepository;
+  final OrderRepository _orderRepository;
+
+  final savedAddresses = <AddressModel>[].obs;
   final shippingAddress = ''.obs;
   final selectedAddressIndex = 0.obs;
+  final isLoadingAddresses = false.obs;
   final isPlacingOrder = false.obs;
-  final savedAddresses = <CheckoutAddress>[
-    const CheckoutAddress(
-      label: 'Default Address',
-      title: 'Pharmacy - Main Branch',
-      details: 'House 12, Road 4, Dhanmondi, Dhaka 1205',
-    ),
-    const CheckoutAddress(
-      label: 'Warehouse',
-      title: 'Care Life Touch Storage',
-      details: 'Plot 7, Sector 3, Uttara, Dhaka 1230',
-    ),
-  ];
+  final addressError = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
-    if (Get.isRegistered<CartController>()) {
-      cartController = Get.find<CartController>();
-    } else {
-      cartController = Get.put(CartController());
-    }
-
-    if (savedAddresses.isNotEmpty) {
-      shippingAddress.value = savedAddresses.first.fullAddress;
-    }
+    cartController = Get.find<CartController>();
+    loadAddresses();
   }
 
   int get totalProductCount => cartController.itemCount;
   double get totalPrice => cartController.subtotal;
-  double get discount => 0;
+  double get discount => cartController.discount;
   double get deliveryFee => cartController.deliveryFee;
-  double get totalPayable => totalPrice - discount + deliveryFee;
+  double get totalPayable => cartController.total;
+
+  AddressModel? get selectedAddress {
+    if (savedAddresses.isEmpty) {
+      return null;
+    }
+    final index = selectedAddressIndex.value;
+    if (index < 0 || index >= savedAddresses.length) {
+      return savedAddresses.first;
+    }
+    return savedAddresses[index];
+  }
+
+  Future<void> loadAddresses() async {
+    try {
+      isLoadingAddresses.value = true;
+      addressError.value = '';
+      final addresses = await _addressRepository.getMyAddresses();
+      savedAddresses.assignAll(addresses);
+
+      final defaultIndex = savedAddresses.indexWhere((item) => item.isDefault);
+      selectedAddressIndex.value = defaultIndex >= 0 ? defaultIndex : 0;
+
+      if (savedAddresses.isNotEmpty) {
+        shippingAddress.value = (selectedAddress?.fullAddress ?? '').trim();
+      } else {
+        shippingAddress.value = '';
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to load addresses', error, stackTrace);
+      addressError.value = _resolveMessage(error, 'Failed to load addresses. Please try again.');
+    } finally {
+      isLoadingAddresses.value = false;
+    }
+  }
 
   void syncSelectedAddressFromCurrent() {
     final currentIndex = savedAddresses.indexWhere(
@@ -62,11 +93,12 @@ class CheckoutController extends GetxController {
   }
 
   void confirmSelectedAddress() {
-    if (savedAddresses.isEmpty) {
+    final address = selectedAddress;
+    if (address == null) {
       return;
     }
 
-    shippingAddress.value = savedAddresses[selectedAddressIndex.value].fullAddress;
+    shippingAddress.value = address.fullAddress;
     Get.back();
   }
 
@@ -75,10 +107,23 @@ class CheckoutController extends GetxController {
       return;
     }
 
-    if (shippingAddress.value.isEmpty) {
+    final address = selectedAddress;
+    if (address == null || address.id.isEmpty) {
       Get.snackbar(
         'Address Required',
-        'Please add a shipping address first.',
+        'Please select a shipping address first.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    final orderItems = cartController.toOrderItems();
+    if (orderItems.isEmpty) {
+      Get.snackbar(
+        'Unable to Continue',
+        'Some cart items are missing variant information. Please refresh your cart and try again.',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -88,9 +133,12 @@ class CheckoutController extends GetxController {
 
     try {
       isPlacingOrder.value = true;
-      await Future.delayed(const Duration(milliseconds: 800));
+      await _orderRepository.createOrder(
+        items: orderItems,
+        addressId: address.id,
+      );
 
-      cartController.clearCart();
+      await cartController.clearCart();
 
       Get.snackbar(
         'Order Confirmed',
@@ -101,23 +149,25 @@ class CheckoutController extends GetxController {
       );
 
       Get.back();
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to place order', error, stackTrace);
+      Get.snackbar(
+        'Order Failed',
+        _resolveMessage(error, 'Unable to place order right now. Please try again.'),
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isPlacingOrder.value = false;
     }
   }
-}
 
-class CheckoutAddress {
-  final String label;
-  final String title;
-  final String details;
-
-  const CheckoutAddress({
-    required this.label,
-    required this.title,
-    required this.details,
-  });
-
-  String get fullAddress => '$title, $details';
+  String _resolveMessage(Object error, String fallback) {
+    if (error is ApiException && error.message.trim().isNotEmpty) {
+      return error.message;
+    }
+    return fallback;
+  }
 }
 

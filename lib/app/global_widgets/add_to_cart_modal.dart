@@ -196,16 +196,24 @@ class _AddToCartModalState extends State<AddToCartModal> {
                     variant: ButtonVariant.primary,
                     size: ButtonSize.medium,
                     fullWidth: true,
-                    onPressed: () {
+                    onPressed: () async {
                       final cartController = Get.find<CartController>();
 
-                      // Add to cart with selected quantity
-                      cartController.addToCart(widget.product, quantity: selectedQuantity);
+                      await cartController.addToCart(
+                        widget.product,
+                        quantity: selectedQuantity,
+                      );
 
-                      // Close modal
+                      if (!mounted) {
+                        return;
+                      }
+
+                      if (cartController.errorMessage.value.isNotEmpty) {
+                        return;
+                      }
+
                       Get.back();
 
-                      // Show success message
                       Get.snackbar(
                         'Added to Cart',
                         '$selectedQuantity ${widget.product.moq} of ${widget.product.name} added',

@@ -2,6 +2,7 @@
 class ProductModel {
   final String id;
   final String? slug;
+  final String? defaultVariantId;
   final String name;
   final String brand;
   final String? description;
@@ -17,6 +18,7 @@ class ProductModel {
   ProductModel({
     required this.id,
     this.slug,
+    this.defaultVariantId,
     required this.name,
     required this.brand,
     this.description,
@@ -49,6 +51,13 @@ class ProductModel {
     final categoryName = (json['category'] is Map)
         ? (json['category']['name'] ?? '').toString()
         : '';
+    final variants = json['variants'] is List ? (json['variants'] as List) : const [];
+    final firstVariant = variants.isNotEmpty && variants.first is Map
+        ? (variants.first as Map).map((key, value) => MapEntry(key.toString(), value))
+        : const <String, dynamic>{};
+    final rawVariantId =
+        json['defaultVariantId'] ?? json['variantId'] ?? firstVariant['_id'] ?? firstVariant['id'];
+    final defaultVariantId = rawVariantId?.toString().trim();
     final imageList = <String>[];
     final images = json['images'];
     if (images is List) {
@@ -75,6 +84,9 @@ class ProductModel {
     return ProductModel(
       id: id,
       slug: (json['slug'] ?? '').toString().isEmpty ? null : json['slug'].toString(),
+      defaultVariantId: defaultVariantId == null || defaultVariantId.isEmpty
+          ? null
+          : defaultVariantId,
       name: json['name'] ?? '',
       brand: (json['brand'] is Map)
           ? (json['brand']['name'] ?? '').toString()
@@ -82,8 +94,8 @@ class ProductModel {
       description: (json['description'] ?? json['shortDescription'])?.toString(),
       price: (finalPrice is num) ? finalPrice.toDouble() : 0,
       maxPrice: comparePrice is num ? comparePrice.toDouble() : null,
-      moq: (json['variants'] is List && (json['variants'] as List).isNotEmpty)
-          ? ((json['variants'] as List).first['unit'] ?? '1 unit').toString()
+      moq: variants.isNotEmpty
+          ? (firstVariant['unit'] ?? firstVariant['packSize'] ?? '1 unit').toString()
           : (categoryName.isNotEmpty ? categoryName : '1 unit'),
       rating: (ratingValue is num) ? ratingValue.toDouble() : 4.9,
       imagePath: primaryImage,
@@ -100,6 +112,7 @@ class ProductModel {
     return {
       'id': id,
       'slug': slug,
+      'defaultVariantId': defaultVariantId,
       'name': name,
       'brand': brand,
       'description': description,

@@ -19,6 +19,12 @@ class CheckoutView extends GetView<CheckoutController> {
         backgroundColor: const Color(0xFFFFFCFC),
       ),
       body: Obx(() {
+        if (controller.cartController.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
         if (controller.cartController.cartItems.isEmpty) {
           return _buildEmptyCheckout();
         }
@@ -124,6 +130,49 @@ class CheckoutView extends GetView<CheckoutController> {
   }
 
   Widget _buildAddressSection() {
+    if (controller.isLoadingAddresses.value) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: CircularProgressIndicator(color: AppColors.primary),
+        ),
+      );
+    }
+
+    if (controller.addressError.value.isNotEmpty) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border.all(color: const Color(0xFFE8EAE8)),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              controller.addressError.value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                height: 1.43,
+                color: Color(0xFFEF4444),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: controller.loadAddresses,
+              child: const Text('Retry'),
+            ),
+          ),
+        ],
+      );
+    }
+
     return Column(
       children: [
         if (controller.shippingAddress.value.isNotEmpty) ...[
@@ -162,7 +211,7 @@ class CheckoutView extends GetView<CheckoutController> {
             icon: const Icon(Icons.add, size: 18, color: AppColors.primary),
             label: Text(
               controller.shippingAddress.value.isEmpty
-                  ? 'Add New Address'
+                  ? 'Select Address'
                   : 'Change Address',
               style: const TextStyle(
                 fontSize: 14,
@@ -197,14 +246,23 @@ class CheckoutView extends GetView<CheckoutController> {
             ),
             child: ClipRRect(
               borderRadius: BorderRadius.circular(4),
-              child: Image.asset(
-                item.product.imagePath,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) => const Icon(
-                  Icons.image_not_supported,
-                  color: Color(0xFFE8EAE8),
-                ),
-              ),
+              child: item.product.hasRemoteImage
+                  ? Image.network(
+                      item.product.imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported,
+                        color: Color(0xFFE8EAE8),
+                      ),
+                    )
+                  : Image.asset(
+                      item.product.imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) => const Icon(
+                        Icons.image_not_supported,
+                        color: Color(0xFFE8EAE8),
+                      ),
+                    ),
             ),
           ),
           const SizedBox(width: 12),
@@ -449,7 +507,7 @@ class CheckoutView extends GetView<CheckoutController> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    address.label,
+                    address.isDefault ? 'Default Address' : 'Saved Address',
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
@@ -459,7 +517,7 @@ class CheckoutView extends GetView<CheckoutController> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    address.title,
+                    address.addressType,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

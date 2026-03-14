@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/providers/storage_provider.dart';
+import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_pages.dart';
 
 class MoreController extends GetxController {
@@ -12,6 +13,7 @@ class MoreController extends GetxController {
   final isLoading = false.obs;
 
   final _storage = Get.find<StorageService>();
+  final _authRepository = Get.find<AuthRepository>();
 
   @override
   void onInit() {
@@ -75,6 +77,7 @@ class MoreController extends GetxController {
           ),
           TextButton(
             onPressed: () async {
+              await _authRepository.logout();
               await _storage.logout();
               Get.back();
               Get.offAllNamed(Routes.LOGIN);

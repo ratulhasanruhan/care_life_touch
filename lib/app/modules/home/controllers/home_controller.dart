@@ -24,8 +24,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    // Initialize cart controller
-    cartController = Get.put(CartController());
+    cartController = Get.find<CartController>();
     loadData();
     _requestLocationPermission();
   }

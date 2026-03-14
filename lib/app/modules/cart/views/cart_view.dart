@@ -25,6 +25,45 @@ class CartView extends GetView<CartController> {
         centerTitle: true,
       ),
       body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFF064E36)),
+          );
+        }
+
+        if (controller.errorMessage.value.isNotEmpty && controller.cartItems.isEmpty) {
+          return Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 56,
+                    color: Color(0xFFEF4444),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    controller.errorMessage.value,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF727379),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  OutlinedButton(
+                    onPressed: controller.loadCart,
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+
         if (controller.cartItems.isEmpty) {
           return _buildEmptyCart();
         }
@@ -181,8 +220,9 @@ class CartView extends GetView<CartController> {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () =>
-                          controller.decreaseQuantity(item.product.id),
+                      onPressed: controller.isMutating.value
+                          ? null
+                          : () => controller.decreaseQuantity(item.product.id),
                       icon: const Icon(Icons.remove, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -195,7 +235,6 @@ class CartView extends GetView<CartController> {
                       child: Text(
                         item.quantity.toString(),
                         style: const TextStyle(
-                          fontFamily: 'DM Sans',
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                           color: Color(0xFF01060F),
@@ -203,8 +242,9 @@ class CartView extends GetView<CartController> {
                       ),
                     ),
                     IconButton(
-                      onPressed: () =>
-                          controller.increaseQuantity(item.product.id),
+                      onPressed: controller.isMutating.value
+                          ? null
+                          : () => controller.increaseQuantity(item.product.id),
                       icon: const Icon(Icons.add, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -217,7 +257,9 @@ class CartView extends GetView<CartController> {
               ),
               const SizedBox(height: 8),
               GestureDetector(
-                onTap: () => controller.removeFromCart(item.product.id),
+                onTap: controller.isMutating.value
+                    ? null
+                    : () => controller.removeFromCart(item.product.id),
                 child: const Icon(
                   Icons.delete_outline,
                   size: 20,
@@ -327,9 +369,11 @@ class CartView extends GetView<CartController> {
               width: double.infinity,
               height: 48,
               child: ElevatedButton(
-                onPressed: () {
-                  Get.toNamed(Routes.CHECKOUT);
-                },
+                onPressed: controller.isMutating.value
+                    ? null
+                    : () {
+                        Get.toNamed(Routes.CHECKOUT);
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF064E36),
                   shape: RoundedRectangleBorder(

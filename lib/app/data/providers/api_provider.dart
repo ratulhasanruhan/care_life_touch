@@ -7,11 +7,13 @@ import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_logger.dart';
 import '../models/api_exception.dart';
 import 'storage_provider.dart';
+import '../../routes/app_pages.dart';
 
 /// Base API Provider
 /// This handles all HTTP requests
 class ApiProvider extends GetConnect {
   late final StorageService _storage;
+  bool _isHandlingUnauthorized = false;
 
   @override
   void onInit() {
@@ -141,6 +143,9 @@ class ApiProvider extends GetConnect {
     while (true) {
       try {
         final response = await invoke();
+        if ((response.statusCode ?? 0) == 401) {
+          _handleUnauthorized();
+        }
         return _normalizeResponse(response);
       } on ApiException catch (error, stackTrace) {
         if (_shouldRetry(method, error.statusCode, attempt)) {
@@ -205,6 +210,9 @@ class ApiProvider extends GetConnect {
     final body = response.body;
 
     if (response.hasError || statusCode == null || statusCode < 200 || statusCode >= 300) {
+      if (statusCode == 401) {
+        _handleUnauthorized();
+      }
       throw ApiException(
         _extractMessage(body, response.bodyString) ?? 'Request failed.',
         statusCode: statusCode,
@@ -233,6 +241,38 @@ class ApiProvider extends GetConnect {
     }
 
     return body;
+  }
+
+  void _handleUnauthorized() {
+    if (_isHandlingUnauthorized) {
+      return;
+    }
+
+    _isHandlingUnauthorized = true;
+    unawaited(_storage.logout());
+
+    Future<void>.microtask(() async {
+      try {
+        final currentRoute = Get.currentRoute;
+        final isAuthRoute = currentRoute == Routes.LOGIN ||
+            currentRoute == Routes.REGISTER ||
+            currentRoute == Routes.FORGOT_PASSWORD ||
+            currentRoute == Routes.FORGOT_PASSWORD_RESET ||
+            currentRoute == Routes.ONBOARDING ||
+            currentRoute == Routes.SPLASH;
+
+        if (!isAuthRoute) {
+          await Get.offAllNamed<void>(Routes.LOGIN);
+          Get.snackbar(
+            'Session expired',
+            'Please sign in again to continue.',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+        }
+      } finally {
+        _isHandlingUnauthorized = false;
+      }
+    });
   }
 
   Map<String, dynamic> _toStringKeyedMap(Map source) {
