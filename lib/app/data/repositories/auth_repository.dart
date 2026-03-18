@@ -8,8 +8,9 @@ import '../models/api_exception.dart';
 import '../providers/api_provider.dart';
 
 class AuthRepository {
-  static const int _maxUploadBytes = 1024 * 1024;
-  static const List<int> _uploadQualities = <int>[75, 65, 55, 45, 35];
+  // Keep uploads comfortably below common server body limits.
+  static const int _maxUploadBytes = 700 * 1024;
+  static const List<int> _uploadQualities = <int>[70, 60, 50, 40, 30, 25];
 
   AuthRepository({ApiProvider? apiProvider})
     : _api = apiProvider ??
@@ -170,9 +171,26 @@ class AuthRepository {
       final response = await _api.uploadFile(
         AppConstants.uploadEndpoint,
         file: preparedFile,
+        fieldName: 'image',
       );
 
       final map = _asMap(response);
+
+      final success = map['success'];
+      if (success is bool && !success) {
+        throw ApiException(
+          (map['message'] as String?)?.trim().isNotEmpty == true
+              ? (map['message'] as String).trim()
+              : 'Image upload failed.',
+          details: map,
+        );
+      }
+
+      final directUrl = map['url'];
+      if (directUrl is String && directUrl.trim().isNotEmpty) {
+        return directUrl.trim();
+      }
+
       final imageUrl = _extractString(
         map,
         const [
@@ -243,8 +261,8 @@ class AuthRepository {
         targetPath,
         format: CompressFormat.jpeg,
         quality: quality,
-        minWidth: 1280,
-        minHeight: 720,
+        minWidth: 960,
+        minHeight: 960,
         keepExif: false,
       );
 
