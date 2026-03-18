@@ -79,7 +79,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             items: controller.images.map((imagePath) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 61.5),
-                child: Image.asset(
+                child: Image.network(
                   imagePath,
                   fit: BoxFit.contain,
                 ),
