@@ -21,25 +21,33 @@ class _ProductFilterModalState extends State<ProductFilterModal>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   late ProductFilterState _tempFilter;
+  Worker? _brandsWorker;
   final _minPriceController = TextEditingController();
   final _maxPriceController = TextEditingController();
   final _brandSearchController = TextEditingController();
-  final List<String> _availableBrands = [
-    'ACME Pharmaceuticals',
-    'Opsonin Pharma',
-    'Aristopharma',
-    'Incepta Pharmaceuticals',
-    'Square Pharmaceuticals',
-    'Beximco Pharmaceuticals',
+  final List<Map<String, String>> _fallbackBrands = const [
+    {'label': 'ACME Pharmaceuticals', 'query': 'ACME Pharmaceuticals'},
+    {'label': 'Opsonin Pharma', 'query': 'Opsonin Pharma'},
+    {'label': 'Aristopharma', 'query': 'Aristopharma'},
+    {'label': 'Incepta Pharmaceuticals', 'query': 'Incepta Pharmaceuticals'},
+    {'label': 'Square Pharmaceuticals', 'query': 'Square Pharmaceuticals'},
+    {'label': 'Beximco Pharmaceuticals', 'query': 'Beximco Pharmaceuticals'},
   ];
-  List<String> _filteredBrands = [];
+  final List<Map<String, String>> _availableBrands = [];
+  List<Map<String, String>> _filteredBrands = [];
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tempFilter = widget.controller.filterState.value;
-    _filteredBrands = List.from(_availableBrands);
+    _syncBrands();
+    _brandsWorker = ever<List<Map<String, String>>>(
+      widget.controller.availableBrands,
+      (_){
+      if (!mounted) return;
+      setState(_syncBrands);
+    });
 
     if (_tempFilter.minPrice != null) {
       _minPriceController.text = _tempFilter.minPrice!.toInt().toString();
@@ -51,11 +59,20 @@ class _ProductFilterModalState extends State<ProductFilterModal>
 
   @override
   void dispose() {
+    _brandsWorker?.dispose();
     _tabController.dispose();
     _minPriceController.dispose();
     _maxPriceController.dispose();
     _brandSearchController.dispose();
     super.dispose();
+  }
+
+  void _syncBrands() {
+    final dynamicBrands = widget.controller.availableBrands.toList();
+    _availableBrands
+      ..clear()
+      ..addAll(dynamicBrands.isEmpty ? _fallbackBrands : dynamicBrands);
+    _filteredBrands = List.from(_availableBrands);
   }
 
   void _filterBrands(String query) {
@@ -64,7 +81,8 @@ class _ProductFilterModalState extends State<ProductFilterModal>
         _filteredBrands = List.from(_availableBrands);
       } else {
         _filteredBrands = _availableBrands
-            .where((brand) => brand.toLowerCase().contains(query.toLowerCase()))
+            .where((brand) =>
+                (brand['label'] ?? '').toLowerCase().contains(query.toLowerCase()))
             .toList();
       }
     });
@@ -374,13 +392,16 @@ class _ProductFilterModalState extends State<ProductFilterModal>
             itemCount: _filteredBrands.length,
             itemBuilder: (context, index) {
               final brand = _filteredBrands[index];
+              final label = brand['label'] ?? '';
+              final query = brand['query'] ?? label;
               return FilterRadioOption(
-                title: brand,
-                isSelected: _tempFilter.selectedBrand == brand,
+                title: label,
+                isSelected: _tempFilter.selectedBrand == query,
                 onTap: () {
                   setState(() {
                     _tempFilter = _tempFilter.copyWith(
-                      selectedBrand: _tempFilter.selectedBrand == brand ? null : brand,
+                      selectedBrand:
+                          _tempFilter.selectedBrand == query ? null : query,
                     );
                   });
                 },

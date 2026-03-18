@@ -32,6 +32,10 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
                 return const Center(child: CircularProgressIndicator());
               }
 
+              if (controller.errorMessage.value.isNotEmpty) {
+                return _buildErrorState();
+              }
+
               if (controller.reviews.isEmpty) {
                 return _buildEmptyState();
               }
@@ -288,23 +292,7 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
               itemBuilder: (context, index) {
                 return ClipRRect(
                   borderRadius: BorderRadius.circular(4),
-                  child: Image.asset(
-                    review.images[index],
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 80,
-                        height: 80,
-                        color: const Color(0xFFF6F6F6),
-                        child: const Icon(
-                          Icons.image,
-                          color: Color(0xFFA2A8AF),
-                        ),
-                      );
-                    },
-                  ),
+                  child: _buildReviewImage(review.images[index]),
                 );
               },
             ),
@@ -376,6 +364,65 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 56, color: Color(0xFFB00020)),
+            const SizedBox(height: 12),
+            Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xB301060F),
+              ),
+            ),
+            const SizedBox(height: 16),
+            OutlinedButton(
+              onPressed: controller.loadReviews,
+              child: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewImage(String path) {
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
+    if (isRemote) {
+      return Image.network(
+        path,
+        width: 80,
+        height: 80,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _imageFallback(),
+      );
+    }
+
+    return Image.asset(
+      path,
+      width: 80,
+      height: 80,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _imageFallback(),
+    );
+  }
+
+  Widget _imageFallback() {
+    return Container(
+      width: 80,
+      height: 80,
+      color: const Color(0xFFF6F6F6),
+      child: const Icon(Icons.image, color: Color(0xFFA2A8AF)),
     );
   }
 
@@ -476,8 +523,11 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
+                      child: Obx(
+                        () => ElevatedButton(
+                          onPressed: controller.isSubmitting.value
+                              ? null
+                              : () {
                           if (rating > 0) {
                             controller.submitReview(
                               rating: rating,
@@ -491,22 +541,32 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
                               snackPosition: SnackPosition.BOTTOM,
                             );
                           }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF064E36),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4),
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF064E36),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            elevation: 0,
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Submit',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.white,
-                          ),
+                          child: controller.isSubmitting.value
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text(
+                                  'Submit',
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

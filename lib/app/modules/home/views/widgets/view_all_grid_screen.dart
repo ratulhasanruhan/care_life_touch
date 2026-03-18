@@ -50,7 +50,7 @@ class ViewAllGridScreen extends StatelessWidget {
           final imagePath = item['image'] ?? '';
 
           return GestureDetector(
-            onTap: () => onItemTap?.call(name),
+            onTap: () => onItemTap?.call(item['query'] ?? name),
             child: Column(
               children: [
                 Container(
@@ -62,17 +62,7 @@ class ViewAllGridScreen extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Image.asset(
-                      imagePath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.image_not_supported,
-                          size: 28,
-                          color: Color(0xFFE8EAE8),
-                        );
-                      },
-                    ),
+                    child: _buildImage(imagePath),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -92,6 +82,30 @@ class ViewAllGridScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          Icons.image_not_supported,
+          size: 28,
+          color: Color(0xFFE8EAE8),
+        ),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => const Icon(
+        Icons.image_not_supported,
+        size: 28,
+        color: Color(0xFFE8EAE8),
       ),
     );
   }

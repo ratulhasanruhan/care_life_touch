@@ -23,6 +23,9 @@ import '../modules/checkout/bindings/checkout_binding.dart';
 import '../modules/checkout/views/checkout_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
+import '../modules/more/bindings/order_binding.dart';
+import '../modules/more/views/order_details_view.dart';
+import '../modules/more/views/order_history_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/settings/bindings/settings_binding.dart';
@@ -36,7 +39,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
     GetPage(
@@ -98,6 +101,16 @@ class AppPages {
       name: _Paths.CHECKOUT,
       page: () => const CheckoutView(),
       binding: CheckoutBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDER_HISTORY,
+      page: () => const OrderHistoryView(),
+      binding: OrderBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDER_DETAILS,
+      page: () => const OrderDetailsView(),
+      binding: OrderBinding(),
     ),
     GetPage(
       name: _Paths.NOTIFICATION,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import '../controllers/home_controller.dart';
 import 'widgets/home_header.dart';
 import 'widgets/section_header.dart';
@@ -36,9 +37,7 @@ class HomeView extends GetView<HomeController> {
           Expanded(
             child: Obx(() {
               if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF064E36)),
-                );
+                return const _HomeSkeleton();
               }
 
               return RefreshIndicator(
@@ -56,13 +55,13 @@ class HomeView extends GetView<HomeController> {
                         onViewAll: () {
                           Get.to(
                             () => AllCategoriesView(
-                              categories: _getCategoriesData(),
+                              categories: controller.categories,
                               onCategoryTap: (category) {
                                 Get.toNamed(
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
                                     type: ProductListingType.category,
-                                    title: '$category',
+                                    title: category,
                                     keyword: category,
                                   ),
                                 );
@@ -107,7 +106,7 @@ class HomeView extends GetView<HomeController> {
                         onViewAll: () {
                           Get.to(
                             () => AllBrandsView(
-                              brands: _getBrandsData(),
+                              brands: controller.brands,
                               onBrandTap: (brand) {
                                 Get.toNamed(
                                   Routes.PRODUCTS,
@@ -176,10 +175,8 @@ class HomeView extends GetView<HomeController> {
 
   /// Categories horizontal list
   Widget _buildCategories() {
-    final categories = _getCategoriesData();
-
     return CategoriesList(
-      categories: categories,
+      categories: controller.categories,
       onCategoryTap: (category) {
         Get.toNamed(
           Routes.PRODUCTS,
@@ -193,28 +190,9 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  List<Map<String, String>> _getCategoriesData() {
-    return [
-      {'name': 'Pharma', 'image': 'assets/demo/cat_1.png'},
-      {'name': 'Unani', 'image': 'assets/demo/cat__2.png'},
-      {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
-      {'name': 'Capsule', 'image': 'assets/demo/cat_4.png'},
-      {'name': 'Pharma', 'image': 'assets/demo/cat_1.png'},
-      {'name': 'Unani', 'image': 'assets/demo/cat__2.png'},
-      {'name': 'Tablet', 'image': 'assets/demo/cat_3.png'},
-      {'name': 'Capsule', 'image': 'assets/demo/cat_4.png'},
-    ];
-  }
-
   /// Offer banners carousel
   Widget _buildOfferBanners() {
-    final banners = [
-      'assets/demo/banner_1.png',
-      'assets/demo/banner_2.png',
-      'assets/demo/banner_1.png',
-    ];
-
-    return OfferBannersCarousel(banners: banners);
+    return OfferBannersCarousel(banners: controller.banners);
   }
 
   /// Product grid widget
@@ -244,27 +222,27 @@ class HomeView extends GetView<HomeController> {
 
   /// Brands horizontal list
   Widget _buildBrands() {
-    final brands = _getBrandsData();
-
     return SizedBox(
       height: 120,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: brands.length,
+        itemCount: controller.brands.length,
         itemBuilder: (context, index) {
-          final brand = brands[index];
+          final brand = controller.brands[index];
           return Container(
-            width: 80,
-            margin: EdgeInsets.only(right: index < brands.length - 1 ? 10 : 0),
+            width: 84,
+            margin: EdgeInsets.only(
+              right: index < controller.brands.length - 1 ? 10 : 0,
+            ),
             child: GestureDetector(
               onTap: () {
-                final brandName = brand['name']!;
+                final brandName = brand['query'] ?? brand['name'] ?? '';
                 Get.toNamed(
                   Routes.PRODUCTS,
                   arguments: ProductsQuery(
                     type: ProductListingType.brand,
-                    title: brand['name']!,
+                    title: brand['name'] ?? 'Brand',
                     keyword: brandName,
                   ),
                 );
@@ -282,17 +260,14 @@ class HomeView extends GetView<HomeController> {
                     child: Center(
                       child: Padding(
                         padding: const EdgeInsets.all(8),
-                        child: Image.asset(
-                          brand['image']!,
-                          fit: BoxFit.contain,
-                        ),
+                        child: _buildImage(brand['image'] ?? ''),
                       ),
                     ),
                   ),
                   const SizedBox(height: 6),
                   // Brand Name
                   Text(
-                    brand['name']!,
+                    brand['name'] ?? '',
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w600,
@@ -312,15 +287,157 @@ class HomeView extends GetView<HomeController> {
     );
   }
 
-  List<Map<String, String>> _getBrandsData() {
-    return [
-      {'name': 'Incepta\nPharmaceu...', 'image': 'assets/demo/company_1.png'},
-      {'name': 'ACME\nPharmaceu...', 'image': 'assets/demo/company_2.png'},
-      {'name': 'Opsonin\nPharmaceu...', 'image': 'assets/demo/company_3.png'},
-      {
-        'name': 'Aristopharma\nPharmaceu...',
-        'image': 'assets/demo/company_4.png',
-      },
-    ];
+  Widget _buildImage(String imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          Icons.image_not_supported,
+          color: Color(0xFFE8EAE8),
+        ),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => const Icon(
+        Icons.image_not_supported,
+        color: Color(0xFFE8EAE8),
+      ),
+    );
   }
 }
+
+class _HomeSkeleton extends StatelessWidget {
+  const _HomeSkeleton();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 16, bottom: 100),
+        child: Shimmer.fromColors(
+          baseColor: const Color(0xFFEDEDED),
+          highlightColor: const Color(0xFFF7F7F7),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _SkeletonLine(width: 180, height: 18),
+              const SizedBox(height: 10),
+              _buildCategorySkeleton(),
+              const SizedBox(height: 20),
+              const _SkeletonBox(height: 160),
+              const SizedBox(height: 20),
+              const _SkeletonLine(width: 140, height: 18),
+              const SizedBox(height: 10),
+              _buildGridSkeleton(),
+              const SizedBox(height: 20),
+              const _SkeletonLine(width: 90, height: 18),
+              const SizedBox(height: 10),
+              _buildBrandSkeleton(),
+              const SizedBox(height: 20),
+              const _SkeletonLine(width: 120, height: 18),
+              const SizedBox(height: 10),
+              _buildGridSkeleton(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategorySkeleton() {
+    return SizedBox(
+      height: 110,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: 4,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (_, __) => const Column(
+          children: [
+            _SkeletonBox(width: 80, height: 80),
+            SizedBox(height: 8),
+            _SkeletonBox(width: 64, height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildBrandSkeleton() {
+    return SizedBox(
+      height: 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: 4,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (_, __) => const Column(
+          children: [
+            _SkeletonBox(width: 80, height: 80),
+            SizedBox(height: 8),
+            _SkeletonBox(width: 70, height: 10),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGridSkeleton() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: GridView.builder(
+        shrinkWrap: true,
+        primary: false,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: 4,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 169 / 225,
+        ),
+        itemBuilder: (_, __) => const _SkeletonBox(),
+      ),
+    );
+  }
+}
+
+class _SkeletonLine extends StatelessWidget {
+  final double width;
+  final double height;
+
+  const _SkeletonLine({required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: _SkeletonBox(width: width, height: height),
+    );
+  }
+}
+
+class _SkeletonBox extends StatelessWidget {
+  final double? width;
+  final double? height;
+
+  const _SkeletonBox({this.width, this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: width,
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+}
+

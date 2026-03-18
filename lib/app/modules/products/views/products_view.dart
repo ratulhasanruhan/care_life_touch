@@ -82,14 +82,102 @@ class _ProductsViewState extends State<ProductsView> {
                 );
               }
 
+              if (_controller.errorMessage.value.isNotEmpty) {
+                return _ProductsStatusView(
+                  icon: Icons.error_outline,
+                  title: 'Unable to load products',
+                  message: _controller.errorMessage.value,
+                  buttonText: 'Retry',
+                  onPressed: _controller.resetFilters,
+                );
+              }
+
               if (_query.type == ProductListingType.brand) {
                 return _BrandProductsBody(controller: _controller);
               }
 
-              return _ProductsGrid(products: _controller.filteredProducts);
+              final items = _controller.filteredProducts;
+              if (items.isEmpty) {
+                return _ProductsStatusView(
+                  icon: Icons.inventory_2_outlined,
+                  title: 'No products found',
+                  message: 'Try changing your search or filter.',
+                );
+              }
+
+              return Column(
+                children: [
+                  Expanded(child: _ProductsGrid(products: items)),
+                  if (_controller.hasMorePages.value)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: _controller.isMutating.value
+                              ? null
+                              : _controller.loadMoreProducts,
+                          child: _controller.isMutating.value
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(strokeWidth: 2),
+                                )
+                              : const Text('Load More'),
+                        ),
+                      ),
+                    ),
+                ],
+              );
             }),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ProductsStatusView extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String message;
+  final String? buttonText;
+  final VoidCallback? onPressed;
+
+  const _ProductsStatusView({
+    required this.icon,
+    required this.title,
+    required this.message,
+    this.buttonText,
+    this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 56, color: const Color(0xFF8D949D)),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 13, color: Color(0xB301060F)),
+            ),
+            if (buttonText != null && onPressed != null) ...[
+              const SizedBox(height: 16),
+              OutlinedButton(onPressed: onPressed, child: Text(buttonText!)),
+            ],
+          ],
+        ),
       ),
     );
   }

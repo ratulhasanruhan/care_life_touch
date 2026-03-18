@@ -50,14 +50,41 @@ class NotificationModel {
   }
 
   factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    DateTime parseDate(dynamic value) {
+      if (value is DateTime) {
+        return value;
+      }
+      if (value is String) {
+        final parsed = DateTime.tryParse(value);
+        if (parsed != null) {
+          return parsed;
+        }
+      }
+      return DateTime.now();
+    }
+
+    bool parseIsRead(dynamic value) {
+      if (value is bool) {
+        return value;
+      }
+      if (value is num) {
+        return value != 0;
+      }
+      if (value is String) {
+        final normalized = value.trim().toLowerCase();
+        return normalized == 'true' || normalized == '1' || normalized == 'read';
+      }
+      return false;
+    }
+
     return NotificationModel(
-      id: json['id'],
-      title: json['title'],
-      message: json['message'],
-      type: json['type'],
-      date: DateTime.parse(json['date']),
-      isRead: json['isRead'] ?? false,
-      icon: json['icon'],
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      title: (json['title'] ?? json['name'] ?? 'Notification').toString(),
+      message: (json['message'] ?? json['description'] ?? '').toString(),
+      type: (json['type'] ?? json['category'] ?? 'general').toString(),
+      date: parseDate(json['createdAt'] ?? json['date'] ?? json['updatedAt']),
+      isRead: parseIsRead(json['isRead'] ?? json['read'] ?? json['seen']),
+      icon: json['icon']?.toString(),
     );
   }
 }

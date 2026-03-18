@@ -8,8 +8,12 @@ import 'app/data/providers/storage_provider.dart';
 import 'app/data/repositories/auth_repository.dart';
 import 'app/data/repositories/address_repository.dart';
 import 'app/data/repositories/cart_repository.dart';
+import 'app/data/repositories/notification_repository.dart';
 import 'app/data/repositories/order_repository.dart';
+import 'app/data/repositories/page_repository.dart';
 import 'app/data/repositories/product_repository.dart';
+import 'app/data/repositories/wishlist_repository.dart';
+import 'app/data/repositories/review_repository.dart';
 import 'app/modules/cart/controllers/cart_controller.dart';
 import 'app/routes/app_pages.dart';
 
@@ -25,8 +29,12 @@ void main() async {
   Get.put(AuthRepository(), permanent: true);
   Get.put(AddressRepository(), permanent: true);
   Get.put(CartRepository(), permanent: true);
+  Get.put(NotificationRepository(), permanent: true);
   Get.put(OrderRepository(), permanent: true);
+  Get.put(PageRepository(), permanent: true);
   Get.put(ProductRepository(), permanent: true);
+  Get.put(WishlistRepository(), permanent: true);
+  Get.put(ReviewRepository(), permanent: true);
   Get.put(CartController(), permanent: true);
 
   runApp(const MyApp());

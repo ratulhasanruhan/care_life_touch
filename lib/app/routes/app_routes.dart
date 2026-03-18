@@ -16,6 +16,7 @@ abstract class Routes {
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
   static const ORDER_HISTORY = _Paths.ORDER_HISTORY;
+  static const ORDER_DETAILS = _Paths.ORDER_DETAILS;
   static const PROFILE = _Paths.PROFILE;
   static const SETTINGS = _Paths.SETTINGS;
   static const CHANGE_PASSWORD = _Paths.CHANGE_PASSWORD;
@@ -42,6 +43,7 @@ abstract class _Paths {
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';
   static const ORDER_HISTORY = '/order-history';
+  static const ORDER_DETAILS = '/order-details';
   static const PROFILE = '/profile';
   static const SETTINGS = '/settings';
   static const CHANGE_PASSWORD = '/settings/change-password';

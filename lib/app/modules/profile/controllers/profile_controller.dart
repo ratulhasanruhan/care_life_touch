@@ -77,6 +77,75 @@ class ProfileController extends GetxController {
     isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
   }
 
+  Future<bool> changePassword({
+    required String oldPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    // Validate inputs
+    if (oldPassword.isEmpty) {
+      Get.snackbar('Error', 'Please enter your current password',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    }
+    if (newPassword.isEmpty) {
+      Get.snackbar('Error', 'Please enter your new password',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    }
+    if (newPassword != confirmPassword) {
+      Get.snackbar('Error', 'Passwords do not match',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    }
+    if (newPassword.length < 6) {
+      Get.snackbar('Error', 'Password must be at least 6 characters',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    }
+
+    isLoading.value = true;
+    try {
+      await _authRepository.changePassword(
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+      );
+      Get.snackbar('Success', 'Password changed successfully',
+          backgroundColor: Colors.green, colorText: Colors.white);
+      // Clear password fields
+      passwordController.clear();
+      confirmPasswordController.clear();
+      return true;
+    } on ApiException catch (e) {
+      Get.snackbar('Error', e.message,
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to change password. Please try again.',
+          backgroundColor: Colors.red, colorText: Colors.white);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    isLoading.value = true;
+    try {
+      await _authRepository.logout();
+      // Clear stored user data
+      await _storage.logout();
+      // Navigate to login
+      Get.offAllNamed('/login');
+    } catch (e) {
+      AppLogger.error('Logout failed', e);
+      Get.snackbar('Error', 'Failed to logout. Please try again.',
+          backgroundColor: Colors.red, colorText: Colors.white);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   String? validateRequiredField(String? value, String label) {
     if (value == null || value.trim().isEmpty) {
       return 'Please enter $label';

@@ -1,11 +1,20 @@
-import 'dart:ui';
-
 import 'package:get/get.dart';
+import '../../../core/utils/app_logger.dart';
+import '../../../data/models/review_model.dart';
+import '../../../data/repositories/review_repository.dart';
 import '../models/review.dart';
 
 class ProductReviewsController extends GetxController {
+  ProductReviewsController({ReviewRepository? reviewRepository})
+    : _reviewRepository = reviewRepository ?? Get.find<ReviewRepository>();
+
+  final ReviewRepository _reviewRepository;
+
   final reviews = <Review>[].obs;
   final isLoading = false.obs;
+  final isSubmitting = false.obs;
+  final errorMessage = ''.obs;
+  final productId = ''.obs;
 
   // Rating statistics
   final averageRating = 0.0.obs;
@@ -15,66 +24,50 @@ class ProductReviewsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadReviews();
+    _resolveArguments();
+    loadReviews();
   }
 
-  void _loadReviews() {
-    isLoading.value = true;
+  void _resolveArguments() {
+    final args = Get.arguments;
+    if (args is Map) {
+      final id = args['productId']?.toString() ?? '';
+      if (id.isNotEmpty) {
+        productId.value = id;
+      }
+      return;
+    }
+    if (args is String && args.isNotEmpty) {
+      productId.value = args;
+    }
+  }
 
-    // Simulate API call - Replace with actual API call
-    Future.delayed(const Duration(milliseconds: 500), () {
-      // Demo data
-      reviews.value = [
-        Review(
-          id: '1',
-          userName: 'John Doe',
-          rating: 5.0,
-          comment: 'Excellent product! Works exactly as described. Very effective for pain relief.',
-          date: 'Feb 28, 2024',
-          isVerifiedPurchase: true,
-          helpfulCount: 12,
-        ),
-        Review(
-          id: '2',
-          userName: 'Jane Smith',
-          rating: 4.0,
-          comment: 'Good quality medicine. Fast delivery and well packaged.',
-          date: 'Feb 25, 2024',
-          isVerifiedPurchase: true,
-          helpfulCount: 8,
-        ),
-        Review(
-          id: '3',
-          userName: 'Mike Johnson',
-          rating: 5.0,
-          comment: 'Very satisfied with the purchase. Will order again.',
-          date: 'Feb 20, 2024',
-          isVerifiedPurchase: false,
-          helpfulCount: 5,
-        ),
-        Review(
-          id: '4',
-          userName: 'Sarah Williams',
-          rating: 4.5,
-          comment: 'Great product at a reasonable price. Highly recommended!',
-          date: 'Feb 18, 2024',
-          isVerifiedPurchase: true,
-          helpfulCount: 15,
-        ),
-        Review(
-          id: '5',
-          userName: 'David Brown',
-          rating: 3.0,
-          comment: 'Product is okay, but delivery took longer than expected.',
-          date: 'Feb 15, 2024',
-          isVerifiedPurchase: true,
-          helpfulCount: 3,
-        ),
-      ];
-
+  Future<void> loadReviews() async {
+    if (productId.value.isEmpty) {
+      errorMessage.value = 'Product not found for reviews.';
+      reviews.clear();
       _calculateRatingStatistics();
+      return;
+    }
+
+    isLoading.value = true;
+    errorMessage.value = '';
+
+    try {
+      final items = await _reviewRepository.getProductReviews(
+        productId.value,
+        limit: 50,
+      );
+      reviews.assignAll(items.map(_mapApiReview));
+      _calculateRatingStatistics();
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to load product reviews', error, stackTrace);
+      errorMessage.value = 'Failed to load reviews. Please try again.';
+      reviews.clear();
+      _calculateRatingStatistics();
+    } finally {
       isLoading.value = false;
-    });
+    }
   }
 
   void _calculateRatingStatistics() {
@@ -114,35 +107,58 @@ class ProductReviewsController extends GetxController {
   void submitReview({
     required double rating,
     required String comment,
-  }) {
-    // Create new review
-    final newReview = Review(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      userName: 'Current User', // Replace with actual user name
-      rating: rating,
-      comment: comment,
-      date: _formatDate(DateTime.now()),
-      isVerifiedPurchase: true,
-      helpfulCount: 0,
+  }) async {
+    if (productId.value.isEmpty) {
+      Get.snackbar('Error', 'Missing product information.');
+      return;
+    }
+    if (comment.trim().isEmpty) {
+      Get.snackbar('Error', 'Please enter your review comment.');
+      return;
+    }
+    if (rating < 1 || rating > 5) {
+      Get.snackbar('Error', 'Please select a rating between 1 and 5.');
+      return;
+    }
+
+    isSubmitting.value = true;
+    try {
+      await _reviewRepository.createReview(
+        productId: productId.value,
+        rating: rating,
+        comment: comment,
+      );
+
+      await loadReviews();
+
+      Get.snackbar(
+        'Success',
+        'Your review has been submitted',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to submit review', error, stackTrace);
+      Get.snackbar(
+        'Error',
+        'Failed to submit review. Please try again.',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+  Review _mapApiReview(ReviewModel model) {
+    return Review(
+      id: model.id,
+      userName: model.reviewerName,
+      rating: model.rating,
+      comment: model.reviewText,
+      date: model.createdAt == null ? '' : _formatDate(model.createdAt!),
+      isVerifiedPurchase: model.isVerifiedPurchase ?? false,
+      images: model.images ?? const <String>[],
+      helpfulCount: model.helpfulCount ?? 0,
     );
-
-    // Add to beginning of list
-    reviews.insert(0, newReview);
-
-    // Recalculate statistics
-    _calculateRatingStatistics();
-
-    // Show success message
-    Get.snackbar(
-      'Success',
-      'Your review has been submitted',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF064E36),
-      colorText: const Color(0xFFFFFFFF),
-      duration: const Duration(seconds: 2),
-    );
-
-    // TODO: Send review to API
   }
 
   String _formatDate(DateTime date) {

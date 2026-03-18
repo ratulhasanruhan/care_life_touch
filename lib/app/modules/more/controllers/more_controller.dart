@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../legal/routes.dart';
 import '../../../routes/app_pages.dart';
 
 class MoreController extends GetxController {
@@ -45,8 +46,7 @@ class MoreController extends GetxController {
   }
 
   void navigateToOrders() {
-    // TODO: Add orders route
-    Get.snackbar('Coming Soon', 'Orders feature');
+    Get.toNamed(Routes.ORDER_HISTORY);
   }
 
   void navigateToSettings() {
@@ -54,15 +54,15 @@ class MoreController extends GetxController {
   }
 
   void navigateToAbout() {
-    Get.toNamed('/legal/about');
+    Get.toNamed(LegalRoutes.about);
   }
 
   void navigateToPrivacyPolicy() {
-    Get.toNamed('/legal/privacy');
+    Get.toNamed(LegalRoutes.privacy);
   }
 
   void navigateToTerms() {
-    Get.toNamed('/legal/terms');
+    Get.toNamed(LegalRoutes.terms);
   }
 
   void signOut() {

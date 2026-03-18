@@ -79,10 +79,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             items: controller.images.map((imagePath) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 61.5),
-                child: Image.network(
-                  imagePath,
-                  fit: BoxFit.contain,
-                ),
+                child: _buildProductImage(imagePath),
               );
             }).toList(),
           ),
@@ -137,34 +134,60 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               ),
 
               // Rating with arrow
-              InkWell(
-                onTap: () {
-                  Get.toNamed(Routes.PRODUCT_REVIEWS);
-                },
-                child: Row(
-                  children: [
-                    Row(
+              Row(
+                children: [
+                  Obx(
+                    () => IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed:
+                          controller.isWishlistBusy.value ? null : controller.toggleWishlist,
+                      icon: Icon(
+                        controller.isWishlisted.value
+                            ? Icons.favorite
+                            : Icons.favorite_border,
+                        color: controller.isWishlisted.value
+                            ? const Color(0xFFE53935)
+                            : const Color(0xB301060F),
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                  InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        Routes.PRODUCT_REVIEWS,
+                        arguments: {
+                          'productId': controller.product.id,
+                          'productName': controller.product.name,
+                        },
+                      );
+                    },
+                    child: Row(
                       children: [
-                        const Icon(Icons.star, color: Color(0xFFF1B71B), size: 14),
+                        Row(
+                          children: [
+                            const Icon(Icons.star, color: Color(0xFFF1B71B), size: 14),
+                            const SizedBox(width: 4),
+                            Text(
+                              controller.product.rating.toStringAsFixed(1),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF01060F),
+                              ),
+                            ),
+                          ],
+                        ),
                         const SizedBox(width: 4),
-                        Text(
-                          controller.product.rating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: Color(0xFF01060F),
-                          ),
+                        const Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color: Color(0xB301060F),
                         ),
                       ],
                     ),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.chevron_right,
-                      size: 20,
-                      color: Color(0xB301060F),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -476,7 +499,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                 fullWidth: true,
                 onPressed: () {
                   if (isInCart) {
-                    Get.toNamed('/cart');
+                    Get.toNamed(Routes.CART);
                   } else {
                     // Show modal to select quantity before adding
                     AddToCartModal.show(controller.product);
@@ -487,6 +510,30 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
           ],
         );
       }),
+    );
+  }
+
+  Widget _buildProductImage(String imagePath) {
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.contain,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          Icons.image_not_supported,
+          color: Color(0xFFE8EAE8),
+          size: 42,
+        ),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) => const Icon(
+        Icons.image_not_supported,
+        color: Color(0xFFE8EAE8),
+        size: 42,
+      ),
     );
   }
 }

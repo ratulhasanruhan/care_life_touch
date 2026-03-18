@@ -64,12 +64,13 @@ class ApiProvider extends GetConnect {
     Map<String, dynamic>? query,
     Map<String, String>? headers,
   }) async {
+    final normalizedQuery = _normalizeQuery(query);
     return _runRequest(
       method: 'GET',
       endpoint: endpoint,
       headers: headers,
-      query: query,
-      invoke: () => get<dynamic>(endpoint, query: query, headers: headers),
+      query: normalizedQuery,
+      invoke: () => get<dynamic>(endpoint, query: normalizedQuery, headers: headers),
     );
   }
 
@@ -87,6 +88,32 @@ class ApiProvider extends GetConnect {
     );
   }
 
+  Map<String, dynamic>? _normalizeQuery(Map<String, dynamic>? query) {
+    if (query == null || query.isEmpty) {
+      return null;
+    }
+
+    final normalized = <String, dynamic>{};
+    query.forEach((key, value) {
+      if (value == null) return;
+
+      if (value is Iterable) {
+        final items = value
+            .where((item) => item != null)
+            .map((item) => item.toString())
+            .toList(growable: false);
+        if (items.isNotEmpty) {
+          normalized[key] = items;
+        }
+        return;
+      }
+
+      normalized[key] = value.toString();
+    });
+
+    return normalized.isEmpty ? null : normalized;
+  }
+
   Future<dynamic> putData(
     String endpoint, {
     dynamic body,
@@ -98,6 +125,20 @@ class ApiProvider extends GetConnect {
       headers: headers,
       body: body,
       invoke: () => put<dynamic>(endpoint, body, headers: headers),
+    );
+  }
+
+  Future<dynamic> patchData(
+    String endpoint, {
+    dynamic body,
+    Map<String, String>? headers,
+  }) async {
+    return _runRequest(
+      method: 'PATCH',
+      endpoint: endpoint,
+      headers: headers,
+      body: body,
+      invoke: () => patch<dynamic>(endpoint, body, headers: headers),
     );
   }
 

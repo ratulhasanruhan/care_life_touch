@@ -17,6 +17,10 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
 
   @override
   Widget build(BuildContext context) {
+    if (widget.banners.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -44,11 +48,9 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
                 margin: const EdgeInsets.symmetric(horizontal: 6),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  image: DecorationImage(
-                    image: AssetImage(banner),
-                    fit: BoxFit.cover,
-                  ),
                 ),
+                clipBehavior: Clip.antiAlias,
+                child: _buildBannerImage(banner),
               );
             }).toList(),
           ),
@@ -73,6 +75,26 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildBannerImage(String banner) {
+    if (banner.startsWith('http://') || banner.startsWith('https://')) {
+      return Image.network(
+        banner,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => Container(
+          color: const Color(0xFFF4F4F4),
+        ),
+      );
+    }
+
+    return Image.asset(
+      banner,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => Container(
+        color: const Color(0xFFF4F4F4),
+      ),
     );
   }
 }

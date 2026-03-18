@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../../legal/routes.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/terms_rich_text.dart';
@@ -81,8 +82,8 @@ class OnboardingView extends GetView<OnboardingController> {
 
                     // Terms and Privacy Text
                     TermsRichText(
-                      onTermsTapped: () => Get.toNamed('/legal/terms'),
-                      onPrivacyTapped: () => Get.toNamed('/legal/privacy'),
+                      onTermsTapped: () => Get.toNamed(LegalRoutes.terms),
+                      onPrivacyTapped: () => Get.toNamed(LegalRoutes.privacy),
                     ),
                   ],
                 ),

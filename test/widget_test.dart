@@ -15,7 +15,11 @@ import 'package:care_life_touch/app/data/repositories/address_repository.dart';
 import 'package:care_life_touch/app/data/repositories/auth_repository.dart';
 import 'package:care_life_touch/app/data/repositories/cart_repository.dart';
 import 'package:care_life_touch/app/data/repositories/order_repository.dart';
+import 'package:care_life_touch/app/data/repositories/page_repository.dart';
 import 'package:care_life_touch/app/data/repositories/product_repository.dart';
+import 'package:care_life_touch/app/data/repositories/notification_repository.dart';
+import 'package:care_life_touch/app/data/repositories/review_repository.dart';
+import 'package:care_life_touch/app/data/repositories/wishlist_repository.dart';
 import 'package:care_life_touch/app/modules/cart/controllers/cart_controller.dart';
 import 'package:care_life_touch/app/modules/home/models/product_model.dart';
 import 'package:get/get.dart';
@@ -46,8 +50,12 @@ void main() {
     Get.put(AuthRepository(), permanent: true);
     Get.put(AddressRepository(), permanent: true);
     Get.put<CartRepository>(_FakeCartRepository(), permanent: true);
+    Get.put(NotificationRepository(), permanent: true);
     Get.put(OrderRepository(), permanent: true);
+    Get.put(PageRepository(), permanent: true);
     Get.put<ProductRepository>(_FakeProductRepository(), permanent: true);
+    Get.put(ReviewRepository(), permanent: true);
+    Get.put(WishlistRepository(), permanent: true);
     Get.put(CartController(), permanent: true);
   });
 
@@ -113,7 +121,34 @@ class _FakeProductRepository extends ProductRepository {
     String? subCategory,
     String? brand,
     String? query,
+    int? page,
+    int? limit,
   }) async => _products;
+
+  @override
+  Future<List<ProductModel>> searchProducts(
+    String query, {
+    int? page,
+    int? limit,
+  }) async => _products;
+
+  @override
+  Future<List<ProductModel>> filterProducts({
+    String? category,
+    String? subCategory,
+    String? brand,
+    double? minPrice,
+    double? maxPrice,
+    int? minDiscount,
+    int? page,
+    int? limit,
+  }) async => _products;
+
+  @override
+  Future<List<Map<String, dynamic>>> getAllBrands() async => const [
+        {'name': 'ACME Pharmaceuticals'},
+        {'name': 'Beximco Pharma'},
+      ];
 
   @override
   Future<List<ProductModel>> getDiscountedProducts() async =>

@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../home/models/product_model.dart';
 import '../models/products_query.dart';
@@ -12,26 +13,191 @@ class ProductsController extends GetxController {
     : _productRepository = productRepository ?? Get.find<ProductRepository>();
 
   final isLoading = false.obs;
+  final isMutating = false.obs;
   final searchText = ''.obs;
   final allProducts = <ProductModel>[].obs;
+  final availableBrands = <Map<String, String>>[].obs;
   final filterState = const ProductFilterState().obs;
+  final errorMessage = ''.obs;
+  
+  // Pagination
+  final currentPage = 1.obs;
+  final pageSize = 20.obs;
+  final hasMorePages = true.obs;
+  final totalCount = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
-    _loadProducts();
+    _loadInitialProducts();
+    _loadFilterOptions();
+    // Auto-search on text change
+    ever(searchText, (_) => _handleSearchChange());
   }
 
-  void onSearchChanged(String value) {
-    searchText.value = value.trim().toLowerCase();
+  Future<void> _loadInitialProducts() async {
+    isLoading.value = true;
+    try {
+      errorMessage.value = '';
+      currentPage.value = 1;
+      
+      final products = await _fetchProducts(page: 1);
+      allProducts.value = products;
+      hasMorePages.value = products.length >= pageSize.value;
+    } catch (e) {
+      AppLogger.error('Failed to load products', e);
+      errorMessage.value = _resolveError(e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
-  void applyFilters(ProductFilterState filter) {
+  Future<void> _handleSearchChange() async {
+    if (searchText.value.isEmpty) {
+      await _loadInitialProducts();
+      return;
+    }
+    await searchProducts(searchText.value);
+  }
+
+  Future<void> searchProducts(String query) async {
+    if (query.trim().isEmpty) {
+      await _loadInitialProducts();
+      return;
+    }
+
+    isLoading.value = true;
+    currentPage.value = 1;
+    try {
+      errorMessage.value = '';
+      final products = await _productRepository.searchProducts(
+        query,
+        page: 1,
+        limit: pageSize.value,
+      );
+      allProducts.value = products;
+      hasMorePages.value = products.length >= pageSize.value;
+    } catch (e) {
+      AppLogger.error('Search failed', e);
+      errorMessage.value = _resolveError(e);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> applyFilters(ProductFilterState filter) async {
     filterState.value = filter;
+    isLoading.value = true;
+    currentPage.value = 1;
+    
+    try {
+      errorMessage.value = '';
+      final (minPrice, maxPrice) = _resolvePriceRange(filter);
+      final minDiscount = _resolveMinDiscount(filter.discountMode);
+      
+      final products = await _productRepository.filterProducts(
+        category: _categoryFromFilter(filter),
+        brand: filter.selectedBrand ?? _queryBrand(),
+        minPrice: minPrice,
+        maxPrice: maxPrice,
+        minDiscount: minDiscount,
+        page: 1,
+        limit: pageSize.value,
+      );
+      allProducts.value = products;
+      hasMorePages.value = products.length >= pageSize.value;
+    } catch (e) {
+      AppLogger.error('Filter failed', e);
+      errorMessage.value = _resolveError(e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   void resetFilters() {
     filterState.value = const ProductFilterState();
+    _loadInitialProducts();
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (!hasMorePages.value || isMutating.value) return;
+    
+    isMutating.value = true;
+    try {
+      final nextPage = currentPage.value + 1;
+      final products = await _fetchProducts(page: nextPage);
+      
+      if (products.isNotEmpty) {
+        final existingIds = allProducts.map((item) => item.id).toSet();
+        final unique = products.where((item) => !existingIds.contains(item.id)).toList();
+
+        if (unique.isEmpty) {
+          hasMorePages.value = false;
+          return;
+        }
+
+        allProducts.addAll(unique);
+        currentPage.value = nextPage;
+        hasMorePages.value = unique.length >= pageSize.value;
+      } else {
+        hasMorePages.value = false;
+      }
+    } catch (e) {
+      AppLogger.error('Load more failed', e);
+    } finally {
+      isMutating.value = false;
+    }
+  }
+
+  Future<List<ProductModel>> _fetchProducts({
+    int? page,
+  }) async {
+    final activeSearch = searchText.value.trim();
+    if (activeSearch.isNotEmpty) {
+      return _productRepository.searchProducts(
+        activeSearch,
+        page: page,
+        limit: pageSize.value,
+      );
+    }
+
+    return _productRepository.filterProducts(
+      category: _queryCategory(),
+      brand: filterState.value.selectedBrand ?? _queryBrand(),
+      minDiscount: _resolveMinDiscount(filterState.value.discountMode),
+      page: page,
+      limit: pageSize.value,
+    );
+  }
+
+  Future<void> _loadFilterOptions() async {
+    try {
+      final brands = await _productRepository.getAllBrands();
+      final resolved = <Map<String, String>>[];
+      final seenQueries = <String>{};
+
+      for (final item in brands) {
+        final label = (item['name'] ?? item['title'] ?? item['brand'] ?? item['label'] ?? '')
+            .toString()
+            .trim();
+        final query = (item['_id'] ?? item['id'] ?? item['query'] ?? label)
+            .toString()
+            .trim();
+
+        if (label.isEmpty || query.isEmpty || seenQueries.contains(query)) {
+          continue;
+        }
+
+        resolved.add({'label': label, 'query': query});
+        seenQueries.add(query);
+      }
+
+      resolved.sort((a, b) =>
+          (a['label'] ?? '').toLowerCase().compareTo((b['label'] ?? '').toLowerCase()));
+      availableBrands.assignAll(resolved);
+    } catch (_) {
+      // Keep modal defaults when brands API is unavailable.
+    }
   }
 
   List<ProductModel> get filteredProducts {
@@ -54,53 +220,21 @@ class ProductsController extends GetxController {
     return _applyFilterPipeline(_productsForType(ProductListingType.brand));
   }
 
-  List<ProductModel> _applyFilterPipeline(List<ProductModel> source) {
-    var items = source;
-
-    // Apply search filter
-    final text = searchText.value;
-    if (text.isNotEmpty) {
-      items = items.where((product) {
-        return product.name.toLowerCase().contains(text) ||
-            product.brand.toLowerCase().contains(text);
-      }).toList();
-    }
-
-    final filter = filterState.value;
-
-    // Apply type filter (medicine vs device)
-    if (filter.type != ProductFilterType.all) {
-      items = items.where((product) {
-        final isDevice = _isDeviceProduct(product);
-        return filter.type == ProductFilterType.device ? isDevice : !isDevice;
-      }).toList();
-    }
-
-    // Apply price range filter
-    final range = _resolvePriceRange(filter);
-    if (range != null) {
-      items = items.where((product) => _isInPriceRange(product, range.$1, range.$2)).toList();
-    }
-
-    // Apply discount filter
-    if (filter.discountMode != DiscountFilterMode.all) {
-      items = items.where((product) => _matchesDiscountFilter(product, filter.discountMode)).toList();
-    }
-
-    // Apply brand filter
-    if (filter.selectedBrand != null) {
-      items = items.where((product) {
-        return product.brand.toLowerCase().contains(filter.selectedBrand!.toLowerCase());
-      }).toList();
-    }
-
-    return items;
+  void onSearchChanged(String value) {
+    searchText.value = value.trim().toLowerCase();
   }
 
-  (double, double)? _resolvePriceRange(ProductFilterState filter) {
+  String _resolveError(dynamic error) {
+    if (error is Exception) {
+      return error.toString();
+    }
+    return 'An error occurred. Please try again.';
+  }
+
+  (double?, double?) _resolvePriceRange(ProductFilterState filter) {
     switch (filter.priceMode) {
       case PriceFilterMode.all:
-        return null;
+        return (null, null);
       case PriceFilterMode.under500:
         return (0, 500);
       case PriceFilterMode.between500To1000:
@@ -108,97 +242,98 @@ class ProductsController extends GetxController {
       case PriceFilterMode.between1000To1500:
         return (1000, 1500);
       case PriceFilterMode.over2000:
-        return (2000, double.infinity);
+        return (2000, null);
       case PriceFilterMode.custom:
-        final min = filter.minPrice;
-        final max = filter.maxPrice;
-        if (min == null && max == null) {
-          return null;
-        }
-        return (min ?? 0, max ?? double.infinity);
+        return (filter.minPrice, filter.maxPrice);
     }
   }
 
-  bool _matchesDiscountFilter(ProductModel product, DiscountFilterMode mode) {
-    if (!product.hasOffer) return false;
+  List<ProductModel> _applyFilterPipeline(List<ProductModel> base) {
+    var result = base;
 
-    // Extract discount percentage from offer label (if any)
-    // For now, we'll assume products with offers match all discount filters
-    // You can enhance this with actual discount percentage in ProductModel
-    return product.hasOffer;
+    // Apply search filter
+    if (searchText.value.isNotEmpty) {
+      final query = searchText.value.toLowerCase();
+      result = result
+          .where((p) =>
+              p.name.toLowerCase().contains(query) ||
+              p.brand.toLowerCase().contains(query) ||
+              (p.description?.toLowerCase().contains(query) ?? false))
+          .toList();
+    }
+
+    // Brand/category/discount filters are applied by API.
+
+    return result;
   }
 
-  bool _isInPriceRange(ProductModel product, double min, double max) {
-    final priceMin = product.price;
-    final priceMax = product.maxPrice ?? product.price;
-    return priceMax >= min && priceMin <= max;
+  String? _categoryFromFilter(ProductFilterState filter) {
+    final fromQuery = _queryCategory();
+    if (fromQuery != null && fromQuery.isNotEmpty) {
+      return fromQuery;
+    }
+
+    switch (filter.type) {
+      case ProductFilterType.all:
+        return null;
+      case ProductFilterType.medicine:
+        return 'medicine';
+      case ProductFilterType.device:
+        return 'device';
+    }
   }
 
-  bool _isDeviceProduct(ProductModel product) {
-    final text = '${product.name} ${product.brand}'.toLowerCase();
-    const deviceKeywords = [
-      'device',
-      'monitor',
-      'machine',
-      'kit',
-      'mask',
-      'thermometer',
-      'nebulizer',
-      'glucose',
-      'bp',
-    ];
-    return deviceKeywords.any(text.contains);
+  String? _queryCategory() {
+    if (query.type != ProductListingType.category) {
+      return null;
+    }
+    final keyword = query.keyword?.trim();
+    if (keyword != null && keyword.isNotEmpty) {
+      return keyword;
+    }
+    return null;
+  }
+
+  String? _queryBrand() {
+    if (query.type != ProductListingType.brand) {
+      return null;
+    }
+    final keyword = query.keyword?.trim();
+    if (keyword != null && keyword.isNotEmpty) {
+      return keyword;
+    }
+    return null;
   }
 
   List<ProductModel> _productsForType(ProductListingType type) {
     switch (type) {
       case ProductListingType.category:
-        final category = (query.keyword ?? '').toLowerCase();
-        if (category.contains('capsule')) {
-          final items = allProducts
-              .where((product) => product.name.toLowerCase().contains('capsule'))
-              .toList();
-          return items.isEmpty ? allProducts : items;
-        }
-        if (category.contains('tablet')) {
-          final items = allProducts
-              .where((product) => product.name.toLowerCase().contains('tablet'))
-              .toList();
-          return items.isEmpty ? allProducts : items;
-        }
-        if (category.contains('unani')) {
-          final items = allProducts
-              .where((product) => product.brand.toLowerCase().contains('incepta'))
-              .toList();
-          return items.isEmpty ? allProducts : items;
-        }
         return allProducts;
       case ProductListingType.brand:
-        final brand = (query.keyword ?? '').toLowerCase().replaceAll('\n', ' ').trim();
-        if (brand.isEmpty) {
-          return allProducts;
-        }
-        final items = allProducts.where((product) {
-          final value = product.brand.toLowerCase();
-          return value.contains(brand) ||
-              brand.split(' ').any((part) => part.length > 2 && value.contains(part));
-        }).toList();
-        return items.isEmpty ? allProducts : items;
+        return allProducts;
       case ProductListingType.trending:
         return allProducts.take(8).toList();
       case ProductListingType.newArrival:
         return allProducts.reversed.take(8).toList();
       case ProductListingType.offers:
-        final items = allProducts.where((product) => product.hasOffer).toList();
-        return items.isEmpty ? allProducts : items;
+        return allProducts.where((p) => p.hasOffer).toList();
       case ProductListingType.all:
         return allProducts;
     }
   }
 
-  Future<void> _loadProducts() async {
-    isLoading.value = true;
-    allProducts.value = await _productRepository.getAllProducts();
-    isLoading.value = false;
+  int? _resolveMinDiscount(DiscountFilterMode mode) {
+    switch (mode) {
+      case DiscountFilterMode.all:
+        return null;
+      case DiscountFilterMode.above10:
+        return 10;
+      case DiscountFilterMode.above20:
+        return 20;
+      case DiscountFilterMode.above30:
+        return 30;
+      case DiscountFilterMode.above50:
+        return 50;
+    }
   }
 }

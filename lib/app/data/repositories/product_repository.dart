@@ -17,11 +17,38 @@ class ProductRepository {
     return getProducts();
   }
 
-  Future<List<ProductModel>> getProducts({
+  Future<List<ProductModel>> searchProducts(
+    String query, {
+    int? page,
+    int? limit,
+  }) async {
+    final params = <String, dynamic>{
+      'q': query.trim(),
+      if (page != null) 'page': page,
+      if (limit != null) 'limit': limit,
+    };
+    try {
+      final response = await _api.getData('/search', query: params);
+      return _extractProducts(response);
+    } on ApiException catch (error) {
+      // Some environments accept only `q` for /search.
+      if (error.statusCode == 400) {
+        final fallback = await _api.getData('/search', query: {'q': query.trim()});
+        return _extractProducts(fallback);
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<ProductModel>> filterProducts({
     String? category,
     String? subCategory,
     String? brand,
-    String? query,
+    double? minPrice,
+    double? maxPrice,
+    int? minDiscount,
+    int? page,
+    int? limit,
   }) async {
     final params = <String, dynamic>{
       if (category != null && category.trim().isNotEmpty)
@@ -29,17 +56,110 @@ class ProductRepository {
       if (subCategory != null && subCategory.trim().isNotEmpty)
         'subCategory': subCategory.trim(),
       if (brand != null && brand.trim().isNotEmpty) 'brand': brand.trim(),
-      if (query != null && query.trim().isNotEmpty) 'q': query.trim(),
+      if (minPrice != null) 'minPrice': minPrice,
+      if (maxPrice != null) 'maxPrice': maxPrice,
+      if (minDiscount != null) 'minDiscount': minDiscount,
+      if (page != null) 'page': page,
+      if (limit != null) 'limit': limit,
     };
 
-    final endpoint = params.containsKey('q') ? '/search' : '/products';
-    final response = await _api.getData(endpoint, query: params.isEmpty ? null : params);
-    return _extractProducts(response);
+    // Postman contract guaranteed keys for `/products` filtering.
+    final strictParams = <String, dynamic>{
+      if (category != null && category.trim().isNotEmpty)
+        'category': category.trim(),
+      if (subCategory != null && subCategory.trim().isNotEmpty)
+        'subCategory': subCategory.trim(),
+      if (brand != null && brand.trim().isNotEmpty) 'brand': brand.trim(),
+    };
+
+    try {
+      final response = await _api.getData(
+        '/products',
+        query: params.isEmpty ? null : params,
+      );
+      return _extractProducts(response);
+    } on ApiException catch (error) {
+      // Strict servers may reject extra query params like page/limit/minDiscount.
+      if (error.statusCode == 400) {
+        final fallback = await _api.getData(
+          '/products',
+          query: strictParams.isEmpty ? null : strictParams,
+        );
+        return _extractProducts(fallback);
+      }
+      rethrow;
+    }
+  }
+
+  Future<List<ProductModel>> getProducts({
+    String? category,
+    String? subCategory,
+    String? brand,
+    String? query,
+    int? page,
+    int? limit,
+  }) async {
+    if (query != null && query.trim().isNotEmpty) {
+      return searchProducts(query, page: page, limit: limit);
+    }
+
+    return filterProducts(
+      category: category,
+      subCategory: subCategory,
+      brand: brand,
+      page: page,
+      limit: limit,
+    );
   }
 
   Future<List<ProductModel>> getDiscountedProducts() async {
     final response = await _api.getData('/discounted-products');
     return _extractProducts(response);
+  }
+
+  Future<List<ProductModel>> getTrendingProducts({int limit = 10}) async {
+    final response = await _api.getData(
+      '/trending-products',
+      query: {'limit': limit},
+    );
+    return _extractProducts(response);
+  }
+
+  Future<List<ProductModel>> getNewProducts({int limit = 10}) async {
+    final response = await _api.getData(
+      '/new-products',
+      query: {'limit': limit},
+    );
+    return _extractProducts(response);
+  }
+
+  Future<List<ProductModel>> getOfferProducts({
+    int limit = 10,
+    int minDiscount = 1,
+  }) async {
+    final response = await _api.getData(
+      '/offer-products',
+      query: {
+        'limit': limit,
+        'minDiscount': minDiscount,
+      },
+    );
+    return _extractProducts(response);
+  }
+
+  Future<List<ProductModel>> getRelatedProducts(String slug) async {
+    final response = await _api.getData('/related-products/$slug/related');
+    return _extractProducts(response);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllCategories() async {
+    final response = await _api.getData('/get-all-categories');
+    return _extractMapItems(response, preferredKeys: const ['categories']);
+  }
+
+  Future<List<Map<String, dynamic>>> getAllBrands() async {
+    final response = await _api.getData('/get-all-brands');
+    return _extractMapItems(response, preferredKeys: const ['brands']);
   }
 
   Future<Map<String, dynamic>> getFilterOptions() async {
@@ -81,7 +201,7 @@ class ProductRepository {
   List<ProductModel> _extractProducts(dynamic response) {
     if (response is Map) {
       final map = response.map((key, value) => MapEntry(key.toString(), value));
-      final products = map['products'] ?? map['data'] ?? map['items'];
+      final products = map['products'] ?? map['data'] ?? map['items'] ?? map['result'];
       if (products is List) {
         return products
             .whereType<Map>()
@@ -102,5 +222,55 @@ class ProductRepository {
     }
 
     throw ApiException('Invalid products response.', details: response);
+  }
+
+  List<Map<String, dynamic>> _extractMapItems(
+    dynamic response, {
+    List<String> preferredKeys = const [],
+  }) {
+    final root = _toMap(response);
+    if (root == null) {
+      return const [];
+    }
+
+    final candidates = <dynamic>[
+      for (final key in preferredKeys) root[key],
+      root['data'],
+      root['items'],
+      root['result'],
+      root,
+    ];
+
+    for (final candidate in candidates) {
+      if (candidate is List) {
+        return candidate
+            .map(_toMap)
+            .whereType<Map<String, dynamic>>()
+            .toList();
+      }
+
+      final nested = _toMap(candidate);
+      if (nested != null) {
+        final nestedList = nested['items'] ?? nested['data'];
+        if (nestedList is List) {
+          return nestedList
+              .map(_toMap)
+              .whereType<Map<String, dynamic>>()
+              .toList();
+        }
+      }
+    }
+
+    return const [];
+  }
+
+  Map<String, dynamic>? _toMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, item) => MapEntry(key.toString(), item));
+    }
+    return null;
   }
 }

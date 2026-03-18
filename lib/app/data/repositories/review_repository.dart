@@ -1,0 +1,104 @@
+import 'package:get/get.dart';
+import '../models/review_model.dart';
+import '../providers/api_provider.dart';
+
+class ReviewRepository {
+  ReviewRepository({ApiProvider? apiProvider})
+      : _api = apiProvider ??
+            (Get.isRegistered<ApiProvider>()
+                ? Get.find<ApiProvider>()
+                : Get.put(ApiProvider(), permanent: true));
+
+  final ApiProvider _api;
+
+  Future<Map<String, dynamic>> createReview({
+    required String productId,
+    required double rating,
+    required String comment,
+    List<String>? images,
+  }) async {
+    final response = await _api.postData(
+      '/create-review',
+      body: {
+        'productId': productId,
+        'rating': rating,
+        'comment': comment.trim(),
+        if (images != null && images.isNotEmpty) 'images': images,
+      },
+    );
+    return _toMap(response) ?? {};
+  }
+
+  Future<List<ReviewModel>> getProductReviews(
+    String productId, {
+    int? page,
+    int? limit,
+    String? sortBy,
+  }) async {
+    final query = <String, dynamic>{
+      if (page != null) 'page': page,
+      if (limit != null) 'limit': limit,
+      if (sortBy != null && sortBy.isNotEmpty) 'sort': sortBy,
+    };
+    final response = await _api.getData(
+      '/get-product-reviews/$productId',
+      query: query.isEmpty ? null : query,
+    );
+    return _extractReviews(response);
+  }
+
+  Future<List<ReviewModel>> getMyReviews({int? page, int? limit}) async {
+    final query = <String, dynamic>{
+      if (page != null) 'page': page,
+      if (limit != null) 'limit': limit,
+    };
+    final response = await _api.getData(
+      '/my-reviews',
+      query: query.isEmpty ? null : query,
+    );
+    return _extractReviews(response);
+  }
+
+  Future<List<Map<String, dynamic>>> getReviewableProducts() async {
+    final response = await _api.getData('/reviewable-products');
+    final map = _toMap(response);
+    if (map == null) return [];
+
+    final productsRaw = map['data'] ?? map['products'] ?? map['items'] ?? [];
+    if (productsRaw is List) {
+      return productsRaw
+          .map(_toMap)
+          .whereType<Map<String, dynamic>>()
+          .toList();
+    }
+    return [];
+  }
+
+  List<ReviewModel> _extractReviews(dynamic response) {
+    final map = _toMap(response);
+    if (map == null) return [];
+
+    final reviewsRaw =
+        map['data'] ?? map['reviews'] ?? map['items'] ?? map['result'] ?? [];
+    if (reviewsRaw is List) {
+      return reviewsRaw
+          .map((r) => _toMap(r))
+          .whereType<Map<String, dynamic>>()
+          .map(ReviewModel.fromJson)
+          .toList();
+    }
+    return [];
+  }
+
+  Map<String, dynamic>? _toMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, item) => MapEntry(key.toString(), item));
+    }
+    return null;
+  }
+}
+
+

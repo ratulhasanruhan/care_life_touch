@@ -1,9 +1,15 @@
 import 'package:get/get.dart';
 import '../../../data/models/notification_model.dart';
+import '../../../data/repositories/notification_repository.dart';
 
 class NotificationController extends GetxController {
+  NotificationController({NotificationRepository? notificationRepository})
+      : _notificationRepository =
+            notificationRepository ?? Get.find<NotificationRepository>();
+
   final notifications = <NotificationModel>[].obs;
   final isLoading = false.obs;
+  final NotificationRepository _notificationRepository;
 
   @override
   void onInit() {
@@ -11,62 +17,14 @@ class NotificationController extends GetxController {
     loadNotifications();
   }
 
-  void loadNotifications() {
-    isLoading.value = true;
-
-    // Demo data
-    notifications.value = [
-      NotificationModel(
-        id: '1',
-        title: 'New Arrivals Just Dropped!',
-        message: 'Be the first to shop the latest styles. Check out our new arrivals now!',
-        type: 'promotion',
-        date: DateTime.now(),
-        isRead: false,
-      ),
-      NotificationModel(
-        id: '2',
-        title: 'Exclusive Offer Just for You!',
-        message: 'Enjoy 10% off on your next purchase! Tap to redeem your exclusive discount.',
-        type: 'promotion',
-        date: DateTime.now(),
-        isRead: false,
-      ),
-      NotificationModel(
-        id: '3',
-        title: 'Item Back in Stock!',
-        message: 'Good news! The item you wanted is back. Hurry before it\'s gone again!',
-        type: 'stock',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-      NotificationModel(
-        id: '4',
-        title: 'Complete Your Look',
-        message: 'Add the perfect finishing touches. Browse recommended accessories just for you.',
-        type: 'general',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-      NotificationModel(
-        id: '5',
-        title: 'Item Back in Stock!',
-        message: 'Good news! The item you wanted is back. Hurry before it\'s gone again!',
-        type: 'stock',
-        date: DateTime(2026, 2, 15),
-        isRead: true,
-      ),
-      NotificationModel(
-        id: '6',
-        title: 'Complete Your Look',
-        message: 'Add the perfect finishing touches. Browse recommended accessories just for you.',
-        type: 'general',
-        date: DateTime(2026, 2, 15),
-        isRead: true,
-      ),
-    ];
-
-    isLoading.value = false;
+  Future<void> loadNotifications() async {
+    try {
+      isLoading.value = true;
+      final items = await _notificationRepository.getBuyerNotifications();
+      notifications.assignAll(items);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Map<String, List<NotificationModel>> get groupedNotifications {
@@ -113,20 +71,38 @@ class NotificationController extends GetxController {
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
 
-  void markAsRead(String id) {
+  Future<void> markAsRead(String id) async {
     final index = notifications.indexWhere((n) => n.id == id);
     if (index != -1) {
       notifications[index] = notifications[index].copyWith(isRead: true);
       notifications.refresh();
     }
+
+    try {
+      await _notificationRepository.markNotificationRead(id);
+    } catch (_) {
+      // Keep optimistic UI update.
+    }
   }
 
-  void markAllAsRead() {
+  Future<void> markAllAsRead() async {
     notifications.value = notifications.map((n) => n.copyWith(isRead: true)).toList();
+
+    try {
+      await _notificationRepository.markAllNotificationsRead();
+    } catch (_) {
+      // Keep optimistic UI update.
+    }
   }
 
-  void deleteNotification(String id) {
+  Future<void> deleteNotification(String id) async {
     notifications.removeWhere((n) => n.id == id);
+
+    try {
+      await _notificationRepository.deleteNotification(id);
+    } catch (_) {
+      // Keep optimistic UI update.
+    }
   }
 
   int get unreadCount => notifications.where((n) => !n.isRead).length;
