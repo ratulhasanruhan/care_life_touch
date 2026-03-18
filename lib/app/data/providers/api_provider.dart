@@ -29,7 +29,11 @@ class ApiProvider extends GetConnect {
       AppLogger.api(request.method, request.url.toString());
       request.headers['Accept'] = 'application/json';
 
-      if (!request.headers.containsKey('Content-Type')) {
+      final forceMultipart = request.headers.remove('X-Multipart') == 'true';
+      final isMultipartRequest =
+          forceMultipart || request.url.path.endsWith(AppConstants.uploadEndpoint);
+
+      if (!request.headers.containsKey('Content-Type') && !isMultipartRequest) {
         request.headers['Content-Type'] = 'application/json';
       }
 
@@ -113,14 +117,28 @@ class ApiProvider extends GetConnect {
     String endpoint, {
     required File file,
     String fieldName = 'image',
+    String? fileName,
+    String? contentType,
     Map<String, String>? headers,
   }) async {
+    final multipart = contentType == null
+        ? MultipartFile(
+            file,
+            filename: fileName ?? file.uri.pathSegments.last,
+          )
+        : MultipartFile(
+            file,
+            filename: fileName ?? file.uri.pathSegments.last,
+            contentType: contentType,
+          );
+
     final formData = FormData({
-      fieldName: MultipartFile(file, filename: file.uri.pathSegments.last),
+      fieldName: multipart,
     });
 
     final uploadHeaders = <String, String>{...?headers};
     uploadHeaders.remove('Content-Type');
+    uploadHeaders['X-Multipart'] = 'true';
 
     return _runRequest(
       method: 'POST',

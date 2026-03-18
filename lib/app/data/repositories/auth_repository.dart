@@ -11,6 +11,11 @@ class AuthRepository {
   // Keep uploads comfortably below common server body limits.
   static const int _maxUploadBytes = 700 * 1024;
   static const List<int> _uploadQualities = <int>[70, 60, 50, 40, 30, 25];
+  static const List<String> _supportedUploadExtensions = <String>[
+    '.png',
+    '.jpg',
+    '.jpeg',
+  ];
 
   AuthRepository({ApiProvider? apiProvider})
     : _api = apiProvider ??
@@ -168,10 +173,13 @@ class AuthRepository {
   Future<String> uploadImage(File file) async {
     try {
       final preparedFile = await _prepareFileForUpload(file);
+      final uploadMeta = _buildUploadMeta(preparedFile);
       final response = await _api.uploadFile(
         AppConstants.uploadEndpoint,
         file: preparedFile,
         fieldName: 'image',
+        fileName: uploadMeta.fileName,
+        contentType: uploadMeta.contentType,
       );
 
       final map = _asMap(response);
@@ -228,6 +236,14 @@ class AuthRepository {
 
       throw const ApiException('Image upload succeeded but no image URL was returned.');
     } on ApiException catch (error) {
+      final normalizedMessage = error.message.toLowerCase();
+      if (normalizedMessage.contains('unsupported file type') ||
+          error.statusCode == 415) {
+        throw const ApiException(
+          'Unsupported file type. Please choose a PNG or JPEG image.',
+          statusCode: 415,
+        );
+      }
       if (error.statusCode == 413) {
         throw const ApiException(
           'Selected image is too large. Please choose a smaller image.',
@@ -241,6 +257,10 @@ class AuthRepository {
   Future<File> _prepareFileForUpload(File originalFile) async {
     if (!originalFile.existsSync()) {
       throw const ApiException('Selected image could not be found. Please pick again.');
+    }
+
+    if (!_isSupportedUploadType(originalFile.path)) {
+      throw const ApiException('Unsupported file type. Please choose a PNG or JPEG image.');
     }
 
     final originalSize = await originalFile.length();
@@ -287,6 +307,20 @@ class AuthRepository {
     }
 
     return originalFile;
+  }
+
+  _UploadMeta _buildUploadMeta(File file) {
+    final lowerPath = file.path.toLowerCase();
+    if (lowerPath.endsWith('.png')) {
+      return _UploadMeta(fileName: file.uri.pathSegments.last, contentType: 'image/png');
+    }
+
+    return _UploadMeta(fileName: file.uri.pathSegments.last, contentType: 'image/jpeg');
+  }
+
+  bool _isSupportedUploadType(String path) {
+    final normalized = path.toLowerCase();
+    return _supportedUploadExtensions.any(normalized.endsWith);
   }
 
   Map<String, dynamic> _normalizeSession(dynamic response) {
@@ -421,5 +455,12 @@ class AuthRepository {
     }
     return null;
   }
+}
+
+class _UploadMeta {
+  const _UploadMeta({required this.fileName, required this.contentType});
+
+  final String fileName;
+  final String contentType;
 }
 
