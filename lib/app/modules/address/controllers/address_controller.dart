@@ -37,11 +37,11 @@ class AddressController extends GetxController {
   }
 
   /// Load saved addresses
-  void loadAddresses() {
+  Future<void> loadAddresses() async {
     isLoading.value = true;
     try {
-      // TODO: Load from API/database
-      addresses.value = [];
+      final fetchedAddresses = await addressRepository.getMyAddresses();
+      addresses.assignAll(fetchedAddresses);
     } catch (e) {
       Get.snackbar('Error', 'Failed to load addresses');
     } finally {
@@ -83,15 +83,10 @@ class AddressController extends GetxController {
   Future<void> getReverseGeocode(double lat, double lng) async {
     try {
       isLoading.value = true;
-
-      // TODO: Call Nominatim reverse API
-      // https://nominatim.openstreetmap.org/reverse?lat={lat}&lon={lon}&format=json
-
-      // Example:
-      // final response = await http.get(
-      //   Uri.parse('https://nominatim.openstreetmap.org/reverse?lat=$lat&lon=$lng&format=json'),
-      //   headers: {'User-Agent': 'CareLifeTouch/1.0'},
-      // );
+      final response = await MapService.reverseGeocode(latitude: lat, longitude: lng);
+      if (response != null) {
+        addressText.value = (response['display_name'] ?? '').toString();
+      }
     } catch (e) {
       Get.snackbar('Error', 'Failed to get address');
     } finally {
@@ -132,22 +127,20 @@ class AddressController extends GetxController {
     try {
       isLoading.value = true;
 
-      final newAddress = AddressModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+      final coordinates = [currentLng.value, currentLat.value];
+      final hasValidCoordinates = currentLat.value != 0.0 || currentLng.value != 0.0;
+
+      final newAddress = await addressRepository.addAddress(
         addressType: selectedAddressType.value,
         fullAddress: addressText.value,
         formattedAddress: addressText.value,
-        isDefault: addresses.isEmpty,
-        coordinates: [currentLng.value, currentLat.value],
+        coordinates: hasValidCoordinates ? coordinates : const [90.4125, 23.8103],
       );
 
-      // TODO: Save to API/database
-      addresses.add(newAddress);
+      addresses.insert(0, newAddress);
 
-      // Clear form
       clearForm();
-
-      Get.back();
+      Get.back(result: newAddress);
       Get.snackbar('Success', 'Address saved successfully');
     } catch (e) {
       Get.snackbar('Error', 'Failed to save address');
@@ -203,11 +196,4 @@ class AddressController extends GetxController {
     selectedAddressType.value = type;
   }
 }
-
-
-
-
-
-
-
 

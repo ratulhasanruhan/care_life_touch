@@ -3,13 +3,16 @@ import 'package:get/get.dart';
 import '../controllers/address_controller.dart';
 
 class AddressListView extends GetView<AddressController> {
-  const AddressListView({Key? key}) : super(key: key);
+  const AddressListView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final args = Get.arguments;
+    final isPickerMode = args is Map && args['pickerMode'] == true;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Addresses'),
+        title: Text(isPickerMode ? 'Choose Address' : 'My Addresses'),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -30,7 +33,7 @@ class AddressListView extends GetView<AddressController> {
                 const Text('No addresses saved yet'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () => Get.toNamed('/address/add'),
+                  onPressed: () => Get.toNamed('/addresses/add')?.then((_) => controller.loadAddresses()),
                   icon: const Icon(Icons.add),
                   label: const Text('Add Address'),
                   style: ElevatedButton.styleFrom(
@@ -51,75 +54,79 @@ class AddressListView extends GetView<AddressController> {
           itemCount: controller.addresses.length,
           itemBuilder: (context, index) {
             final address = controller.addresses[index];
-            return Card(
-              margin: const EdgeInsets.only(bottom: 12),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: _getTypeColor(address.addressType),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            address.addressType,
-                            style: const TextStyle(
-                              color: Color(0xFF064E36),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 12,
+            return GestureDetector(
+              onTap: isPickerMode ? () => Get.back(result: address) : null,
+              child: Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _getTypeColor(address.addressType),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              address.addressType,
+                              style: const TextStyle(
+                                color: Color(0xFF064E36),
+                                fontWeight: FontWeight.w500,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
+                          if (!isPickerMode)
+                            PopupMenuButton(
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  child: const Text('Edit'),
+                                  onTap: () => controller.editAddress(address),
+                                ),
+                                PopupMenuItem(
+                                  child: const Text('Delete'),
+                                  onTap: () => controller.deleteAddress(address.id),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        address.fullAddress.split(',').first,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
                         ),
-                        PopupMenuButton(
-                          itemBuilder: (context) => [
-                            PopupMenuItem(
-                              child: const Text('Edit'),
-                              onTap: () => controller.editAddress(address),
-                            ),
-                            PopupMenuItem(
-                              child: const Text('Delete'),
-                              onTap: () => controller.deleteAddress(address.id),
-                            ),
-                          ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        address.fullAddress,
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 14,
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      address.fullAddress.split(',').first,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      address.fullAddress,
-                      style: const TextStyle(
-                        color: Colors.grey,
-                        fontSize: 14,
+                      const SizedBox(height: 8),
+                      Text(
+                        address.title,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      address.title,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );
@@ -127,7 +134,7 @@ class AddressListView extends GetView<AddressController> {
         );
       }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/address/add'),
+        onPressed: () => Get.toNamed('/addresses/add')?.then((_) => controller.loadAddresses()),
         backgroundColor: const Color(0xFF064E36),
         child: const Icon(Icons.add),
       ),
@@ -145,6 +152,4 @@ class AddressListView extends GetView<AddressController> {
     }
   }
 }
-
-
 

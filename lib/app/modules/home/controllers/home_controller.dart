@@ -1,9 +1,12 @@
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/address_model.dart';
+import '../../../data/repositories/address_repository.dart';
 import '../../../data/repositories/page_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../global_widgets/info_modal.dart';
+import '../../address/views/routes.dart';
 import '../models/product_model.dart';
 import '../../cart/controllers/cart_controller.dart';
 
@@ -12,6 +15,12 @@ class HomeController extends GetxController {
   // Observable variables
   final isLoading = false.obs;
   final selectedIndex = 0.obs;
+
+  // Header location state
+  final isResolvingLocation = false.obs;
+  final hasLocationError = false.obs;
+  final locationText = 'Choose delivery location'.obs;
+  final selectedHomeAddress = Rxn<AddressModel>();
 
   // Product data
   final trendingProducts = <ProductModel>[].obs;
@@ -25,6 +34,7 @@ class HomeController extends GetxController {
   late CartController cartController;
   final ProductRepository _productRepository = Get.find<ProductRepository>();
   final PageRepository _pageRepository = Get.find<PageRepository>();
+  final AddressRepository _addressRepository = Get.find<AddressRepository>();
 
   static const _categoryFallbackImages = <String>[
     'assets/demo/cat_1.png',
@@ -51,6 +61,7 @@ class HomeController extends GetxController {
     cartController = Get.find<CartController>();
     loadData();
     _requestLocationPermission();
+    resolveHomeLocation();
   }
 
   /// Load initial data
@@ -123,7 +134,6 @@ class HomeController extends GetxController {
     }
   }
 
-
   /// Request location permission (approximate location)
   Future<void> _requestLocationPermission() async {
     try {
@@ -157,9 +167,54 @@ class HomeController extends GetxController {
     );
   }
 
+  /// Resolve and load the home location address
+  Future<void> resolveHomeLocation() async {
+    isResolvingLocation.value = true;
+    hasLocationError.value = false;
+
+    try {
+      final addresses = await _addressRepository.getMyAddresses();
+      if (addresses.isEmpty) {
+        locationText.value = 'Choose delivery location';
+        selectedHomeAddress.value = null;
+        return;
+      }
+
+      AddressModel preferred = addresses.first;
+      for (final item in addresses) {
+        if (item.isDefault) {
+          preferred = item;
+          break;
+        }
+      }
+
+      selectedHomeAddress.value = preferred;
+      locationText.value = preferred.details.isEmpty ? 'Choose delivery location' : preferred.details;
+    } catch (e, stackTrace) {
+      hasLocationError.value = true;
+      locationText.value = 'Location unavailable. Tap to choose';
+      AppLogger.error('Failed to resolve home location', e, stackTrace);
+    } finally {
+      isResolvingLocation.value = false;
+    }
+  }
+
+  /// Handle location tap to open address picker
+  Future<void> onLocationTap() async {
+    final result = await Get.toNamed(AddressRoutes.addresses, arguments: {'pickerMode': true});
+
+    if (result is AddressModel) {
+      selectedHomeAddress.value = result;
+      locationText.value = result.details.isEmpty ? 'Choose delivery location' : result.details;
+      hasLocationError.value = false;
+    } else {
+      await resolveHomeLocation();
+    }
+  }
+
   /// Refresh data
   Future<void> onRefresh() async {
-    await loadData();
+    await Future.wait([loadData(), resolveHomeLocation()]);
   }
 
   /// Navigate to category

@@ -23,14 +23,17 @@ class HomeView extends GetView<HomeController> {
       body: Column(
         children: [
           // Custom Header
-          HomeHeader(
-            onLocationTap: () {
-              Get.snackbar('Location', 'Location picker coming soon');
-            },
-            onNotificationTap: () {
-              Get.toNamed(Routes.NOTIFICATION);
-            },
-            onSearch: controller.onSearch,
+          Obx(
+            () => HomeHeader(
+              locationText: controller.locationText.value,
+              isLocationLoading: controller.isResolvingLocation.value,
+              hasLocationError: controller.hasLocationError.value,
+              onLocationTap: controller.onLocationTap,
+              onNotificationTap: () {
+                Get.toNamed(Routes.NOTIFICATION);
+              },
+              onSearch: controller.onSearch,
+            ),
           ),
 
           // Scrollable Content

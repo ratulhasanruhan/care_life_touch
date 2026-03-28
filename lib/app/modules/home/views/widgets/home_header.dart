@@ -6,16 +6,28 @@ class HomeHeader extends StatelessWidget {
   final VoidCallback? onLocationTap;
   final VoidCallback? onNotificationTap;
   final Function(String)? onSearch;
+  final String locationText;
+  final bool isLocationLoading;
+  final bool hasLocationError;
 
   const HomeHeader({
     super.key,
     this.onLocationTap,
     this.onNotificationTap,
     this.onSearch,
+    required this.locationText,
+    required this.isLocationLoading,
+    required this.hasLocationError,
   });
 
   @override
   Widget build(BuildContext context) {
+    final subtitleText = isLocationLoading
+        ? 'Getting location...'
+        : hasLocationError
+            ? 'Location unavailable. Tap to choose'
+            : locationText;
+
     return Container(
       decoration: const BoxDecoration(
         color: Color(0xFF065F42),
@@ -59,8 +71,8 @@ class HomeHeader extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
-                              children: const [
-                                Text(
+                              children: [
+                                const Text(
                                   'Deliver to',
                                   style: TextStyle(
                                     fontSize: 14,
@@ -68,21 +80,31 @@ class HomeHeader extends StatelessWidget {
                                     color: Colors.white,
                                   ),
                                 ),
-                                SizedBox(width: 4),
-                                Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: Colors.white,
-                                  size: 16,
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: onLocationTap,
+                                  child: const Icon(
+                                    Icons.keyboard_arrow_down,
+                                    color: Colors.white,
+                                    size: 16,
+                                  ),
                                 ),
                               ],
                             ),
                             const SizedBox(height: 2),
-                            const Text(
-                              'Jessore Khulna, Bangladesh',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
+                            SizedBox(
+                              width: 220,
+                              child: Text(
+                                subtitleText,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w500,
+                                  color: isLocationLoading
+                                      ? Colors.white.withValues(alpha: 0.8)
+                                      : Colors.white,
+                                ),
                               ),
                             ),
                           ],
