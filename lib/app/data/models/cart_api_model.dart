@@ -23,14 +23,29 @@ class CartApiItem {
     final productMap = _mapValue(json['product']) ??
         _mapValue(json['productId']) ??
         _mapValue(json['item']) ??
-        json;
+        _mapValue(json['productDetails']) ??
+        _mapValue(json['snapshot']) ??
+        <String, dynamic>{};
     final variantMap = _mapValue(json['variant']) ?? _mapValue(json['selectedVariant']);
 
-    final product = ProductModel.fromJson(productMap);
-    final quantity = _asInt(json['quantity']) ?? 1;
     final productId = (json['productId'] is String || json['productId'] is num)
         ? json['productId'].toString()
-        : (product.id.isNotEmpty ? product.id : (productMap['_id'] ?? productMap['id'] ?? '').toString());
+        : (json['product'] is String || json['product'] is num)
+            ? json['product'].toString()
+            : (_extractString(productMap, const ['_id', 'id', 'productId']) ?? '');
+
+    final normalizedProduct = _normalizeCartProduct(
+      root: json,
+      productMap: productMap,
+      variantMap: variantMap,
+      fallbackProductId: productId,
+    );
+
+    final product = ProductModel.fromJson(normalizedProduct);
+    final quantity = _asInt(json['quantity']) ?? 1;
+    final resolvedProductId = productId.isNotEmpty
+        ? productId
+        : (product.id.isNotEmpty ? product.id : (normalizedProduct['_id'] ?? normalizedProduct['id'] ?? '').toString());
     final variantId = (json['variantId'] ?? variantMap?['_id'] ?? variantMap?['id'] ?? product.defaultVariantId)
         ?.toString();
 
@@ -44,12 +59,11 @@ class CartApiItem {
         ) ??
         product.price;
 
-    final totalPrice = _asDouble(json['totalPrice'] ?? json['subtotal']) ??
-        (unitPrice * quantity);
+    final totalPrice = _asDouble(json['totalPrice'] ?? json['subtotal']) ?? (unitPrice * quantity);
 
     return CartApiItem(
-      itemId: (json['_id'] ?? json['id'] ?? json['itemId'] ?? productId).toString(),
-      productId: productId,
+      itemId: (json['_id'] ?? json['id'] ?? json['itemId'] ?? resolvedProductId).toString(),
+      productId: resolvedProductId,
       variantId: variantId,
       quantity: quantity,
       unitPrice: unitPrice,
@@ -166,3 +180,65 @@ double? _asDouble(dynamic value) {
   return null;
 }
 
+Map<String, dynamic> _normalizeCartProduct({
+  required Map<String, dynamic> root,
+  required Map<String, dynamic> productMap,
+  required Map<String, dynamic>? variantMap,
+  required String fallbackProductId,
+}) {
+  final result = <String, dynamic>{
+    ...productMap,
+  };
+
+  final id = _extractString(result, const ['_id', 'id']) ?? fallbackProductId;
+  final name = _extractString(result, const ['name', 'productName', 'title']) ??
+      _extractString(root, const ['name', 'productName', 'title']) ??
+      'Product';
+
+  final brand = _extractString(result, const ['brandName']) ??
+      _extractString(root, const ['brandName', 'brand']) ??
+      (result['brand'] is Map ? _extractString(_mapValue(result['brand']) ?? const {}, const ['name']) : null) ??
+      '';
+
+  final imageUrl = _extractString(result, const ['thumbnail', 'image', 'imagePath', 'imageUrl']) ??
+      _extractString(root, const ['thumbnail', 'image', 'imagePath', 'imageUrl']);
+
+  final resolvedPrice = _asDouble(result['finalPrice'] ?? result['price']) ??
+      _asDouble(variantMap?['finalPrice'] ?? variantMap?['price']) ??
+      _asDouble(root['unitPrice'] ?? root['price'] ?? root['finalPrice']) ??
+      0;
+
+  result['_id'] = id;
+  result['id'] = id;
+  result['name'] = name;
+  result['brand'] = brand;
+  result['price'] = resolvedPrice;
+  result['finalPrice'] = resolvedPrice;
+
+  if (imageUrl != null && imageUrl.isNotEmpty) {
+    result['thumbnail'] = imageUrl;
+    result['imagePath'] = imageUrl;
+  }
+
+  if (variantMap != null && variantMap.isNotEmpty) {
+    final variantId = _extractString(variantMap, const ['_id', 'id']);
+    if (variantId != null && variantId.isNotEmpty) {
+      result['defaultVariantId'] = variantId;
+    }
+    result['variants'] = <Map<String, dynamic>>[variantMap];
+  }
+
+  return result;
+}
+
+String? _extractString(Map<String, dynamic> map, List<String> keys) {
+  for (final key in keys) {
+    final value = map[key];
+    if (value == null) continue;
+    final text = value.toString().trim();
+    if (text.isNotEmpty && text.toLowerCase() != 'null') {
+      return text;
+    }
+  }
+  return null;
+}

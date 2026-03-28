@@ -110,12 +110,54 @@ class StorageService extends GetxService {
     await remove(AppConstants.keyUser);
   }
 
+  /// Save account ID
+  Future<void> saveAccountId(String accountId) async {
+    await write(AppConstants.keyAccountId, accountId);
+  }
+
+  /// Get account ID
+  String? getAccountId() {
+    return read<String>(AppConstants.keyAccountId);
+  }
+
+  /// Save reference ID
+  Future<void> saveReferenceId(String referenceId) async {
+    await write(AppConstants.keyReferenceId, referenceId);
+  }
+
+  /// Get reference ID
+  String? getReferenceId() {
+    return read<String>(AppConstants.keyReferenceId);
+  }
+
+  /// Save user role
+  Future<void> saveUserRole(String role) async {
+    await write(AppConstants.keyUserRole, role);
+  }
+
+  /// Get user role
+  String? getUserRole() {
+    return read<String>(AppConstants.keyUserRole);
+  }
+
   Future<void> saveSession({
     required String token,
     required Map<String, dynamic> user,
+    String? accountId,
+    String? referenceId,
+    String? role,
   }) async {
     await saveToken(token);
     await saveUser(user);
+    if (accountId != null && accountId.isNotEmpty) {
+      await saveAccountId(accountId);
+    }
+    if (referenceId != null && referenceId.isNotEmpty) {
+      await saveReferenceId(referenceId);
+    }
+    if (role != null && role.isNotEmpty) {
+      await saveUserRole(role);
+    }
   }
 
   Future<void> saveLastLoginIdentifier(String identifier) async {
@@ -137,5 +179,8 @@ class StorageService extends GetxService {
   Future<void> logout() async {
     await removeToken();
     await removeUser();
+    await remove(AppConstants.keyAccountId);
+    await remove(AppConstants.keyReferenceId);
+    await remove(AppConstants.keyUserRole);
   }
 }

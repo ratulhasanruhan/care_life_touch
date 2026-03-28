@@ -333,7 +333,104 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Login Account",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"identifier\": \"0192618991\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{Server}}/login-account",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "login-account"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 28 Mar 2026 18:31:37 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "set-cookie",
+                  "value": "buyer_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5YjEzMzZlYmM5MzNlNzVmNDQ1Y2RmNSIsInJvbGUiOiJidXllciIsInJlZmVyZW5jZUlkIjoiNjliMTMzNmViYzkzM2U3NWY0NDVjZGY3Iiwic2Vzc2lvbklkIjoiM2JjZjI1MTYtMTQ5Zi00ZGQ3LThhMDctNzE4YjNmNWZiMmFiIiwiaXBIYXNoIjoiN2U2MzMyM2JkZWM1MDNhN2MxYjE3OTcwMzQ3YWU1NTEyYjM4YzY1YzBmNjEzNmE1Y2I3MWRhZmMxYmE4NjE1YSIsImZwIjoiZWQ0ODNmYjRlY2NjNzE4MWI1Y2JmMjYwZjRlNTE1MzY2NTIxNWU4N2Y2YzI2MjM3YTg5MWE1MmUwZTU0MzI0NyIsImlhdCI6MTc3NDcyMjY5NywiZXhwIjoxNzc0NzgwMjk3fQ.ULV_u1BmnpKfZyyNru0d5hQXBXgQDy6ea_9fJ3qzSow; Max-Age=57600; Path=/; Expires=Sun, 29 Mar 2026 10:31:37 GMT; HttpOnly; Secure; SameSite=None"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"7d-Jh9EGCMWejgve0pxWFqX+lePF8Q\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"message\": \"Login successful\",\n    \"role\": \"buyer\",\n    \"accountId\": \"69b1336ebc933e75f445cdf5\",\n    \"referenceId\": \"69b1336ebc933e75f445cdf7\"\n}"
+            }
+          ]
         },
         {
           "name": "Access Me",
@@ -441,7 +538,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"shopName\": \"Jarif shop\",\r\n    \"fullName\": \"Jarif\",\r\n    \"phone\": \"01926189960\",\r\n    // \"email\": \"rahim@gmail.com\",\r\n    \"password\": \"123456\",\r\n    \"drugLicense\": \"DL-12345622\",\r\n    \"tradeLicense\": \"TL-78901222\",\r\n    \"nidImage\": \"nid1.jpg\",\r\n    \"shopImages\": [\r\n        \"shop1.jpg\",\r\n        \"shop2.jpg\"\r\n    ] \r\n}",
+              "raw": "{\r\n    \"shopName\": \"Jarif shop\",\r\n    \"fullName\": \"Jarif\",\r\n    \"phone\": \"01926179962\",\r\n    // \"email\": \"rahim@gmail.com\",\r\n    \"password\": \"01926179962\",\r\n    \"drugLicense\": \"DL-12345622\",\r\n    \"tradeLicense\": \"TL-78901222\",\r\n    \"nidImage\": \"nid1.jpg\",\r\n    \"shopImages\": [\r\n        \"shop1.jpg\",\r\n        \"shop2.jpg\"\r\n    ] \r\n}",
               "options": {
                 "raw": {
                   "language": "json"

@@ -51,7 +51,7 @@ class LoginView extends GetView<AuthController> {
                 // Email field
                 CustomTextField(
                   controller: controller.emailController,
-                  hintText: 'Enter your email',
+                  hintText: 'Enter your email or phone number',
                   prefixIcon: const Icon(Icons.email_outlined),
                   keyboardType: TextInputType.emailAddress,
                   validator: controller.validateEmail,

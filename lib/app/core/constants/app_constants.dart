@@ -29,6 +29,9 @@ class AppConstants {
   static const String keyLanguage = 'language';
   static const String keyTheme = 'theme_mode';
   static const String keyCart = 'cart_data';
+  static const String keyAccountId = 'account_id';
+  static const String keyReferenceId = 'reference_id';
+  static const String keyUserRole = 'user_role';
 
   // Validation
   static const int minPasswordLength = 6;

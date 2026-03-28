@@ -4,6 +4,7 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
+import '../../core/utils/app_logger.dart';
 import '../models/api_exception.dart';
 import '../providers/api_provider.dart';
 
@@ -325,19 +326,44 @@ class AuthRepository {
 
   Map<String, dynamic> _normalizeSession(dynamic response) {
     final map = _asMap(response);
-    final token = _extractToken(map);
-    final user = _extractUserMap(map) ?? <String, dynamic>{};
 
-    if (token == null || token.isEmpty) {
-      throw ApiException(
-        'Login succeeded but no access token was returned by the server.',
-        details: map,
-      );
+    // Extract account ID
+    final accountId = _extractString(map, const ['accountId', 'account_id']) ?? '';
+
+    // Extract reference ID
+    final referenceId = _extractString(map, const ['referenceId', 'reference_id']) ?? '';
+
+    // Extract role
+    final role = _extractString(map, const ['role', 'userRole', 'user_role']) ?? '';
+
+    // Try to extract token (may not exist in new format)
+    final token = _extractToken(map);
+
+    // Extract or create user data
+    final user = _extractUserMap(map) ?? <String, dynamic>{
+      'accountId': accountId,
+      'referenceId': referenceId,
+      'role': role,
+    };
+
+    // If token is missing, use accountId as fallback token
+    final finalToken = (token != null && token.isNotEmpty)
+        ? token
+        : (accountId.isNotEmpty ? accountId : 'default_token');
+
+    if (finalToken.isNotEmpty && finalToken != 'default_token') {
+      final tokenPreview = finalToken.length > 20
+          ? '${finalToken.substring(0, 20)}...'
+          : finalToken;
+      AppLogger.success('Login successful. Token: $tokenPreview');
     }
 
     return {
-      'token': token,
+      'token': finalToken,
       'user': user,
+      'accountId': accountId,
+      'referenceId': referenceId,
+      'role': role,
       'raw': map,
     };
   }
@@ -361,27 +387,35 @@ class AuthRepository {
     final directToken = _extractString(
       data,
       const [
+        'buyer_token',
+        'buyerToken',
         'token',
         'accessToken',
         'access_token',
         'jwt',
         'bearerToken',
+        'authToken',
+        'auth_token',
       ],
     );
     if (directToken != null && directToken.isNotEmpty) {
       return directToken;
     }
 
-    final nestedData = _firstNestedMap(data, const ['data', 'result', 'session']);
+    final nestedData = _firstNestedMap(data, const ['data', 'result', 'session', 'auth']);
     if (nestedData != null) {
       return _extractString(
         nestedData,
         const [
+          'buyer_token',
+          'buyerToken',
           'token',
           'accessToken',
           'access_token',
           'jwt',
           'bearerToken',
+          'authToken',
+          'auth_token',
         ],
       );
     }

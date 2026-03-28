@@ -62,10 +62,11 @@ class AddressSearchWidget extends GetView<AddressController> {
                     title: Text(result['display_name'] ?? 'Unknown'),
                     onTap: () {
                       controller.addressText.value = result['display_name'] ?? '';
-                      controller.currentLat.value =
-                          double.tryParse(result['lat'].toString()) ?? 0.0;
-                      controller.currentLng.value =
-                          double.tryParse(result['lon'].toString()) ?? 0.0;
+                      final lat = double.tryParse(result['lat'].toString()) ?? 0.0;
+                      final lng = double.tryParse(result['lon'].toString()) ?? 0.0;
+                      if (lat != 0.0 || lng != 0.0) {
+                        controller.setManualLocation(lat, lng);
+                      }
                       searchController.clear();
                       controller.searchResults.clear();
                     },
@@ -79,4 +80,3 @@ class AddressSearchWidget extends GetView<AddressController> {
     );
   }
 }
-

@@ -26,7 +26,6 @@ class ApiProvider extends GetConnect {
     httpClient.maxAuthRetries = 1;
 
     httpClient.addRequestModifier<dynamic>((request) {
-      AppLogger.api(request.method, request.url.toString());
       request.headers['Accept'] = 'application/json';
 
       final forceMultipart = request.headers.remove('X-Multipart') == 'true';
@@ -38,8 +37,8 @@ class ApiProvider extends GetConnect {
       }
 
       final token = _storage.getToken();
-      if (token != null && token.trim().isNotEmpty) {
-        request.headers['Authorization'] = 'Bearer $token';
+      if (token != null && token.isNotEmpty) {
+        request.headers['Cookie'] = 'buyer_token=$token';
       }
 
       return request;
@@ -51,6 +50,26 @@ class ApiProvider extends GetConnect {
         AppLogger.success('API ${request.method} $statusCode');
       } else {
         AppLogger.warning('API ${request.method} $statusCode');
+      }
+
+      // Extract token from Set-Cookie header
+      try {
+        var setCookieHeader = response.headers?['set-cookie'] ?? response.headers?['Set-Cookie'];
+        if (setCookieHeader != null) {
+          final cookieString = setCookieHeader is List
+              ? (setCookieHeader.isNotEmpty ? setCookieHeader[0] : null)
+              : setCookieHeader.toString();
+
+          if (cookieString != null && cookieString.contains('buyer_token=')) {
+            final tokenPart = cookieString.split(';')[0].trim();
+            final token = tokenPart.substring('buyer_token='.length).trim();
+            if (token.isNotEmpty) {
+              _storage.saveToken(token);
+            }
+          }
+        }
+      } catch (e) {
+        // Silent
       }
 
       return response;

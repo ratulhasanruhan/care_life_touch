@@ -126,6 +126,12 @@ class CartView extends GetView<CartController> {
 
   /// Build cart item widget
   Widget _buildCartItem(CartItem item) {
+    final resolvedProductId = item.product.id.isNotEmpty ? item.product.id : item.productId;
+    final productName = item.product.name.trim().isEmpty ? 'Product' : item.product.name;
+    final brandName = item.product.brand.trim().isEmpty ? 'Unknown brand' : item.product.brand;
+    final priceText = item.product.price > 0 ? item.product.priceDisplay : '৳${item.unitPrice.toInt()}';
+    final hasImage = item.product.imagePath.trim().isNotEmpty;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
@@ -158,17 +164,23 @@ class CartView extends GetView<CartController> {
                         );
                       },
                     )
-                  : Image.asset(
-                      item.product.imagePath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
+                  : hasImage
+                      ? Image.asset(
+                          item.product.imagePath,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Icon(
+                              Icons.image_not_supported,
+                              size: 32,
+                              color: Color(0xFFE8EAE8),
+                            );
+                          },
+                        )
+                      : const Icon(
                           Icons.image_not_supported,
                           size: 32,
                           color: Color(0xFFE8EAE8),
-                        );
-                      },
-                    ),
+                        ),
             ),
           ),
 
@@ -180,7 +192,7 @@ class CartView extends GetView<CartController> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  item.product.name,
+                  productName,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -189,7 +201,7 @@ class CartView extends GetView<CartController> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  item.product.brand,
+                  brandName,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -198,7 +210,7 @@ class CartView extends GetView<CartController> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  item.product.priceDisplay,
+                  priceText,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -222,7 +234,7 @@ class CartView extends GetView<CartController> {
                     IconButton(
                       onPressed: controller.isMutating.value
                           ? null
-                          : () => controller.decreaseQuantity(item.product.id),
+                          : () => controller.decreaseQuantity(resolvedProductId),
                       icon: const Icon(Icons.remove, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -244,7 +256,7 @@ class CartView extends GetView<CartController> {
                     IconButton(
                       onPressed: controller.isMutating.value
                           ? null
-                          : () => controller.increaseQuantity(item.product.id),
+                          : () => controller.increaseQuantity(resolvedProductId),
                       icon: const Icon(Icons.add, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -259,7 +271,7 @@ class CartView extends GetView<CartController> {
               GestureDetector(
                 onTap: controller.isMutating.value
                     ? null
-                    : () => controller.removeFromCart(item.product.id),
+                    : () => controller.removeFromCart(resolvedProductId),
                 child: const Icon(
                   Icons.delete_outline,
                   size: 20,

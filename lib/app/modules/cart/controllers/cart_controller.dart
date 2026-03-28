@@ -76,12 +76,11 @@ class CartController extends GetxController {
         variantId: variantId,
         quantity: quantity,
       ),
-      successMessage: '${product.name} added to cart',
     );
   }
 
   Future<void> removeFromCart(String productId) async {
-    final item = cartItems.firstWhereOrNull((entry) => entry.product.id == productId);
+    final item = _findByProductId(productId);
     if (item == null || item.itemId.isEmpty) {
       return;
     }
@@ -93,7 +92,7 @@ class CartController extends GetxController {
   }
 
   Future<void> updateQuantity(String productId, int quantity) async {
-    final item = cartItems.firstWhereOrNull((entry) => entry.product.id == productId);
+    final item = _findByProductId(productId);
     if (item == null) {
       return;
     }
@@ -109,14 +108,14 @@ class CartController extends GetxController {
   }
 
   Future<void> increaseQuantity(String productId) async {
-    final item = cartItems.firstWhereOrNull((entry) => entry.product.id == productId);
+    final item = _findByProductId(productId);
     if (item != null) {
       await updateQuantity(productId, item.quantity + 1);
     }
   }
 
   Future<void> decreaseQuantity(String productId) async {
-    final item = cartItems.firstWhereOrNull((entry) => entry.product.id == productId);
+    final item = _findByProductId(productId);
     if (item != null) {
       await updateQuantity(productId, item.quantity - 1);
     }
@@ -138,17 +137,22 @@ class CartController extends GetxController {
     }
   }
 
-  bool isInCart(String productId) => cartItems.any((item) => item.product.id == productId);
+  bool isInCart(String productId) => _findByProductId(productId) != null;
 
-  int getQuantity(String productId) =>
-      cartItems.firstWhereOrNull((item) => item.product.id == productId)?.quantity ?? 0;
+  int getQuantity(String productId) => _findByProductId(productId)?.quantity ?? 0;
+
+  CartItem? _findByProductId(String productId) {
+    return cartItems.firstWhereOrNull(
+      (item) => item.product.id == productId || item.productId == productId,
+    );
+  }
 
   List<Map<String, dynamic>> toOrderItems() {
     return cartItems
         .where((item) => item.variantId != null && item.variantId!.isNotEmpty)
         .map(
           (item) => {
-            'productId': item.product.id,
+            'productId': item.product.id.isNotEmpty ? item.product.id : item.productId,
             'variantId': item.variantId,
             'quantity': item.quantity,
           },
@@ -182,6 +186,7 @@ class CartController extends GetxController {
           .map(
             (item) => CartItem(
               itemId: item.itemId,
+              productId: item.productId,
               variantId: item.variantId,
               product: item.product,
               quantity: item.quantity,
@@ -212,6 +217,7 @@ class CartController extends GetxController {
 /// Cart Item Model
 class CartItem {
   final String itemId;
+  final String productId;
   final String? variantId;
   final ProductModel product;
   int quantity;
@@ -220,6 +226,7 @@ class CartItem {
 
   CartItem({
     required this.itemId,
+    required this.productId,
     required this.variantId,
     required this.product,
     required this.quantity,

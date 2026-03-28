@@ -213,16 +213,6 @@ class _AddToCartModalState extends State<AddToCartModal> {
                       }
 
                       Get.back();
-
-                      Get.snackbar(
-                        'Added to Cart',
-                        '$selectedQuantity ${widget.product.moq} of ${widget.product.name} added',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: const Color(0xFF064E36),
-                        colorText: Colors.white,
-                        duration: const Duration(seconds: 2),
-                        margin: const EdgeInsets.all(16),
-                      );
                     },
                   ),
                 ),

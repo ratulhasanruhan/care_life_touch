@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import '../../../../core/values/app_colors.dart';
+import '../../../cart/controllers/cart_controller.dart';
 
 /// Bottom Navigation Bar Widget - SVG Version
 ///
@@ -108,21 +110,55 @@ class BottomNavigationBarWidget extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // Icon with background circle - Optimized with SVG
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? activeBgColor : inactiveBgColor,
-            ),
-            child: Center(
-              child: SvgPicture.asset(
-                config.icon,
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+          Stack(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: isActive ? activeBgColor : inactiveBgColor,
+                ),
+                child: Center(
+                  child: SvgPicture.asset(
+                    config.icon,
+                    width: 20,
+                    height: 20,
+                    colorFilter: ColorFilter.mode(iconColor, BlendMode.srcIn),
+                  ),
+                ),
               ),
-            ),
+              // Badge for cart (index 2 is My Bag)
+              if (index == 2)
+                Obx(() {
+                  final cartController = Get.find<CartController>();
+                  final count = cartController.cartItems.length;
+                  if (count == 0) return const SizedBox.shrink();
+
+                  return Positioned(
+                    right: 0,
+                    top: 0,
+                    child: Container(
+                      width: 18,
+                      height: 18,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFEF4444),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          count > 9 ? '9+' : count.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            ],
           ),
 
           const SizedBox(height: 4),

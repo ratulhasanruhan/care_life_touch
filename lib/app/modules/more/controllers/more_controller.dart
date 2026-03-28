@@ -26,10 +26,28 @@ class MoreController extends GetxController {
   void _loadUserData() {
     final user = _storage.getUser();
 
-    userName.value =
-        (user?['ownerName'] ?? user?['name'] ?? 'Guest User').toString();
+    final resolvedName = _firstNonEmptyString(<dynamic>[
+      user?['fullName'],
+      user?['ownerName'],
+      user?['name'],
+      user?['userName'],
+      user?['phone'],
+      user?['email'],
+    ]);
+
+    userName.value = resolvedName ?? 'Guest User';
     userImage.value =
-        (user?['profileImage'] ?? user?['shopImage'] ?? '').toString();
+        _firstNonEmptyString(<dynamic>[user?['profileImage'], user?['shopImage']]) ?? '';
+  }
+
+  String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = (value ?? '').toString().trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return null;
   }
 
   // Navigation methods
@@ -93,5 +111,4 @@ class MoreController extends GetxController {
     navigateToProfile();
   }
 }
-
 

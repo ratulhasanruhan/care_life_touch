@@ -63,6 +63,24 @@ class AuthController extends GetxController {
     super.onClose();
   }
 
+  /// Get stored account ID
+  String? getAccountId() {
+    return _storage.getAccountId();
+  }
+
+  /// Get stored reference ID
+  String? getReferenceId() {
+    return _storage.getReferenceId();
+  }
+
+  /// Get stored user role
+  String? getUserRole() {
+    return _storage.getUserRole();
+  }
+
+  /// Check if user is logged in
+  bool get isLoggedIn => _storage.isLoggedIn;
+
   /// Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -215,16 +233,36 @@ class AuthController extends GetxController {
         password: password,
       );
 
-      final token = (session['token'] ?? '').toString();
+      // Token is saved by API provider from Set-Cookie header
+      final token = _storage.getToken() ?? '';
+      final accountId = (session['accountId'] ?? '').toString();
+      final referenceId = (session['referenceId'] ?? '').toString();
+      final role = (session['role'] ?? '').toString();
+
       final user = (session['user'] is Map<String, dynamic>)
           ? session['user'] as Map<String, dynamic>
           : <String, dynamic>{
               'name': identifier,
               'phone': identifier,
+              'accountId': accountId,
+              'referenceId': referenceId,
+              'role': role,
             };
 
-      await _storage.saveSession(token: token, user: user);
+      // Save user data (token already saved by API provider)
+      await _storage.saveUser(user);
+      if (accountId.isNotEmpty) {
+        await _storage.saveAccountId(accountId);
+      }
+      if (referenceId.isNotEmpty) {
+        await _storage.saveReferenceId(referenceId);
+      }
+      if (role.isNotEmpty) {
+        await _storage.saveUserRole(role);
+      }
+
       await _storage.saveLastLoginIdentifier(identifier);
+
 
       Get.offAllNamed(Routes.HOME);
     } catch (e, stackTrace) {
@@ -417,14 +455,10 @@ class AuthController extends GetxController {
     return null;
   }
 
-  /// Validate email
+  /// Validate email or phone (both accepted for login)
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-    final emailRegex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value)) {
-      return 'Please enter a valid email';
+      return 'Please enter your email or phone number';
     }
     return null;
   }

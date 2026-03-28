@@ -1,5 +1,8 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/repositories/address_repository.dart';
 import '../../../services/map_service.dart';
@@ -15,10 +18,16 @@ class AddressController extends GetxController {
 
   /// Loading state
   final isLoading = false.obs;
+  final isGettingLocation = false.obs;
+  final isSearching = false.obs;
 
   /// Current latitude & longitude
   final currentLat = 0.0.obs;
   final currentLng = 0.0.obs;
+
+  /// Location status
+  final locationStatus = 'Choose location'.obs;
+  final hasLocationError = false.obs;
 
   /// Search results
   final searchResults = <Map<String, dynamic>>[].obs;
@@ -29,11 +38,19 @@ class AddressController extends GetxController {
   final recipientPhone = ''.obs;
   final addressText = ''.obs;
 
+  bool _locationBootstrapped = false;
+
   @override
   void onInit() {
     super.onInit();
     addressRepository = Get.find<AddressRepository>();
     loadAddresses();
+  }
+
+  void ensureLocationBootstrapped() {
+    if (_locationBootstrapped) return;
+    _locationBootstrapped = true;
+    getCurrentLocation();
   }
 
   /// Load saved addresses
@@ -52,30 +69,55 @@ class AddressController extends GetxController {
   /// Get current location
   Future<void> getCurrentLocation() async {
     try {
-      isLoading.value = true;
+      isGettingLocation.value = true;
+      hasLocationError.value = false;
+      locationStatus.value = 'Getting location...';
+
       final permission = await Geolocator.checkPermission();
 
       if (permission == LocationPermission.denied) {
         final result = await Geolocator.requestPermission();
         if (result == LocationPermission.denied) {
+          hasLocationError.value = true;
+          locationStatus.value = 'Location permission denied';
           Get.snackbar('Permission', 'Location permission denied');
           return;
         }
       }
 
+      if (permission == LocationPermission.deniedForever) {
+        hasLocationError.value = true;
+        locationStatus.value = 'Location permission denied';
+        Get.snackbar('Error', 'Enable location permissions in app settings');
+        return;
+      }
+
       final position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 30),
+      ).timeout(
+        const Duration(seconds: 35),
+        onTimeout: () {
+          throw TimeoutException('Location request timed out');
+        },
       );
 
       currentLat.value = position.latitude;
       currentLng.value = position.longitude;
+      locationStatus.value = 'Location found';
+      hasLocationError.value = false;
+
+      AppLogger.success('Location obtained: ${position.latitude}, ${position.longitude}');
 
       // Get address from coordinates
       await getReverseGeocode(position.latitude, position.longitude);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to get location');
+      hasLocationError.value = true;
+      locationStatus.value = 'Failed to get location';
+      AppLogger.error('Failed to get location', e);
+      Get.snackbar('Error', 'Failed to get location: $e');
     } finally {
-      isLoading.value = false;
+      isGettingLocation.value = false;
     }
   }
 
@@ -83,12 +125,28 @@ class AddressController extends GetxController {
   Future<void> getReverseGeocode(double lat, double lng) async {
     try {
       isLoading.value = true;
+      locationStatus.value = 'Resolving address...';
+
       final response = await MapService.reverseGeocode(latitude: lat, longitude: lng);
+
       if (response != null) {
-        addressText.value = (response['display_name'] ?? '').toString();
+        final displayName = (response['display_name'] ?? '').toString();
+        if (displayName.isNotEmpty) {
+          addressText.value = displayName;
+          locationStatus.value = displayName;
+          hasLocationError.value = false;
+          AppLogger.success('Address resolved: $displayName');
+        } else {
+          throw Exception('No address found for coordinates');
+        }
+      } else {
+        throw Exception('Failed to resolve address');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to get address');
+      hasLocationError.value = true;
+      locationStatus.value = 'Failed to get address';
+      AppLogger.error('Failed to get address', e);
+      Get.snackbar('Error', 'Failed to resolve address: $e');
     } finally {
       isLoading.value = false;
     }
@@ -102,6 +160,7 @@ class AddressController extends GetxController {
     }
 
     try {
+      isSearching.value = true;
       isLoading.value = true;
 
       final results = await MapService.searchAddress(
@@ -109,10 +168,18 @@ class AddressController extends GetxController {
         countryCode: 'bd',
       );
 
-      searchResults.value = results;
+      searchResults.assignAll(results);
+
+      if (results.isEmpty) {
+        Get.snackbar('Info', 'No addresses found matching your query');
+      }
+
+      AppLogger.info('Search results: ${results.length} addresses found');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to search address');
+      AppLogger.error('Failed to search address', e);
+      Get.snackbar('Error', 'Failed to search address: $e');
     } finally {
+      isSearching.value = false;
       isLoading.value = false;
     }
   }
@@ -195,5 +262,11 @@ class AddressController extends GetxController {
   void selectAddressType(String type) {
     selectedAddressType.value = type;
   }
-}
 
+  void setManualLocation(double lat, double lng) {
+    currentLat.value = lat;
+    currentLng.value = lng;
+    locationStatus.value = 'Resolving address...';
+    getReverseGeocode(lat, lng);
+  }
+}
