@@ -82,8 +82,12 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
     if (banner.startsWith('http://') || banner.startsWith('https://')) {
       return Image.network(
         banner,
+        width: double.infinity,
+        height: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => Container(
+          width: double.infinity,
+          height: double.infinity,
           color: const Color(0xFFF4F4F4),
         ),
       );
@@ -91,8 +95,12 @@ class _OfferBannersCarouselState extends State<OfferBannersCarousel> {
 
     return Image.asset(
       banner,
+      width: double.infinity,
+      height: double.infinity,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => Container(
+        width: double.infinity,
+        height: double.infinity,
         color: const Color(0xFFF4F4F4),
       ),
     );

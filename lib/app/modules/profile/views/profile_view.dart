@@ -152,6 +152,8 @@ class ProfileView extends GetView<ProfileController> {
                   imageFile: controller.shopImage,
                 ),
                 const SizedBox(height: 24),
+                _buildAddressesSection(),
+                const SizedBox(height: 24),
                 Obx(
                   () => CustomButton(
                     text: 'Update Profile',
@@ -251,6 +253,76 @@ class ProfileView extends GetView<ProfileController> {
             ),
           );
         }),
+      ],
+    );
+  }
+
+  Widget _buildAddressesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Delivery Addresses',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            height: 1.5,
+            color: Color(0xFF01060F),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => Get.toNamed('/addresses'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF064E36),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                icon: const Icon(Icons.location_on, size: 18),
+                label: const Text(
+                  'Manage Addresses',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            ElevatedButton.icon(
+              onPressed: () => Get.toNamed('/addresses/add'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFECFDF7),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  side: const BorderSide(color: Color(0xFF064E36)),
+                ),
+              ),
+              icon: const Icon(Icons.add, size: 18, color: Color(0xFF064E36)),
+              label: const Text(
+                'Add New',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF064E36),
+                ),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }

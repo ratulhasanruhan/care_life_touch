@@ -222,6 +222,31 @@ class CheckoutView extends GetView<CheckoutController> {
             ),
           ),
         ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: double.infinity,
+          child: OutlinedButton.icon(
+            onPressed: () => Get.toNamed('/addresses/add'),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Color(0xFF064E36)),
+              backgroundColor: const Color(0xFFECFDF7),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+            ),
+            icon: const Icon(Icons.location_on, size: 18, color: Color(0xFF064E36)),
+            label: const Text(
+              'Add New Address',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                height: 1.43,
+                color: Color(0xFF064E36),
+              ),
+            ),
+          ),
+        ),
       ],
     );
   }

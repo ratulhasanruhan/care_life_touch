@@ -32,6 +32,7 @@ import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/bindings/change_password_binding.dart';
 import '../modules/settings/views/change_password_view.dart';
 import '../modules/settings/views/settings_view.dart';
+import '../modules/address/views/routes.dart';
 
 part 'app_routes.dart';
 
@@ -39,7 +40,7 @@ part 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.SPLASH;
+  static const INITIAL = Routes.HOME;
 
   static final routes = [
     GetPage(
@@ -134,6 +135,8 @@ class AppPages {
     ),
     // Legal module routes
     ...LegalRoutes.pages,
+    // Address module routes
+    ...AddressPages.pages,
     // Add more routes here as you create modules
   ];
 }
