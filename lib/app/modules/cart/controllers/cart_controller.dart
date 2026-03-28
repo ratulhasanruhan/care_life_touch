@@ -21,6 +21,9 @@ class CartController extends GetxController {
   final isMutating = false.obs;
   final errorMessage = ''.obs;
 
+  final _cardQuantities = <String, int>{}.obs;
+  final Map<String, ProductModel> _knownProducts = <String, ProductModel>{};
+
   double _subtotal = 0;
   double _discount = 0;
   double _deliveryFee = 0;
@@ -63,12 +66,18 @@ class CartController extends GetxController {
     }
   }
 
+  bool isInCardState(String productId) => (_cardQuantities[productId] ?? 0) > 0;
+
+  int getCardQuantity(String productId) => _cardQuantities[productId] ?? 0;
+
   Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
     final variantId = product.defaultVariantId;
     if (variantId == null || variantId.isEmpty) {
       _showError('This product is not available for cart yet.');
       return;
     }
+
+    _knownProducts[product.id] = product;
 
     await _mutateCart(
       () => _cartRepository.addToCart(
@@ -77,6 +86,10 @@ class CartController extends GetxController {
         quantity: quantity,
       ),
     );
+
+    if (errorMessage.value.isEmpty) {
+      _cardQuantities[product.id] = (_cardQuantities[product.id] ?? 0) + quantity;
+    }
   }
 
   Future<void> removeFromCart(String productId) async {
@@ -188,7 +201,7 @@ class CartController extends GetxController {
               itemId: item.itemId,
               productId: item.productId,
               variantId: item.variantId,
-              product: item.product,
+              product: _mergeKnownProduct(item),
               quantity: item.quantity,
               unitPrice: item.unitPrice,
               totalPrice: item.totalPrice,
@@ -202,6 +215,40 @@ class CartController extends GetxController {
     _total = snapshot.total;
   }
 
+  ProductModel _mergeKnownProduct(CartApiItem item) {
+    final cached = _knownProducts[item.productId];
+    final current = item.product;
+
+    if (cached == null) {
+      if (current.name.trim().isNotEmpty && current.name.trim().toLowerCase() != 'product') {
+        _knownProducts[item.productId] = current;
+      }
+      return current;
+    }
+
+    final merged = ProductModel(
+      id: current.id.isNotEmpty ? current.id : cached.id,
+      slug: current.slug ?? cached.slug,
+      defaultVariantId: current.defaultVariantId ?? cached.defaultVariantId,
+      name: current.name.trim().isNotEmpty && current.name.trim().toLowerCase() != 'product'
+          ? current.name
+          : cached.name,
+      brand: current.brand.trim().isNotEmpty ? current.brand : cached.brand,
+      description: current.description ?? cached.description,
+      price: current.price > 0 ? current.price : cached.price,
+      maxPrice: current.maxPrice ?? cached.maxPrice,
+      moq: current.moq.trim().isNotEmpty ? current.moq : cached.moq,
+      rating: current.rating > 0 ? current.rating : cached.rating,
+      imagePath: current.imagePath.trim().isNotEmpty ? current.imagePath : cached.imagePath,
+      imageUrls: current.imageUrls.isNotEmpty ? current.imageUrls : cached.imageUrls,
+      hasOffer: current.hasOffer || cached.hasOffer,
+      offerLabel: current.offerLabel ?? cached.offerLabel,
+    );
+
+    _knownProducts[item.productId] = merged;
+    return merged;
+  }
+
   String _resolveMessage(Object error, String fallback) {
     if (error is ApiException && error.message.trim().isNotEmpty) {
       return error.message;
@@ -211,6 +258,26 @@ class CartController extends GetxController {
 
   void _showError(String message) {
     Get.snackbar('Error', message, snackPosition: SnackPosition.BOTTOM);
+  }
+
+  Future<void> increaseCardQuantity(ProductModel product) async {
+    await addToCart(product, quantity: 1);
+  }
+
+  Future<void> decreaseCardQuantity(ProductModel product) async {
+    final current = _cardQuantities[product.id] ?? 0;
+    if (current <= 0) {
+      return;
+    }
+
+    final next = current - 1;
+    if (next <= 0) {
+      _cardQuantities.remove(product.id);
+    } else {
+      _cardQuantities[product.id] = next;
+    }
+
+    await decreaseQuantity(product.id);
   }
 }
 

@@ -33,6 +33,8 @@ import '../modules/settings/bindings/change_password_binding.dart';
 import '../modules/settings/views/change_password_view.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/address/views/routes.dart';
+import '../modules/payment/bindings/payment_binding.dart';
+import '../modules/payment/views/payment_view.dart';
 
 part 'app_routes.dart';
 
@@ -132,6 +134,11 @@ class AppPages {
       name: _Paths.CHANGE_PASSWORD,
       page: () => const ChangePasswordView(),
       binding: ChangePasswordBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYMENT,
+      page: () => const PaymentView(),
+      binding: PaymentBinding(),
     ),
     // Legal module routes
     ...LegalRoutes.pages,

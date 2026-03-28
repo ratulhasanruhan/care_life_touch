@@ -106,7 +106,7 @@ class CheckoutView extends GetView<CheckoutController> {
                     isLoading: controller.isPlacingOrder.value,
                     onPressed: controller.isPlacingOrder.value
                         ? null
-                        : controller.placeOrder,
+                        : controller.goToPayment,
                   ),
                 ),
               ],
@@ -584,6 +584,4 @@ class CheckoutView extends GetView<CheckoutController> {
 
   String _money(double amount) => '৳${amount.toStringAsFixed(0)}';
 }
-
-
 

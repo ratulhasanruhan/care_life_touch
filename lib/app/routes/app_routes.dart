@@ -24,6 +24,7 @@ abstract class Routes {
   static const TERMS = LegalRoutes.terms;
   static const PRIVACY = LegalRoutes.privacy;
   static const ABOUT = LegalRoutes.about;
+  static const PAYMENT = _Paths.PAYMENT;
   // Add more routes as needed
 }
 
@@ -48,5 +49,6 @@ abstract class _Paths {
   static const SETTINGS = '/settings';
   static const CHANGE_PASSWORD = '/settings/change-password';
   static const NOTIFICATION = '/notification';
+  static const PAYMENT = '/payment';
   // Add more paths as needed
 }

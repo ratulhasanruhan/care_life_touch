@@ -5,19 +5,16 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/repositories/address_repository.dart';
-import '../../../data/repositories/order_repository.dart';
 import '../../cart/controllers/cart_controller.dart';
+import '../../../routes/app_pages.dart';
 
 class CheckoutController extends GetxController {
   CheckoutController({
     AddressRepository? addressRepository,
-    OrderRepository? orderRepository,
-  })  : _addressRepository = addressRepository ?? Get.find<AddressRepository>(),
-        _orderRepository = orderRepository ?? Get.find<OrderRepository>();
+  }) : _addressRepository = addressRepository ?? Get.find<AddressRepository>();
 
   late final CartController cartController;
   final AddressRepository _addressRepository;
-  final OrderRepository _orderRepository;
 
   final savedAddresses = <AddressModel>[].obs;
   final shippingAddress = ''.obs;
@@ -102,7 +99,7 @@ class CheckoutController extends GetxController {
     Get.back();
   }
 
-  Future<void> placeOrder() async {
+  Future<void> goToPayment() async {
     if (cartController.cartItems.isEmpty) {
       return;
     }
@@ -131,36 +128,13 @@ class CheckoutController extends GetxController {
       return;
     }
 
-    try {
-      isPlacingOrder.value = true;
-      await _orderRepository.createOrder(
-        items: orderItems,
-        addressId: address.id,
-      );
-
-      await cartController.clearCart();
-
-      Get.snackbar(
-        'Order Confirmed',
-        'Your order has been placed successfully.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-
-      Get.back();
-    } catch (error, stackTrace) {
-      AppLogger.error('Failed to place order', error, stackTrace);
-      Get.snackbar(
-        'Order Failed',
-        _resolveMessage(error, 'Unable to place order right now. Please try again.'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
-    } finally {
-      isPlacingOrder.value = false;
-    }
+    Get.toNamed(
+      Routes.PAYMENT,
+      arguments: <String, dynamic>{
+        'addressId': address.id,
+        'shippingAddress': address.fullAddress,
+      },
+    );
   }
 
   String _resolveMessage(Object error, String fallback) {
@@ -170,4 +144,3 @@ class CheckoutController extends GetxController {
     return fallback;
   }
 }
-

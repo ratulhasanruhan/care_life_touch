@@ -178,8 +178,8 @@ class ProductCard extends StatelessWidget {
 
   /// Build price and add to cart button
   Widget _buildPriceAndButton(CartController cartController) {
-    final isInCart = cartController.isInCart(product.id);
-    final quantity = cartController.getQuantity(product.id);
+    final isInCard = cartController.isInCardState(product.id);
+    final quantity = cartController.getCardQuantity(product.id);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,7 +212,7 @@ class ProductCard extends StatelessWidget {
         ),
 
         // Add to Bag / Quantity Button
-        if (isInCart && quantity > 0)
+        if (isInCard && quantity > 0)
           _buildQuantityControls(cartController, quantity)
         else
           _buildAddToCartButton(cartController),
@@ -262,7 +262,7 @@ class ProductCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            onTap: () => cartController.decreaseQuantity(product.id),
+            onTap: () => cartController.decreaseCardQuantity(product),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: const Icon(Icons.remove, color: Colors.white, size: 12),
@@ -280,7 +280,7 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => cartController.increaseQuantity(product.id),
+            onTap: () => cartController.increaseCardQuantity(product),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: const Icon(Icons.add, color: Colors.white, size: 12),

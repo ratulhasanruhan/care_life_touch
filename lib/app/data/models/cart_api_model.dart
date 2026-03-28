@@ -191,17 +191,17 @@ Map<String, dynamic> _normalizeCartProduct({
   };
 
   final id = _extractString(result, const ['_id', 'id']) ?? fallbackProductId;
-  final name = _extractString(result, const ['name', 'productName', 'title']) ??
-      _extractString(root, const ['name', 'productName', 'title']) ??
+  final name = _extractString(result, const ['name', 'productName', 'title', 'product_title']) ??
+      _extractString(root, const ['name', 'productName', 'title', 'product_title']) ??
       'Product';
 
-  final brand = _extractString(result, const ['brandName']) ??
-      _extractString(root, const ['brandName', 'brand']) ??
+  final brand = _extractString(result, const ['brandName', 'manufacturer']) ??
+      _extractString(root, const ['brandName', 'brand', 'manufacturer']) ??
       (result['brand'] is Map ? _extractString(_mapValue(result['brand']) ?? const {}, const ['name']) : null) ??
       '';
 
-  final imageUrl = _extractString(result, const ['thumbnail', 'image', 'imagePath', 'imageUrl']) ??
-      _extractString(root, const ['thumbnail', 'image', 'imagePath', 'imageUrl']);
+  final imageUrl = _extractString(result, const ['thumbnail', 'image', 'imagePath', 'imageUrl', 'productImage']) ??
+      _extractString(root, const ['thumbnail', 'image', 'imagePath', 'imageUrl', 'productImage']);
 
   final resolvedPrice = _asDouble(result['finalPrice'] ?? result['price']) ??
       _asDouble(variantMap?['finalPrice'] ?? variantMap?['price']) ??
