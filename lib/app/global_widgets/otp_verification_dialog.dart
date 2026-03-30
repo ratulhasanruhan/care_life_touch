@@ -233,41 +233,37 @@ class OTPVerificationDialog extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Resend Code Timer
+            // Resend Code Button (No Timer)
             Obx(
-              () => Text(
-                resendTimer.value > 0
-                    ? 'Resend Code in 00:${resendTimer.value.toString().padLeft(2, '0')}'
-                    : 'Resend Code',
-                style: TextStyle(
-                  fontFamily: 'DM Sans',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
-                  height: 1.43,
-                  color: resendTimer.value > 0
-                      ? const Color.fromRGBO(1, 6, 15, 0.7)
-                      : AppColors.primary,
-                ),
-              ),
+              () => resendTimer.value == 0
+                  ? TextButton(
+                      onPressed: onResend,
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(0, 0),
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: const Text(
+                        'Tap to resend OTP',
+                        style: TextStyle(
+                          fontFamily: 'DM Sans',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    )
+                  : const Text(
+                      'Resend OTP',
+                      style: TextStyle(
+                        fontFamily: 'DM Sans',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        height: 1.43,
+                        color: Color.fromRGBO(1, 6, 15, 0.7),
+                      ),
+                    ),
             ),
-            if (resendTimer.value == 0)
-              TextButton(
-                onPressed: onResend,
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  minimumSize: const Size(0, 0),
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                child: const Text(
-                  'Tap to resend',
-                  style: TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
           ],
         ),
       ),

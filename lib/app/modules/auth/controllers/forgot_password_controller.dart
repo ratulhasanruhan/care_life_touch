@@ -55,6 +55,21 @@ class ForgotPasswordController extends GetxController {
     super.onClose();
   }
 
+  /// Validate phone or email identifier
+  String? validateIdentifier(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Phone or Email is required';
+    }
+
+    final isPhone = RegExp(r'^(\+8801|8801|01)[0-9]{9}$').hasMatch(value.replaceAll('-', '').replaceAll(' ', ''));
+    final isEmail = RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value);
+
+    if (!isPhone && !isEmail) {
+      return 'Please enter a valid phone or email';
+    }
+    return null;
+  }
+
   /// Validate email
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {

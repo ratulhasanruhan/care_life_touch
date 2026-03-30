@@ -38,7 +38,9 @@ class ApiProvider extends GetConnect {
 
       final token = _storage.getToken();
       if (token != null && token.isNotEmpty) {
-        request.headers['Cookie'] = 'buyer_token=$token';
+        // Set both Cookie header and authorization header for compatibility
+        request.headers['Cookie'] = 'buyer_token=$token; Path=/';
+        request.headers['Authorization'] = 'Bearer $token';
       }
 
       return request;

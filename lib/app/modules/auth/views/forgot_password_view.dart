@@ -38,7 +38,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
 
                 // Subtitle
                 Text(
-                  'Enter the email associated with your account and we\'ll send an email with instructions to reset your password.',
+                  'Enter your phone number or email associated with your account and we\'ll send an OTP to verify your identity.',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -49,13 +49,13 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                 ),
                 const SizedBox(height: 40),
 
-                // Email field
+                // Phone or Email field
                 CustomTextField(
                   controller: controller.emailController,
-                  hintText: 'Enter Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: controller.validateEmail,
+                  hintText: 'Enter Phone or Email',
+                  prefixIcon: const Icon(Icons.person_outline),
+                  keyboardType: TextInputType.text,
+                  validator: controller.validateIdentifier,
                   textInputAction: TextInputAction.done,
                 ),
                 const SizedBox(height: 32),

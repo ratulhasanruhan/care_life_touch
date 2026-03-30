@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../controllers/payment_controller.dart';
+import 'widgets/delivery_shift_bottom_sheet.dart';
 
 class PaymentView extends GetView<PaymentController> {
   const PaymentView({super.key});
@@ -47,6 +48,59 @@ class PaymentView extends GetView<PaymentController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Delivery Shift Section
+                  const Text(
+                    'Delivery Shift',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 12),
+                  Obx(
+                    () => GestureDetector(
+                      onTap: DeliveryShiftBottomSheet.show,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          border: Border.all(color: const Color(0xFFE8EAE8)),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        padding: const EdgeInsets.all(12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  controller.selectedDeliveryShift.value == 'morning'
+                                      ? 'Morning'
+                                      : 'Evening',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xFF01060F),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  controller.selectedDeliveryShift.value == 'morning'
+                                      ? 'Delivery between 8 AM - 12 PM'
+                                      : 'Delivery between 2 PM - 6 PM',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w400,
+                                    color: Color(0xB3010607),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Icon(Icons.chevron_right, color: Color(0xFF727379)),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Recommended Methods Section
                   const Text(
                     'Recommended Methods',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),

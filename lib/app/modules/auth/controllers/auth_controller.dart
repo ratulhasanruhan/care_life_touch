@@ -27,6 +27,7 @@ class AuthController extends GetxController {
   final shopNameController = TextEditingController();
   final ownerNameController = TextEditingController();
   final phoneController = TextEditingController();
+  final addressController = TextEditingController();
 
   // Form keys
   final registerFormKey = GlobalKey<FormState>();
@@ -60,6 +61,7 @@ class AuthController extends GetxController {
     shopNameController.dispose();
     ownerNameController.dispose();
     phoneController.dispose();
+    addressController.dispose();
     super.onClose();
   }
 
@@ -189,13 +191,19 @@ class AuthController extends GetxController {
 
       isLoading.value = false;
 
+      // Save pending OTP state for resumption
+      await _storage.savePendingOTP(
+        accountId: _pendingAccountId ?? '',
+        identifier: phoneController.text.isNotEmpty ? phoneController.text : emailController.text,
+      );
+
       // Send OTP
       await sendOTP();
 
       // Show OTP verification dialog
       Get.dialog(
         OTPVerificationDialog(
-          email: emailController.text,
+          email: phoneController.text.isNotEmpty ? phoneController.text : emailController.text,
           onVerify: (pin) async {
             otpController.text = pin;
             await verifyRegistrationOTP();
@@ -234,7 +242,6 @@ class AuthController extends GetxController {
       );
 
       // Token is saved by API provider from Set-Cookie header
-      final token = _storage.getToken() ?? '';
       final accountId = (session['accountId'] ?? '').toString();
       final referenceId = (session['referenceId'] ?? '').toString();
       final role = (session['role'] ?? '').toString();
@@ -321,6 +328,7 @@ class AuthController extends GetxController {
 
       otpVerified.value = true;
       await _storage.setOnboardingCompleted(true);
+      await _storage.removePendingOTP();  // Clear pending OTP state
 
       AppLogger.success('Registration OTP verified successfully');
 

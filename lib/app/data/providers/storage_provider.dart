@@ -182,5 +182,37 @@ class StorageService extends GetxService {
     await remove(AppConstants.keyAccountId);
     await remove(AppConstants.keyReferenceId);
     await remove(AppConstants.keyUserRole);
+    await removePendingOTP();
+  }
+
+  /// Save pending OTP state (accountId waiting for OTP verification)
+  Future<void> savePendingOTP({
+    required String accountId,
+    required String identifier,
+  }) async {
+    final otpData = {
+      'accountId': accountId,
+      'identifier': identifier,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+    await write('pending_otp', jsonEncode(otpData));
+  }
+
+  /// Get pending OTP state
+  Map<String, dynamic>? getPendingOTP() {
+    final otpJson = read<String>('pending_otp');
+    if (otpJson == null || otpJson.isEmpty) {
+      return null;
+    }
+    try {
+      return jsonDecode(otpJson) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Remove pending OTP state
+  Future<void> removePendingOTP() async {
+    await remove('pending_otp');
   }
 }

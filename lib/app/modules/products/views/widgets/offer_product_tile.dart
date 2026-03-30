@@ -139,7 +139,9 @@ class OfferProductTile extends StatelessWidget {
 
   Widget _buildAddToCartButton(CartController cartController) {
     return GestureDetector(
-      onTap: () => cartController.addToCart(product),
+      onTap: () async {
+        await cartController.addToCart(product, quantity: 1);
+      },
       child: Container(
         width: 68,
         height: 22,

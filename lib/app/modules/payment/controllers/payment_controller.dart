@@ -30,6 +30,7 @@ class PaymentController extends GetxController {
 
   final isProcessing = false.obs;
   final selectedMethodKey = 'card'.obs;
+  final selectedDeliveryShift = 'morning'.obs;
 
   late final String addressId;
   late final String shippingAddress;
@@ -80,6 +81,10 @@ class PaymentController extends GetxController {
     selectedMethodKey.value = key;
   }
 
+  void selectDeliveryShift(String shift) {
+    selectedDeliveryShift.value = shift;
+  }
+
   Future<void> completePayment() async {
     if (isProcessing.value) return;
 
@@ -112,6 +117,7 @@ class PaymentController extends GetxController {
       await _orderRepository.createOrder(
         items: orderItems,
         addressId: addressId,
+        deliveryShift: selectedDeliveryShift.value,
         paymentMethod: selectedMethodKey.value,
       );
 

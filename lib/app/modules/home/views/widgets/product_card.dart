@@ -223,7 +223,10 @@ class ProductCard extends StatelessWidget {
   /// Build add to cart button
   Widget _buildAddToCartButton(CartController cartController) {
     return GestureDetector(
-      onTap: () => cartController.addToCart(product),
+      onTap: () async {
+        // Add to cart without showing snackbar - just update state
+        await cartController.addToCart(product, quantity: 1);
+      },
       child: Container(
         height: 22,
         padding: const EdgeInsets.symmetric(horizontal: 6),

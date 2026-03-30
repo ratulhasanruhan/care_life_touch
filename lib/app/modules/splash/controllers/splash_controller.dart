@@ -10,12 +10,20 @@ class SplashController extends GetxController {
   void onInit() {
     super.onInit();
     AppLogger.info('Splash screen initialized');
-    _navigateToOnboarding();
+    _navigateToNextScreen();
   }
 
-  /// Navigate to onboarding after delay
-  Future<void> _navigateToOnboarding() async {
+  /// Navigate to next screen after delay
+  Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
+
+    // Check if there's a pending OTP verification (registration in progress)
+    final pendingOTP = _storage.getPendingOTP();
+    if (pendingOTP != null && pendingOTP['accountId'] != null) {
+      AppLogger.info('Resuming pending OTP verification');
+      Get.offNamed(Routes.REGISTER, arguments: {'resumePending': true, 'pending': pendingOTP});
+      return;
+    }
 
     final nextRoute = _storage.isLoggedIn
         ? Routes.HOME

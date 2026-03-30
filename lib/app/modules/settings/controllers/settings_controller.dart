@@ -12,13 +12,6 @@ class SettingsController extends GetxController {
     Get.toNamed(Routes.CHANGE_PASSWORD);
   }
 
-  void deleteAccount() {
-    Get.snackbar(
-      'Not Available',
-      'Delete account is not available from the current API yet.',
-      snackPosition: SnackPosition.BOTTOM,
-    );
-  }
 
   Future<void> signOut() async {
     await _authRepository.logout();

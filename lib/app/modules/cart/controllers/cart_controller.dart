@@ -160,18 +160,18 @@ class CartController extends GetxController {
     );
   }
 
-  List<Map<String, dynamic>> toOrderItems() {
-    return cartItems
-        .where((item) => item.variantId != null && item.variantId!.isNotEmpty)
-        .map(
-          (item) => {
-            'productId': item.product.id.isNotEmpty ? item.product.id : item.productId,
-            'variantId': item.variantId,
-            'quantity': item.quantity,
-          },
-        )
-        .toList();
-  }
+  // List<Map<String, dynamic>> toOrderItems() {
+  //   return cartItems
+  //       .where((item) => item.variantId != null && item.variantId!.isNotEmpty)
+  //       .map(
+  //         (item) => {
+  //           'productId': item.product.id.isNotEmpty ? item.product.id : item.productId,
+  //           'variantId': item.variantId,
+  //           'quantity': item.quantity,
+  //         },
+  //       )
+  //       .toList();
+  // }
 
   Future<void> _mutateCart(
     Future<CartApiSnapshot> Function() action, {
@@ -278,6 +278,22 @@ class CartController extends GetxController {
     }
 
     await decreaseQuantity(product.id);
+  }
+
+  /// Convert cart items to order format
+  List<Map<String, dynamic>> toOrderItems() {
+    return cartItems.map((item) {
+      return <String, dynamic>{
+        'productId': item.productId,
+        'variantId': item.variantId ?? '',
+        'quantity': item.quantity,
+        'unitPrice': item.unitPrice,
+        'totalPrice': item.totalPrice,
+        'name': item.product.name,
+        'brand': item.product.brand,
+        'image': item.product.imagePath,
+      };
+    }).toList();
   }
 }
 

@@ -26,12 +26,6 @@ class SettingsView extends GetView<SettingsController> {
                 title: 'Change Password',
                 onTap: controller.changePassword,
               ),
-              const SizedBox(height: 12),
-              _SettingsTile(
-                icon: Icons.delete_outline,
-                title: 'Delete Account',
-                onTap: controller.deleteAccount,
-              ),
             ],
           ),
         ),
