@@ -110,13 +110,27 @@ class HomeView extends GetView<HomeController> {
                           Get.to(
                             () => AllBrandsView(
                               brands: controller.brands,
-                              onBrandTap: (brand) {
+                              onBrandTap: (brandValue) {
+                                Map<String, String>? matchedBrand;
+                                for (final item in controller.brands) {
+                                  final query = (item['query'] ?? '').trim();
+                                  final name = (item['name'] ?? '').trim();
+                                  if (brandValue == query || brandValue == name) {
+                                    matchedBrand = item;
+                                    break;
+                                  }
+                                }
+
+                                final brandTitle = (matchedBrand?['name'] ?? brandValue).trim();
+                                final brandKeyword =
+                                    (matchedBrand?['query'] ?? brandTitle).trim();
+
                                 Get.toNamed(
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
                                     type: ProductListingType.brand,
-                                    title: brand,
-                                    keyword: brand,
+                                    title: brandTitle,
+                                    keyword: brandKeyword,
                                   ),
                                 );
                               },
@@ -159,7 +173,6 @@ class HomeView extends GetView<HomeController> {
                             ),
                           );
                         },
-                        extra: const OfferTimer(),
                       ),
                       const SizedBox(height: 12),
                       _buildProductGrid(controller.offerProducts),

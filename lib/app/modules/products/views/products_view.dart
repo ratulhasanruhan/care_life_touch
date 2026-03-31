@@ -318,7 +318,7 @@ class _BrandProductsBody extends StatelessWidget {
         const SizedBox(height: 12),
         _ProductsGrid(products: controller.brandNewProducts, nested: true),
         const SizedBox(height: 16),
-        SectionHeader(title: 'Offer Products', extra: const OfferTimer()),
+        SectionHeader(title: 'Offer Products'),
         const SizedBox(height: 12),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20),

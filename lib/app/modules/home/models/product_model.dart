@@ -88,9 +88,7 @@ class ProductModel {
           ? null
           : defaultVariantId,
       name: json['name'] ?? '',
-      brand: (json['brand'] is Map)
-          ? (json['brand']['name'] ?? '').toString()
-          : (json['brand'] ?? '').toString(),
+      brand: _resolveBrandName(json),
       description: (json['description'] ?? json['shortDescription'])?.toString(),
       price: (finalPrice is num) ? finalPrice.toDouble() : 0,
       maxPrice: comparePrice is num ? comparePrice.toDouble() : null,
@@ -105,6 +103,52 @@ class ProductModel {
           ? '${discountValue.toInt()} OFF'
           : json['offerLabel'],
     );
+  }
+
+  static String _resolveBrandName(Map<String, dynamic> json) {
+    final brandValue = json['brand'];
+
+    if (brandValue is Map) {
+      final nestedCandidates = <dynamic>[
+        brandValue['name'],
+        brandValue['brandName'],
+        brandValue['title'],
+      ];
+      for (final candidate in nestedCandidates) {
+        final value = candidate?.toString().trim() ?? '';
+        if (_isValidBrandText(value)) {
+          return value;
+        }
+      }
+    }
+
+    final directNameCandidates = <dynamic>[
+      json['brandName'],
+      json['brand_name'],
+      json['manufacturer'],
+      brandValue,
+    ];
+
+    for (final candidate in directNameCandidates) {
+      final value = candidate?.toString().trim() ?? '';
+      if (_isValidBrandText(value)) {
+        return value;
+      }
+    }
+
+    return 'Unknown brand';
+  }
+
+  static bool _isValidBrandText(String value) {
+    if (value.isEmpty || value.toLowerCase() == 'null') {
+      return false;
+    }
+    return !_looksLikeMongoId(value);
+  }
+
+  static bool _looksLikeMongoId(String value) {
+    final regex = RegExp(r'^[a-fA-F0-9]{24}$');
+    return regex.hasMatch(value);
   }
 
   /// Convert to JSON
