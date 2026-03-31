@@ -4,26 +4,46 @@ import '../providers/api_provider.dart';
 
 class ReviewRepository {
   ReviewRepository({ApiProvider? apiProvider})
-      : _api = apiProvider ??
-            (Get.isRegistered<ApiProvider>()
-                ? Get.find<ApiProvider>()
-                : Get.put(ApiProvider(), permanent: true));
+    : _api =
+          apiProvider ??
+          (Get.isRegistered<ApiProvider>()
+              ? Get.find<ApiProvider>()
+              : Get.put(ApiProvider(), permanent: true));
 
   final ApiProvider _api;
 
   Future<Map<String, dynamic>> createReview({
     required String productId,
     required double rating,
+    String? orderId,
+    String? variantId,
+    String? title,
     required String comment,
     List<String>? images,
   }) async {
+    final trimmedOrderId = orderId?.trim() ?? '';
+    final trimmedVariantId = variantId?.trim() ?? '';
+    final trimmedTitle = title?.trim() ?? '';
+
+    final imagePayload = images == null
+        ? null
+        : images
+              .map((url) => url.trim())
+              .where((url) => url.isNotEmpty)
+              .map((url) => {'url': url})
+              .toList();
+
     final response = await _api.postData(
       '/create-review',
       body: {
         'productId': productId,
         'rating': rating,
+        if (trimmedOrderId.isNotEmpty) 'orderId': trimmedOrderId,
+        if (trimmedVariantId.isNotEmpty) 'variantId': trimmedVariantId,
+        if (trimmedTitle.isNotEmpty) 'title': trimmedTitle,
         'comment': comment.trim(),
-        if (images != null && images.isNotEmpty) 'images': images,
+        if (imagePayload != null && imagePayload.isNotEmpty)
+          'images': imagePayload,
       },
     );
     return _toMap(response) ?? {};
@@ -66,10 +86,7 @@ class ReviewRepository {
 
     final productsRaw = map['data'] ?? map['products'] ?? map['items'] ?? [];
     if (productsRaw is List) {
-      return productsRaw
-          .map(_toMap)
-          .whereType<Map<String, dynamic>>()
-          .toList();
+      return productsRaw.map(_toMap).whereType<Map<String, dynamic>>().toList();
     }
     return [];
   }
@@ -100,5 +117,3 @@ class ReviewRepository {
     return null;
   }
 }
-
-

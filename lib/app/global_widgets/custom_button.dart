@@ -152,11 +152,11 @@ class CustomButton extends StatelessWidget {
       case ButtonSize.small:
         return _SizeProperties(
           height: 32,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
           fontSize: 12,
-          lineHeight: 18,
+          lineHeight: 14,
           iconSize: 16,
-          borderRadius: 2,
+          borderRadius: 4,
         );
     }
   }

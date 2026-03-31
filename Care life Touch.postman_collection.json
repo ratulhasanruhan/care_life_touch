@@ -1241,7 +1241,103 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "My Orders",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{Server}}/get-my-orders",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-my-orders"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 31 Mar 2026 22:01:57 GMT"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"395d-VGMUCyhrjfQHCdXBPLJ1OECROEI\""
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "Content-Encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"orders\": [\n        {\n            \"_id\": \"69c832bb3252f80912322bfc\",\n            \"buyer\": \"69b1336ebc933e75f445cdf7\",\n            \"items\": [\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050754\",\n                        \"unit\": \"1 Strip (10 Capsule)\"\n                    },\n                    \"quantity\": 4,\n                    \"price\": 118,\n                    \"total\": 472,\n                    \"_id\": \"69c832bb3252f80912322bfd\"\n                }\n            ],\n            \"shippingAddress\": {\n                \"_id\": \"69b1339bbc933e75f445ce19\",\n                \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n                \"addressType\": \"Office\",\n                \"location\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        90.4124,\n                        23.8102\n                    ],\n                    \"formattedAddress\": \"Mirpur, Dhaka\"\n                },\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"recipientName\": \"Jarif\",\n                \"recipientPhone\": \"0192618991\",\n                \"isDefault\": true,\n                \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n                \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n                \"__v\": 0\n            },\n            \"shippingAddressSnapshot\": {\n                \"fullName\": \"Jarif\",\n                \"phone\": \"0192618991\",\n                \"addressType\": \"Office\",\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"formattedAddress\": \"Mirpur, Dhaka\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ]\n            },\n            \"deliveryShift\": \"morning\",\n            \"estimatedDays\": {\n                \"min\": 1,\n                \"max\": 3\n            },\n            \"isGuest\": false,\n            \"guestInfo\": {\n                \"name\": null,\n                \"phone\": null\n            },\n            \"subtotal\": 472,\n            \"shippingCharge\": 0,\n            \"discount\": 0,\n            \"coupon\": {\n                \"code\": null,\n                \"couponId\": null,\n                \"discountAmount\": 0\n            },\n            \"total\": 472,\n            \"paymentMethod\": \"bkash\",\n            \"paymentStatus\": \"pending\",\n            \"paymentDetails\": {\n                \"transactionId\": null,\n                \"paidAt\": null,\n                \"paidAmount\": 0,\n                \"gateway\": null\n            },\n            \"status\": \"pending\",\n            \"tracking\": {\n                \"courier\": null,\n                \"trackingNo\": null,\n                \"consignmentId\": null,\n                \"estimatedDelivery\": null,\n                \"shippedAt\": null,\n                \"deliveredAt\": null\n            },\n            \"statusHistory\": [\n                {\n                    \"status\": \"pending\",\n                    \"note\": \"Order placed\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69c832bb3252f80912322bfe\",\n                    \"timestamp\": \"2026-03-28T19:57:47.966Z\"\n                }\n            ],\n            \"returnReason\": null,\n            \"returnRequestedAt\": null,\n            \"returnApprovedAt\": null,\n            \"returnNote\": null,\n            \"cancelReason\": null,\n            \"cancelledBy\": null,\n            \"cancelledAt\": null,\n            \"invoiceNo\": null,\n            \"returnImages\": [],\n            \"adminNotes\": [],\n            \"createdAt\": \"2026-03-28T19:57:47.968Z\",\n            \"updatedAt\": \"2026-03-28T19:57:47.968Z\",\n            \"orderNo\": \"ORD-5\",\n            \"__v\": 0\n        },\n        {\n            \"_id\": \"69c82ed93252f80912322b28\",\n            \"buyer\": \"69b1336ebc933e75f445cdf7\",\n            \"items\": [\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050754\",\n                        \"unit\": \"1 Strip (10 Capsule)\"\n                    },\n                    \"quantity\": 2,\n                    \"price\": 118,\n                    \"total\": 236,\n                    \"_id\": \"69c82ed93252f80912322b29\"\n                },\n                {\n                    \"product\": \"69b231cfb3f3a8710005072b\",\n                    \"name\": \"Napa Tablet\",\n                    \"productNo\": \"PRD-2\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773285680466-napa.jpg\",\n                    \"variant\": {\n                        \"variantId\": \"69b231cfb3f3a8710005072c\",\n                        \"unit\": \"1 Strip (10 Tablet)\"\n                    },\n                    \"quantity\": 1,\n                    \"price\": 20,\n                    \"total\": 20,\n                    \"_id\": \"69c82ed93252f80912322b2a\"\n                }\n            ],\n            \"shippingAddress\": {\n                \"_id\": \"69b1339bbc933e75f445ce19\",\n                \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n                \"addressType\": \"Office\",\n                \"location\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        90.4124,\n                        23.8102\n                    ],\n                    \"formattedAddress\": \"Mirpur, Dhaka\"\n                },\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"recipientName\": \"Jarif\",\n                \"recipientPhone\": \"0192618991\",\n                \"isDefault\": true,\n                \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n                \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n                \"__v\": 0\n            },\n            \"shippingAddressSnapshot\": {\n                \"fullName\": \"Jarif\",\n                \"phone\": \"0192618991\",\n                \"addressType\": \"Office\",\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"formattedAddress\": \"Mirpur, Dhaka\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ]\n            },\n            \"deliveryShift\": \"morning\",\n            \"estimatedDays\": {\n                \"min\": 1,\n                \"max\": 3\n            },\n            \"isGuest\": false,\n            \"guestInfo\": {\n                \"name\": null,\n                \"phone\": null\n            },\n            \"subtotal\": 256,\n            \"shippingCharge\": 0,\n            \"discount\": 0,\n            \"coupon\": {\n                \"code\": null,\n                \"couponId\": null,\n                \"discountAmount\": 0\n            },\n            \"total\": 256,\n            \"paymentMethod\": \"cod\",\n            \"paymentStatus\": \"pending\",\n            \"paymentDetails\": {\n                \"transactionId\": null,\n                \"paidAt\": null,\n                \"paidAmount\": 0,\n                \"gateway\": null\n            },\n            \"status\": \"pending\",\n            \"tracking\": {\n                \"courier\": null,\n                \"trackingNo\": null,\n                \"consignmentId\": null,\n                \"estimatedDelivery\": null,\n                \"shippedAt\": null,\n                \"deliveredAt\": null\n            },\n            \"statusHistory\": [\n                {\n                    \"status\": \"pending\",\n                    \"note\": \"Order placed\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69c82ed93252f80912322b2b\",\n                    \"timestamp\": \"2026-03-28T19:41:13.271Z\"\n                }\n            ],\n            \"returnReason\": null,\n            \"returnRequestedAt\": null,\n            \"returnApprovedAt\": null,\n            \"returnNote\": null,\n            \"cancelReason\": null,\n            \"cancelledBy\": null,\n            \"cancelledAt\": null,\n            \"invoiceNo\": null,\n            \"returnImages\": [],\n            \"adminNotes\": [],\n            \"createdAt\": \"2026-03-28T19:41:13.273Z\",\n            \"updatedAt\": \"2026-03-28T19:41:13.273Z\",\n            \"orderNo\": \"ORD-4\",\n            \"__v\": 0\n        },\n        {\n            \"_id\": \"69b24aa2a1cae4c76738e54e\",\n            \"buyer\": \"69b1336ebc933e75f445cdf7\",\n            \"items\": [\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050754\",\n                        \"unit\": \"1 Strip (10 Capsule)\"\n                    },\n                    \"quantity\": 2,\n                    \"price\": 118,\n                    \"total\": 236,\n                    \"_id\": \"69b24aa2a1cae4c76738e54f\"\n                },\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050755\",\n                        \"unit\": \"1 Box (100 Capsule)\"\n                    },\n                    \"quantity\": 6,\n                    \"price\": 998,\n                    \"total\": 5988,\n                    \"_id\": \"69b24aa2a1cae4c76738e550\"\n                }\n            ],\n            \"shippingAddress\": {\n                \"_id\": \"69b1339bbc933e75f445ce19\",\n                \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n                \"addressType\": \"Office\",\n                \"location\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        90.4124,\n                        23.8102\n                    ],\n                    \"formattedAddress\": \"Mirpur, Dhaka\"\n                },\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"recipientName\": \"Jarif\",\n                \"recipientPhone\": \"0192618991\",\n                \"isDefault\": true,\n                \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n                \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n                \"__v\": 0\n            },\n            \"shippingAddressSnapshot\": {\n                \"fullName\": \"Jarif\",\n                \"phone\": \"0192618991\",\n                \"addressType\": \"Office\",\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"formattedAddress\": \"Mirpur, Dhaka\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ]\n            },\n            \"deliveryShift\": \"morning\",\n            \"estimatedDays\": {\n                \"min\": 1,\n                \"max\": 3\n            },\n            \"isGuest\": false,\n            \"guestInfo\": {\n                \"name\": null,\n                \"phone\": null\n            },\n            \"subtotal\": 6224,\n            \"shippingCharge\": 0,\n            \"discount\": 0,\n            \"coupon\": {\n                \"code\": null,\n                \"couponId\": null,\n                \"discountAmount\": 0\n            },\n            \"total\": 6224,\n            \"paymentMethod\": \"cod\",\n            \"paymentStatus\": \"paid\",\n            \"paymentDetails\": {\n                \"transactionId\": null,\n                \"paidAt\": \"2026-03-12T07:58:27.993Z\",\n                \"paidAmount\": 6224,\n                \"gateway\": null\n            },\n            \"status\": \"delivered\",\n            \"tracking\": {\n                \"courier\": \"Man\",\n                \"trackingNo\": null,\n                \"consignmentId\": null,\n                \"estimatedDelivery\": \"2026-03-13T00:00:00.000Z\",\n                \"shippedAt\": \"2026-03-12T07:58:24.894Z\",\n                \"deliveredAt\": \"2026-03-12T07:58:27.993Z\"\n            },\n            \"statusHistory\": [\n                {\n                    \"status\": \"pending\",\n                    \"note\": \"Order placed\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69b24aa2a1cae4c76738e551\",\n                    \"timestamp\": \"2026-03-12T05:09:54.863Z\"\n                },\n                {\n                    \"status\": \"confirmed\",\n                    \"note\": \"Status changed from pending to confirmed\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b24ab6a1cae4c76738e58e\",\n                    \"timestamp\": \"2026-03-12T05:10:14.533Z\"\n                },\n                {\n                    \"status\": \"processing\",\n                    \"note\": \"Status changed from confirmed to processing\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b24fe02d2b3ceb4ad3a563\",\n                    \"timestamp\": \"2026-03-12T05:32:16.234Z\"\n                },\n                {\n                    \"status\": \"shipped\",\n                    \"note\": \"Status changed from processing to shipped\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b272203f3ec4cb044f8546\",\n                    \"timestamp\": \"2026-03-12T07:58:24.894Z\"\n                },\n                {\n                    \"status\": \"delivered\",\n                    \"note\": \"Status changed from shipped to delivered\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b272233f3ec4cb044f855a\",\n                    \"timestamp\": \"2026-03-12T07:58:27.993Z\"\n                }\n            ],\n            \"returnReason\": null,\n            \"returnRequestedAt\": null,\n            \"returnApprovedAt\": null,\n            \"returnNote\": null,\n            \"cancelReason\": null,\n            \"cancelledBy\": null,\n            \"cancelledAt\": null,\n            \"invoiceNo\": \"INV-2\",\n            \"returnImages\": [],\n            \"adminNotes\": [\n                {\n                    \"note\": \"Amoxil Capsule 2 box\",\n                    \"addedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"_id\": \"69b250212d2b3ceb4ad3a587\",\n                    \"addedAt\": \"2026-03-12T05:33:21.744Z\"\n                }\n            ],\n            \"createdAt\": \"2026-03-12T05:09:54.864Z\",\n            \"updatedAt\": \"2026-03-12T07:58:27.994Z\",\n            \"orderNo\": \"ORD-3\",\n            \"__v\": 4\n        },\n        {\n            \"_id\": \"69b242bea1cae4c76738e39d\",\n            \"buyer\": \"69b1336ebc933e75f445cdf7\",\n            \"items\": [\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050754\",\n                        \"unit\": \"1 Strip (10 Capsule)\"\n                    },\n                    \"quantity\": 2,\n                    \"price\": 118,\n                    \"total\": 236,\n                    \"_id\": \"69b242bea1cae4c76738e39e\"\n                },\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050755\",\n                        \"unit\": \"1 Box (100 Capsule)\"\n                    },\n                    \"quantity\": 6,\n                    \"price\": 998,\n                    \"total\": 5988,\n                    \"_id\": \"69b242bea1cae4c76738e39f\"\n                }\n            ],\n            \"shippingAddress\": {\n                \"_id\": \"69b1339bbc933e75f445ce19\",\n                \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n                \"addressType\": \"Office\",\n                \"location\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        90.4124,\n                        23.8102\n                    ],\n                    \"formattedAddress\": \"Mirpur, Dhaka\"\n                },\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"recipientName\": \"Jarif\",\n                \"recipientPhone\": \"0192618991\",\n                \"isDefault\": true,\n                \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n                \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n                \"__v\": 0\n            },\n            \"shippingAddressSnapshot\": {\n                \"fullName\": \"Jarif\",\n                \"phone\": \"0192618991\",\n                \"addressType\": \"Office\",\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"formattedAddress\": \"Mirpur, Dhaka\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ]\n            },\n            \"deliveryShift\": \"morning\",\n            \"estimatedDays\": {\n                \"min\": 1,\n                \"max\": 3\n            },\n            \"isGuest\": false,\n            \"guestInfo\": {\n                \"name\": null,\n                \"phone\": null\n            },\n            \"subtotal\": 6224,\n            \"shippingCharge\": 0,\n            \"discount\": 0,\n            \"coupon\": {\n                \"code\": null,\n                \"couponId\": null,\n                \"discountAmount\": 0\n            },\n            \"total\": 6224,\n            \"paymentMethod\": \"cod\",\n            \"paymentStatus\": \"refunded\",\n            \"paymentDetails\": {\n                \"transactionId\": null,\n                \"paidAt\": \"2026-03-12T04:59:39.990Z\",\n                \"paidAmount\": 6224,\n                \"gateway\": null\n            },\n            \"status\": \"refunded\",\n            \"tracking\": {\n                \"courier\": \"Man\",\n                \"trackingNo\": null,\n                \"consignmentId\": null,\n                \"estimatedDelivery\": \"2026-03-13T00:00:00.000Z\",\n                \"shippedAt\": \"2026-03-12T04:59:12.523Z\",\n                \"deliveredAt\": \"2026-03-12T04:59:39.990Z\"\n            },\n            \"statusHistory\": [\n                {\n                    \"status\": \"pending\",\n                    \"note\": \"Order placed\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69b242bea1cae4c76738e3a0\",\n                    \"timestamp\": \"2026-03-12T04:36:14.359Z\"\n                },\n                {\n                    \"status\": \"confirmed\",\n                    \"note\": \"Status changed from pending to confirmed\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b247d9a1cae4c76738e45b\",\n                    \"timestamp\": \"2026-03-12T04:58:01.919Z\"\n                },\n                {\n                    \"status\": \"processing\",\n                    \"note\": \"Status changed from confirmed to processing\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b247efa1cae4c76738e471\",\n                    \"timestamp\": \"2026-03-12T04:58:23.544Z\"\n                },\n                {\n                    \"status\": \"shipped\",\n                    \"note\": \"ok\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b24820a1cae4c76738e48e\",\n                    \"timestamp\": \"2026-03-12T04:59:12.523Z\"\n                },\n                {\n                    \"status\": \"delivered\",\n                    \"note\": \"Status changed from shipped to delivered\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b2483ba1cae4c76738e4ac\",\n                    \"timestamp\": \"2026-03-12T04:59:39.990Z\"\n                },\n                {\n                    \"status\": \"return-requested\",\n                    \"note\": \"Wrong product delivered\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69b249dda1cae4c76738e4c6\",\n                    \"timestamp\": \"2026-03-12T05:06:37.548Z\"\n                },\n                {\n                    \"status\": \"return-approved\",\n                    \"note\": \"Status changed from return-requested to return-approved\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b249f6a1cae4c76738e4e2\",\n                    \"timestamp\": \"2026-03-12T05:07:02.521Z\"\n                },\n                {\n                    \"status\": \"refunded\",\n                    \"note\": \"Status changed from return-approved to refunded\",\n                    \"updatedBy\": \"69afddf75c3a7d826f72ac2b\",\n                    \"updatedByModel\": \"User\",\n                    \"_id\": \"69b249fda1cae4c76738e4fa\",\n                    \"timestamp\": \"2026-03-12T05:07:09.880Z\"\n                }\n            ],\n            \"returnReason\": \"Wrong product delivered\",\n            \"returnRequestedAt\": \"2026-03-12T05:06:37.548Z\",\n            \"returnApprovedAt\": \"2026-03-12T05:07:02.521Z\",\n            \"returnNote\": null,\n            \"cancelReason\": null,\n            \"cancelledBy\": null,\n            \"cancelledAt\": null,\n            \"invoiceNo\": \"INV-1\",\n            \"returnImages\": [\n                {\n                    \"url\": \"https://thumbs.dreamstime.com/b/crushed-damaged-tablets-concept-expired-drugs-closeup-view-237567543.jpg\",\n                    \"_id\": \"69b249dda1cae4c76738e4c4\"\n                },\n                {\n                    \"url\": \"https://5.imimg.com/data5/SELLER/Default/2026/1/574670122/IL/LQ/PY/212299670/gabapentin-tablet-400-mg-500x500.jpg\",\n                    \"_id\": \"69b249dda1cae4c76738e4c5\"\n                }\n            ],\n            \"adminNotes\": [],\n            \"createdAt\": \"2026-03-12T04:36:14.363Z\",\n            \"updatedAt\": \"2026-03-12T05:07:10.062Z\",\n            \"orderNo\": \"ORD-2\",\n            \"__v\": 7\n        },\n        {\n            \"_id\": \"69b241ca66279efc4e4f367f\",\n            \"buyer\": \"69b1336ebc933e75f445cdf7\",\n            \"items\": [\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050754\",\n                        \"unit\": \"1 Strip (10 Capsule)\"\n                    },\n                    \"quantity\": 10,\n                    \"price\": 118,\n                    \"total\": 1180,\n                    \"_id\": \"69b241ca66279efc4e4f3680\"\n                },\n                {\n                    \"product\": \"69b233f0b3f3a87100050753\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"productNo\": \"PRD-3\",\n                    \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                    \"variant\": {\n                        \"variantId\": \"69b233f0b3f3a87100050755\",\n                        \"unit\": \"1 Box (100 Capsule)\"\n                    },\n                    \"quantity\": 4,\n                    \"price\": 998,\n                    \"total\": 3992,\n                    \"_id\": \"69b241ca66279efc4e4f3681\"\n                }\n            ],\n            \"shippingAddress\": {\n                \"_id\": \"69b1339bbc933e75f445ce19\",\n                \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n                \"addressType\": \"Office\",\n                \"location\": {\n                    \"type\": \"Point\",\n                    \"coordinates\": [\n                        90.4124,\n                        23.8102\n                    ],\n                    \"formattedAddress\": \"Mirpur, Dhaka\"\n                },\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"recipientName\": \"Jarif\",\n                \"recipientPhone\": \"0192618991\",\n                \"isDefault\": true,\n                \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n                \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n                \"__v\": 0\n            },\n            \"shippingAddressSnapshot\": {\n                \"fullName\": \"Jarif\",\n                \"phone\": \"0192618991\",\n                \"addressType\": \"Office\",\n                \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n                \"formattedAddress\": \"Mirpur, Dhaka\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ]\n            },\n            \"deliveryShift\": \"morning\",\n            \"estimatedDays\": {\n                \"min\": 3,\n                \"max\": 7\n            },\n            \"isGuest\": false,\n            \"guestInfo\": {\n                \"name\": null,\n                \"phone\": null\n            },\n            \"subtotal\": 5172,\n            \"shippingCharge\": 60,\n            \"discount\": 0,\n            \"coupon\": {\n                \"code\": null,\n                \"couponId\": null,\n                \"discountAmount\": 0\n            },\n            \"total\": 5232,\n            \"paymentMethod\": \"cod\",\n            \"paymentStatus\": \"pending\",\n            \"paymentDetails\": {\n                \"transactionId\": null,\n                \"paidAt\": null,\n                \"paidAmount\": 0,\n                \"gateway\": null\n            },\n            \"status\": \"cancelled\",\n            \"tracking\": {\n                \"courier\": null,\n                \"trackingNo\": null,\n                \"consignmentId\": null,\n                \"estimatedDelivery\": null,\n                \"shippedAt\": null,\n                \"deliveredAt\": null\n            },\n            \"statusHistory\": [\n                {\n                    \"status\": \"pending\",\n                    \"note\": \"Order placed\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69b241ca66279efc4e4f3682\",\n                    \"timestamp\": \"2026-03-12T04:32:10.532Z\"\n                },\n                {\n                    \"status\": \"cancelled\",\n                    \"note\": \"Changed my mind\",\n                    \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                    \"updatedByModel\": \"Buyer\",\n                    \"_id\": \"69b2478ea1cae4c76738e437\",\n                    \"timestamp\": \"2026-03-12T04:56:46.663Z\"\n                }\n            ],\n            \"returnReason\": null,\n            \"returnRequestedAt\": null,\n            \"returnApprovedAt\": null,\n            \"returnNote\": null,\n            \"cancelReason\": \"Changed my mind\",\n            \"cancelledBy\": \"buyer\",\n            \"cancelledAt\": \"2026-03-12T04:56:46.662Z\",\n            \"invoiceNo\": null,\n            \"returnImages\": [],\n            \"adminNotes\": [],\n            \"createdAt\": \"2026-03-12T04:32:10.536Z\",\n            \"updatedAt\": \"2026-03-12T04:56:46.855Z\",\n            \"orderNo\": \"ORD-1\",\n            \"__v\": 1\n        }\n    ],\n    \"pagination\": {\n        \"total\": 5,\n        \"page\": 1,\n        \"limit\": 10,\n        \"totalPages\": 1\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Single Order",
@@ -1266,7 +1362,104 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Single Order",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{Server}}/get-my-order/69b241ca66279efc4e4f367f",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-my-order",
+                    "69b241ca66279efc4e4f367f"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": "Server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "Date",
+                  "value": "Tue, 31 Mar 2026 22:03:49 GMT"
+                },
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "Transfer-Encoding",
+                  "value": "chunked"
+                },
+                {
+                  "key": "Connection",
+                  "value": "keep-alive"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Accept-Encoding"
+                },
+                {
+                  "key": "Vary",
+                  "value": "Origin"
+                },
+                {
+                  "key": "X-Powered-By",
+                  "value": "Express"
+                },
+                {
+                  "key": "Access-Control-Allow-Credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "ETag",
+                  "value": "W/\"b29-n7rX4j4Kb3/0EEgyaRVqbxUdsc4\""
+                },
+                {
+                  "key": "X-Frame-Options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "X-Content-Type-Options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "X-XSS-Protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "X-Permitted-Cross-Domain-Policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "Referrer-Policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "Content-Encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"order\": {\n        \"_id\": \"69b241ca66279efc4e4f367f\",\n        \"buyer\": \"69b1336ebc933e75f445cdf7\",\n        \"items\": [\n            {\n                \"product\": {\n                    \"_id\": \"69b233f0b3f3a87100050753\",\n                    \"productNo\": \"PRD-3\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"slug\": \"amoxil-capsule-mmmwxfd7\",\n                    \"genericName\": \"Amoxicillin\",\n                    \"dosageForm\": \"capsule\"\n                },\n                \"name\": \"Amoxil Capsule\",\n                \"productNo\": \"PRD-3\",\n                \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                \"variant\": {\n                    \"variantId\": \"69b233f0b3f3a87100050754\",\n                    \"unit\": \"1 Strip (10 Capsule)\"\n                },\n                \"quantity\": 10,\n                \"price\": 118,\n                \"total\": 1180,\n                \"_id\": \"69b241ca66279efc4e4f3680\"\n            },\n            {\n                \"product\": {\n                    \"_id\": \"69b233f0b3f3a87100050753\",\n                    \"productNo\": \"PRD-3\",\n                    \"name\": \"Amoxil Capsule\",\n                    \"slug\": \"amoxil-capsule-mmmwxfd7\",\n                    \"genericName\": \"Amoxicillin\",\n                    \"dosageForm\": \"capsule\"\n                },\n                \"name\": \"Amoxil Capsule\",\n                \"productNo\": \"PRD-3\",\n                \"image\": \"https://arhamsahirkhan.com/uploads/1773286246862-Amoxil Capsule.png\",\n                \"variant\": {\n                    \"variantId\": \"69b233f0b3f3a87100050755\",\n                    \"unit\": \"1 Box (100 Capsule)\"\n                },\n                \"quantity\": 4,\n                \"price\": 998,\n                \"total\": 3992,\n                \"_id\": \"69b241ca66279efc4e4f3681\"\n            }\n        ],\n        \"shippingAddress\": {\n            \"_id\": \"69b1339bbc933e75f445ce19\",\n            \"buyerId\": \"69b1336ebc933e75f445cdf7\",\n            \"addressType\": \"Office\",\n            \"location\": {\n                \"type\": \"Point\",\n                \"coordinates\": [\n                    90.4124,\n                    23.8102\n                ],\n                \"formattedAddress\": \"Mirpur, Dhaka\"\n            },\n            \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n            \"recipientName\": \"Jarif\",\n            \"recipientPhone\": \"0192618991\",\n            \"isDefault\": true,\n            \"createdAt\": \"2026-03-11T09:19:23.867Z\",\n            \"updatedAt\": \"2026-03-11T09:42:02.760Z\",\n            \"__v\": 0\n        },\n        \"shippingAddressSnapshot\": {\n            \"fullName\": \"Jarif\",\n            \"phone\": \"0192618991\",\n            \"addressType\": \"Office\",\n            \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka-1230\",\n            \"formattedAddress\": \"Mirpur, Dhaka\",\n            \"coordinates\": [\n                90.4124,\n                23.8102\n            ]\n        },\n        \"deliveryShift\": \"morning\",\n        \"estimatedDays\": {\n            \"min\": 3,\n            \"max\": 7\n        },\n        \"isGuest\": false,\n        \"guestInfo\": {\n            \"name\": null,\n            \"phone\": null\n        },\n        \"subtotal\": 5172,\n        \"shippingCharge\": 60,\n        \"discount\": 0,\n        \"coupon\": {\n            \"code\": null,\n            \"couponId\": null,\n            \"discountAmount\": 0\n        },\n        \"total\": 5232,\n        \"paymentMethod\": \"cod\",\n        \"paymentStatus\": \"pending\",\n        \"paymentDetails\": {\n            \"transactionId\": null,\n            \"paidAt\": null,\n            \"paidAmount\": 0,\n            \"gateway\": null\n        },\n        \"status\": \"cancelled\",\n        \"tracking\": {\n            \"courier\": null,\n            \"trackingNo\": null,\n            \"consignmentId\": null,\n            \"estimatedDelivery\": null,\n            \"shippedAt\": null,\n            \"deliveredAt\": null\n        },\n        \"statusHistory\": [\n            {\n                \"status\": \"pending\",\n                \"note\": \"Order placed\",\n                \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                \"updatedByModel\": \"Buyer\",\n                \"_id\": \"69b241ca66279efc4e4f3682\",\n                \"timestamp\": \"2026-03-12T04:32:10.532Z\"\n            },\n            {\n                \"status\": \"cancelled\",\n                \"note\": \"Changed my mind\",\n                \"updatedBy\": \"69b1336ebc933e75f445cdf7\",\n                \"updatedByModel\": \"Buyer\",\n                \"_id\": \"69b2478ea1cae4c76738e437\",\n                \"timestamp\": \"2026-03-12T04:56:46.663Z\"\n            }\n        ],\n        \"returnReason\": null,\n        \"returnRequestedAt\": null,\n        \"returnApprovedAt\": null,\n        \"returnNote\": null,\n        \"cancelReason\": \"Changed my mind\",\n        \"cancelledBy\": \"buyer\",\n        \"cancelledAt\": \"2026-03-12T04:56:46.662Z\",\n        \"invoiceNo\": null,\n        \"returnImages\": [],\n        \"adminNotes\": [],\n        \"createdAt\": \"2026-03-12T04:32:10.536Z\",\n        \"updatedAt\": \"2026-03-12T04:56:46.855Z\",\n        \"orderNo\": \"ORD-1\",\n        \"__v\": 1\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Cancel Order",

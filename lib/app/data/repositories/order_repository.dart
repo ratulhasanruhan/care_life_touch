@@ -25,7 +25,7 @@ class OrderRepository {
         'items': items,
         'addressId': addressId,
         'deliveryShift': deliveryShift,
-        'paymentMethod': 'cod',
+        'paymentMethod': paymentMethod,
         if (couponCode != null && couponCode.trim().isNotEmpty)
           'couponCode': couponCode.trim(),
       },
@@ -56,32 +56,31 @@ class OrderRepository {
     }
 
     final data = _toMap(map['data']) ?? map;
-    final orders = data['orders'] ?? data['items'] ?? map['orders'];
+    final orders = data['orders'] ?? map['orders'] ?? data['items'] ?? map['items'];
     if (orders is! List) {
       return const [];
     }
 
-    return orders
-        .map(_toMap)
-        .whereType<Map<String, dynamic>>()
-        .toList();
+    return orders.map(_toMap).whereType<Map<String, dynamic>>().toList();
   }
 
   Future<Map<String, dynamic>> getSingleOrder(String orderId) async {
-    final response = await _api.getData('/get-order/$orderId');
+    final response = await _api.getData('/get-my-order/$orderId');
     final map = _toMap(response);
     if (map == null) {
       throw ApiException('Unexpected order response format.', details: response);
     }
+
     final data = _toMap(map['data']) ?? map;
-    return data;
+    final order = _toMap(data['order']) ?? _toMap(map['order']) ?? data;
+    return order;
   }
 
   Future<Map<String, dynamic>> cancelOrder({
     required String orderId,
     required String reason,
   }) async {
-    final response = await _api.postData(
+    final response = await _api.putData(
       '/cancel-order/$orderId',
       body: {
         'reason': reason.trim(),
@@ -99,11 +98,12 @@ class OrderRepository {
     required String reason,
     List<String>? images,
   }) async {
-    final response = await _api.postData(
+    final response = await _api.putData(
       '/return-order/$orderId',
       body: {
         'reason': reason.trim(),
-        if (images != null && images.isNotEmpty) 'images': images,
+        if (images != null && images.isNotEmpty)
+          'images': images.map((url) => {'url': url}).toList(growable: false),
       },
     );
     final map = _toMap(response);

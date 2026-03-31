@@ -12,6 +12,7 @@ abstract class Routes {
   static const PRODUCT_DETAILS = _Paths.PRODUCT_DETAILS;
   static const MEDICINE_OVERVIEW = _Paths.MEDICINE_OVERVIEW;
   static const PRODUCT_REVIEWS = _Paths.PRODUCT_REVIEWS;
+  static const WRITE_REVIEW = _Paths.WRITE_REVIEW;
   static const PRODUCTS = _Paths.PRODUCTS;
   static const CART = _Paths.CART;
   static const CHECKOUT = _Paths.CHECKOUT;
@@ -40,6 +41,7 @@ abstract class _Paths {
   static const PRODUCT_DETAILS = '/product-details';
   static const MEDICINE_OVERVIEW = '/medicine-overview';
   static const PRODUCT_REVIEWS = '/product-reviews';
+  static const WRITE_REVIEW = '/write-review';
   static const PRODUCTS = '/products';
   static const CART = '/cart';
   static const CHECKOUT = '/checkout';

@@ -19,6 +19,8 @@ import '../modules/product_details/bindings/product_reviews_binding.dart';
 import '../modules/product_details/views/product_details_view.dart';
 import '../modules/product_details/views/medicine_overview_view.dart';
 import '../modules/product_details/views/product_reviews_view.dart';
+import '../modules/review/bindings/write_review_binding.dart';
+import '../modules/review/views/write_review_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';
 import '../modules/checkout/views/checkout_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
@@ -99,6 +101,11 @@ class AppPages {
       name: _Paths.PRODUCT_REVIEWS,
       page: () => const ProductReviewsView(),
       binding: ProductReviewsBinding(),
+    ),
+    GetPage(
+      name: _Paths.WRITE_REVIEW,
+      page: () => const WriteReviewView(),
+      binding: WriteReviewBinding(),
     ),
     GetPage(
       name: _Paths.CHECKOUT,
