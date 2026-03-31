@@ -4,7 +4,9 @@ class ProductModel {
   final String? slug;
   final String? defaultVariantId;
   final String name;
+  final String? brandId;
   final String brand;
+  final String categoryName;
   final String? description;
   final double price;
   final double? maxPrice;
@@ -20,7 +22,9 @@ class ProductModel {
     this.slug,
     this.defaultVariantId,
     required this.name,
+    this.brandId,
     required this.brand,
+    this.categoryName = '',
     this.description,
     required this.price,
     this.maxPrice,
@@ -81,6 +85,21 @@ class ProductModel {
     final discount = json['discount'];
     final discountValue = discount is Map ? (discount['value'] ?? 0) : 0;
 
+    final rawBrandValue = json['brand'];
+    final brandIdFromObject = (rawBrandValue is Map)
+        ? (rawBrandValue['_id'] ?? rawBrandValue['id'])?.toString().trim()
+        : null;
+    final brandIdFromField = (json['brandId'] ?? '').toString().trim();
+    final brandIdFromRaw = rawBrandValue is String ? rawBrandValue.trim() : '';
+
+    final resolvedBrandId = _isValidBrandId(brandIdFromObject)
+        ? brandIdFromObject!
+        : _isValidBrandId(brandIdFromField)
+            ? brandIdFromField
+            : _isValidBrandId(brandIdFromRaw)
+                ? brandIdFromRaw
+                : '';
+
     return ProductModel(
       id: id,
       slug: (json['slug'] ?? '').toString().isEmpty ? null : json['slug'].toString(),
@@ -88,13 +107,15 @@ class ProductModel {
           ? null
           : defaultVariantId,
       name: json['name'] ?? '',
-      brand: _resolveBrandName(json),
+      brandId: resolvedBrandId.isEmpty ? null : resolvedBrandId,
+      brand: _resolveBrandText(json),
+      categoryName: categoryName,
       description: (json['description'] ?? json['shortDescription'])?.toString(),
       price: (finalPrice is num) ? finalPrice.toDouble() : 0,
       maxPrice: comparePrice is num ? comparePrice.toDouble() : null,
       moq: variants.isNotEmpty
           ? (firstVariant['unit'] ?? firstVariant['packSize'] ?? '1 unit').toString()
-          : (categoryName.isNotEmpty ? categoryName : '1 unit'),
+          : '1 unit',
       rating: (ratingValue is num) ? ratingValue.toDouble() : 4.9,
       imagePath: primaryImage,
       imageUrls: imageList,
@@ -105,50 +126,47 @@ class ProductModel {
     );
   }
 
-  static String _resolveBrandName(Map<String, dynamic> json) {
+  static String _resolveBrandText(Map<String, dynamic> json) {
     final brandValue = json['brand'];
 
     if (brandValue is Map) {
-      final nestedCandidates = <dynamic>[
-        brandValue['name'],
-        brandValue['brandName'],
-        brandValue['title'],
-      ];
-      for (final candidate in nestedCandidates) {
-        final value = candidate?.toString().trim() ?? '';
-        if (_isValidBrandText(value)) {
-          return value;
-        }
+      final name = (brandValue['name'] ?? '').toString().trim();
+      if (_isValidBrand(name)) {
+        return name;
       }
     }
 
-    final directNameCandidates = <dynamic>[
-      json['brandName'],
-      json['brand_name'],
-      json['manufacturer'],
-      brandValue,
-    ];
+    final brandName = (json['brandName'] ?? json['brand_name'] ?? '').toString().trim();
+    if (_isValidBrand(brandName)) {
+      return brandName;
+    }
 
-    for (final candidate in directNameCandidates) {
-      final value = candidate?.toString().trim() ?? '';
-      if (_isValidBrandText(value)) {
-        return value;
-      }
+    final manufacturer = (json['manufacturer'] ?? '').toString().trim();
+    if (_isValidBrand(manufacturer)) {
+      return manufacturer;
+    }
+
+    final brandText = brandValue?.toString().trim() ?? '';
+    if (_isValidBrand(brandText)) {
+      return brandText;
     }
 
     return 'Unknown brand';
   }
 
-  static bool _isValidBrandText(String value) {
+  static bool _isValidBrand(String value) {
     if (value.isEmpty || value.toLowerCase() == 'null') {
       return false;
     }
-    return !_looksLikeMongoId(value);
+    return !RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(value);
   }
 
-  static bool _looksLikeMongoId(String value) {
-    final regex = RegExp(r'^[a-fA-F0-9]{24}$');
-    return regex.hasMatch(value);
+  static bool _isValidBrandId(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty || text.toLowerCase() == 'null') {
+      return false;
+    }
+    return RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(text);
   }
 
   /// Convert to JSON
@@ -158,7 +176,9 @@ class ProductModel {
       'slug': slug,
       'defaultVariantId': defaultVariantId,
       'name': name,
+      'brandId': brandId,
       'brand': brand,
+      'categoryName': categoryName,
       'description': description,
       'price': price,
       'maxPrice': maxPrice,

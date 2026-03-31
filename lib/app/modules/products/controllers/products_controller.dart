@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/api_exception.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../home/models/product_model.dart';
 import '../models/products_query.dart';
@@ -161,13 +162,40 @@ class ProductsController extends GetxController {
       );
     }
 
-    return _productRepository.filterProducts(
-      category: _queryCategory(),
-      brand: filterState.value.selectedBrand ?? _queryBrand(),
-      minDiscount: _resolveMinDiscount(filterState.value.discountMode),
-      page: page,
-      limit: pageSize.value,
-    );
+    final brandQuery = filterState.value.selectedBrand ?? _queryBrand();
+
+    try {
+      return await _productRepository.filterProducts(
+        category: _queryCategory(),
+        brand: brandQuery,
+        minDiscount: _resolveMinDiscount(filterState.value.discountMode),
+        page: page,
+        limit: pageSize.value,
+      );
+    } on ApiException catch (error) {
+      final titleBrand = query.title.trim();
+      final canRetryWithTitle =
+          query.type == ProductListingType.brand &&
+          filterState.value.selectedBrand == null &&
+          titleBrand.isNotEmpty &&
+          (brandQuery ?? '').trim() != titleBrand;
+
+      if (!canRetryWithTitle) {
+        rethrow;
+      }
+
+      AppLogger.warning(
+        'Brand query fallback: retrying /products with title brand after ${error.statusCode}',
+      );
+
+      return _productRepository.filterProducts(
+        category: _queryCategory(),
+        brand: titleBrand,
+        minDiscount: _resolveMinDiscount(filterState.value.discountMode),
+        page: page,
+        limit: pageSize.value,
+      );
+    }
   }
 
   Future<void> _loadFilterOptions() async {

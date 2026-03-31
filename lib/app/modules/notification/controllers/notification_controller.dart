@@ -11,10 +11,18 @@ class NotificationController extends GetxController {
   final isLoading = false.obs;
   final NotificationRepository _notificationRepository;
 
+  bool _didAutoMarkOnView = false;
+
   @override
   void onInit() {
     super.onInit();
     loadNotifications();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
+    _autoMarkAllOnView();
   }
 
   Future<void> loadNotifications() async {
@@ -102,6 +110,24 @@ class NotificationController extends GetxController {
       await _notificationRepository.deleteNotification(id);
     } catch (_) {
       // Keep optimistic UI update.
+    }
+  }
+
+  Future<void> _autoMarkAllOnView() async {
+    if (_didAutoMarkOnView) {
+      return;
+    }
+    _didAutoMarkOnView = true;
+
+    if (isLoading.value) {
+      await Future.doWhile(() async {
+        await Future.delayed(const Duration(milliseconds: 120));
+        return isLoading.value;
+      });
+    }
+
+    if (notifications.any((n) => !n.isRead)) {
+      await markAllAsRead();
     }
   }
 

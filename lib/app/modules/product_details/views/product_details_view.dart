@@ -200,13 +200,29 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             children: [
               // Name
               Expanded(
-                child: Text(
-                  controller.product.name,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                    color: Color(0xFF01060F),
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      controller.product.name,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF01060F),
+                      ),
+                    ),
+                    if (controller.product.categoryName.trim().isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'Category: ${controller.product.categoryName}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xB301060F),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
               const SizedBox(width: 16),
@@ -394,12 +410,17 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               ),
               GestureDetector(
                 onTap: () {
+                  final brandKeyword =
+                      (controller.product.brandId ?? '').trim().isNotEmpty
+                          ? controller.product.brandId!
+                          : controller.product.brand;
+
                   Get.toNamed(
                     Routes.PRODUCTS,
                     arguments: ProductsQuery(
                       type: ProductListingType.brand,
                       title: controller.product.brand,
-                      keyword: controller.product.brand
+                      keyword: brandKeyword,
                     ),
                   );
                 },
@@ -537,10 +558,3 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     );
   }
 }
-
-
-
-
-
-
-

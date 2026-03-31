@@ -63,7 +63,6 @@ class ProductRepository {
       if (limit != null) 'limit': limit,
     };
 
-    // Postman contract guaranteed keys for `/products` filtering.
     final strictParams = <String, dynamic>{
       if (category != null && category.trim().isNotEmpty)
         'category': category.trim(),
@@ -79,14 +78,18 @@ class ProductRepository {
       );
       return _extractProducts(response);
     } on ApiException catch (error) {
-      // Strict servers may reject extra query params like page/limit/minDiscount.
-      if (error.statusCode == 400) {
+      // Some environments return 500 when optional filters/pagination are present.
+      final shouldTryStrict = error.statusCode == 400 ||
+          (error.statusCode != null && error.statusCode! >= 500);
+
+      if (shouldTryStrict) {
         final fallback = await _api.getData(
           '/products',
           query: strictParams.isEmpty ? null : strictParams,
         );
         return _extractProducts(fallback);
       }
+
       rethrow;
     }
   }

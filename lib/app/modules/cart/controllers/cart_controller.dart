@@ -233,7 +233,13 @@ class CartController extends GetxController {
       name: current.name.trim().isNotEmpty && current.name.trim().toLowerCase() != 'product'
           ? current.name
           : cached.name,
+      brandId: (current.brandId != null && current.brandId!.trim().isNotEmpty)
+          ? current.brandId
+          : cached.brandId,
       brand: current.brand.trim().isNotEmpty ? current.brand : cached.brand,
+      categoryName: current.categoryName.trim().isNotEmpty
+          ? current.categoryName
+          : cached.categoryName,
       description: current.description ?? cached.description,
       price: current.price > 0 ? current.price : cached.price,
       maxPrice: current.maxPrice ?? cached.maxPrice,
