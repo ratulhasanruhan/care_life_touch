@@ -37,7 +37,7 @@ class AuthController extends GetxController {
   final Rx<File?> drugLicenseImage = Rx<File?>(null);
   final Rx<File?> tradeLicenseImage = Rx<File?>(null);
   final Rx<File?> nidImage = Rx<File?>(null);
-  final Rx<File?> shopImage = Rx<File?>(null);
+  final shopImages = <File>[].obs;
 
   // Image picker
   final ImagePicker _picker = ImagePicker();
@@ -181,9 +181,7 @@ class AuthController extends GetxController {
       final uploadedNid = nidImage.value == null
           ? null
           : await _authRepository.uploadImage(nidImage.value!);
-      final uploadedShop = shopImage.value == null
-          ? null
-          : await _authRepository.uploadImage(shopImage.value!);
+      final uploadedShopImages = await _resolveUploads(shopImages);
 
       final response = await _authRepository.registerBuyer(
         shopName: shopNameController.text,
@@ -194,7 +192,7 @@ class AuthController extends GetxController {
         drugLicense: uploadedDrugLicense,
         tradeLicense: uploadedTradeLicense,
         nidImage: uploadedNid,
-        shopImages: uploadedShop == null ? null : [uploadedShop],
+        shopImages: uploadedShopImages.isEmpty ? null : uploadedShopImages,
       );
 
       _pendingAccountId = _extractAccountId(response);
@@ -580,7 +578,7 @@ class AuthController extends GetxController {
             nidImage.value = imageFile;
             break;
           case 'shop':
-            shopImage.value = imageFile;
+            shopImages.add(imageFile);
             break;
         }
 
@@ -661,6 +659,29 @@ class AuthController extends GetxController {
     );
   }
 
+  Future<List<String>> _resolveUploads(List<File> files) async {
+    if (files.isEmpty) {
+      return const [];
+    }
+
+    final uploaded = <String>[];
+    for (final file in files) {
+      if (file.path.startsWith('http://') || file.path.startsWith('https://')) {
+        uploaded.add(file.path);
+      } else {
+        uploaded.add(await _authRepository.uploadImage(file));
+      }
+    }
+    return uploaded;
+  }
+
+  void removeShopImageAt(int index) {
+    if (index < 0 || index >= shopImages.length) {
+      return;
+    }
+    shopImages.removeAt(index);
+  }
+
   /// Remove image
   void removeImage(String imageType) {
     switch (imageType) {
@@ -674,7 +695,7 @@ class AuthController extends GetxController {
         nidImage.value = null;
         break;
       case 'shop':
-        shopImage.value = null;
+        shopImages.clear();
         break;
     }
     AppLogger.info('Image removed: $imageType');

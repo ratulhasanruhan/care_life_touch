@@ -172,11 +172,7 @@ class RegisterView extends GetView<AuthController> {
                 const SizedBox(height: 16),
 
                 // Shop Image Upload
-                _buildDocumentUploadSection(
-                  title: 'Shop Image',
-                  imageType: 'shop',
-                  imageFile: controller.shopImage,
-                ),
+                _buildShopImagesSection(),
                 const SizedBox(height: 24),
 
                 // Register button (inside scrollable content)
@@ -336,4 +332,111 @@ class RegisterView extends GetView<AuthController> {
       ],
     );
   }
+
+  /// Build shop images section
+  Widget _buildShopImagesSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Shop Image',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.43,
+            color: Color(0xFF01060F),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(() {
+          final items = controller.shopImages;
+
+          return Column(
+            children: [
+              SizedBox(
+                height: 112,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: items.length + 1,
+                  separatorBuilder: (_, __) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    if (index == items.length) {
+                      return GestureDetector(
+                        onTap: () => controller.pickImage('shop'),
+                        child: Container(
+                          width: 112,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFFAFAFA),
+                            border: Border.all(color: const Color(0xFFE8EAE8)),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.add,
+                            color: Color(0xFF064E36),
+                            size: 28,
+                          ),
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      width: 112,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFAFAFA),
+                        border: Border.all(color: const Color(0xFFE8EAE8)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.file(
+                              items[index],
+                              width: 112,
+                              height: 112,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          Positioned(
+                            top: 6,
+                            right: 6,
+                            child: GestureDetector(
+                              onTap: () => controller.removeShopImageAt(index),
+                              child: Container(
+                                padding: const EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: Colors.red,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Icon(
+                                  Icons.close,
+                                  color: Colors.white,
+                                  size: 14,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
+              if (items.isEmpty) ...[
+                const SizedBox(height: 8),
+                const Text(
+                  'Upload one or more shop images',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Color(0xB30A0A0A),
+                  ),
+                ),
+              ],
+            ],
+          );
+        }),
+      ],
+    );
+  }
 }
+

@@ -11,12 +11,13 @@ class AddAddressView extends GetView<AddressController> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.hydrateFormFromArguments();
       controller.ensureLocationBootstrapped();
     });
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Address'),
+        title: Obx(() => Text(controller.isEditMode.value ? 'Update Address' : 'Add New Address')),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
@@ -73,6 +74,7 @@ class AddAddressView extends GetView<AddressController> {
                           _buildTextField(
                             label: 'Recipient Name',
                             placeholder: 'Enter full name',
+                            textController: controller.recipientNameController,
                             onChanged: (value) => controller.recipientName.value = value,
                           ),
                           const SizedBox(height: 16),
@@ -82,6 +84,7 @@ class AddAddressView extends GetView<AddressController> {
                             label: 'Recipient Phone Number',
                             placeholder: 'Enter phone number',
                             keyboardType: TextInputType.phone,
+                            textController: controller.recipientPhoneController,
                             onChanged: (value) => controller.recipientPhone.value = value,
                           ),
                         ],
@@ -116,9 +119,9 @@ class AddAddressView extends GetView<AddressController> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text(
-                                    'Confirm',
-                                    style: TextStyle(
+                                : Text(
+                                    controller.isEditMode.value ? 'Update' : 'Confirm',
+                                    style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 14,
                                       fontWeight: FontWeight.w500,
@@ -141,6 +144,7 @@ class AddAddressView extends GetView<AddressController> {
   Widget _buildTextField({
     required String label,
     required String placeholder,
+    required TextEditingController textController,
     TextInputType keyboardType = TextInputType.text,
     required Function(String) onChanged,
   }) {
@@ -156,6 +160,7 @@ class AddAddressView extends GetView<AddressController> {
         ),
         const SizedBox(height: 8),
         TextField(
+          controller: textController,
           keyboardType: keyboardType,
           onChanged: onChanged,
           decoration: InputDecoration(

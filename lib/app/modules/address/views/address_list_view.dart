@@ -2,6 +2,7 @@ import 'package:care_life_touch/app/global_widgets/primary_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/address_controller.dart';
+import 'routes.dart';
 
 class AddressListView extends GetView<AddressController> {
   const AddressListView({super.key});
@@ -31,7 +32,7 @@ class AddressListView extends GetView<AddressController> {
                 const Text('No addresses saved yet'),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
-                  onPressed: () => Get.toNamed('/addresses/add')?.then((_) => controller.loadAddresses()),
+                  onPressed: () => Get.toNamed(AddressRoutes.addAddress)?.then((_) => controller.loadAddresses()),
                   icon: const Icon(Icons.add),
                   label: const Text('Add Address'),
                   style: ElevatedButton.styleFrom(
@@ -83,27 +84,63 @@ class AddressListView extends GetView<AddressController> {
                             ),
                           ),
                           if (!isPickerMode)
-                            PopupMenuButton(
+                            PopupMenuButton<String>(
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  controller.editAddress(address);
+                                } else if (value == 'default') {
+                                  controller.setDefaultAddress(address.id);
+                                } else if (value == 'delete') {
+                                  controller.deleteAddress(address.id);
+                                }
+                              },
                               itemBuilder: (context) => [
-                                PopupMenuItem(
-                                  child: const Text('Edit'),
-                                  onTap: () => controller.editAddress(address),
+                                const PopupMenuItem<String>(
+                                  value: 'edit',
+                                  child: Text('Edit'),
                                 ),
-                                PopupMenuItem(
-                                  child: const Text('Delete'),
-                                  onTap: () => controller.deleteAddress(address.id),
+                                if (!address.isDefault)
+                                  const PopupMenuItem<String>(
+                                    value: 'default',
+                                    child: Text('Set as Default'),
+                                  ),
+                                const PopupMenuItem<String>(
+                                  value: 'delete',
+                                  child: Text('Delete'),
                                 ),
                               ],
                             ),
                         ],
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        address.fullAddress.split(',').first,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 16,
-                        ),
+                      Row(
+                        children: [
+                          Text(
+                            address.fullAddress.split(',').first,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                          ),
+                          if (address.isDefault) ...[
+                            const SizedBox(width: 8),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFECFDF7),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Text(
+                                'Default',
+                                style: TextStyle(
+                                  color: Color(0xFF064E36),
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ],
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -132,7 +169,7 @@ class AddressListView extends GetView<AddressController> {
         );
       }),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.toNamed('/addresses/add')?.then((_) => controller.loadAddresses()),
+        onPressed: () => Get.toNamed(AddressRoutes.addAddress)?.then((_) => controller.loadAddresses()),
         backgroundColor: const Color(0xFF064E36),
         child: const Icon(Icons.add),
       ),

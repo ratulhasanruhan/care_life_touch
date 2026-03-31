@@ -26,7 +26,7 @@ class ProfileController extends GetxController {
   final Rx<File?> drugLicenseImage = Rx<File?>(null);
   final Rx<File?> tradeLicenseImage = Rx<File?>(null);
   final Rx<File?> nidImage = Rx<File?>(null);
-  final Rx<File?> shopImage = Rx<File?>(null);
+  final shopImages = <File>[].obs;
 
   final ImagePicker _picker = ImagePicker();
   final _storage = Get.find<StorageService>();
@@ -54,7 +54,24 @@ class ProfileController extends GetxController {
     _setImageFromPath(user['drugLicenseImage'], drugLicenseImage);
     _setImageFromPath(user['tradeLicenseImage'], tradeLicenseImage);
     _setImageFromPath(user['nidImage'], nidImage);
-    _setImageFromPath(user['shopImage'] ?? user['profileImage'], shopImage);
+
+    shopImages.clear();
+    final dynamic rawShopImages = user['shopImages'];
+    if (rawShopImages is List) {
+      for (final item in rawShopImages) {
+        final path = (item ?? '').toString().trim();
+        if (path.isNotEmpty) {
+          shopImages.add(File(path));
+        }
+      }
+    }
+
+    if (shopImages.isEmpty) {
+      final legacyPath = (user['shopImage'] ?? user['profileImage'] ?? '').toString().trim();
+      if (legacyPath.isNotEmpty) {
+        shopImages.add(File(legacyPath));
+      }
+    }
   }
 
   void _setImageFromPath(dynamic path, Rx<File?> target) {
@@ -224,13 +241,13 @@ class ProfileController extends GetxController {
       final existingUser = _storage.getUser() ?? <String, dynamic>{};
 
       final uploadedNid = await _resolveUpload(nidImage.value);
-      final uploadedShop = await _resolveUpload(shopImage.value);
+      final uploadedShopImages = await _resolveUploads(shopImages);
 
       await _authRepository.updateBuyerProfile(
         shopName: shopNameController.text.trim(),
         fullName: ownerNameController.text.trim(),
         nidImage: uploadedNid,
-        shopImages: uploadedShop == null ? null : [uploadedShop],
+        shopImages: uploadedShopImages.isEmpty ? null : uploadedShopImages,
       );
 
       final latestUser = await _authRepository.accessMe();
@@ -242,7 +259,12 @@ class ProfileController extends GetxController {
         'phone': phoneController.text.trim(),
         'email': emailController.text.trim(),
         'nidImage': uploadedNid ?? existingUser['nidImage'],
-        'shopImage': uploadedShop ?? existingUser['shopImage'],
+        'shopImages': uploadedShopImages.isEmpty
+            ? (existingUser['shopImages'] ?? const <String>[])
+            : uploadedShopImages,
+        'shopImage': uploadedShopImages.isEmpty
+            ? existingUser['shopImage']
+            : uploadedShopImages.first,
         'updatedAt': DateTime.now().toIso8601String(),
       });
 
@@ -298,6 +320,22 @@ class ProfileController extends GetxController {
     return _authRepository.uploadImage(file);
   }
 
+  Future<List<String>> _resolveUploads(List<File> files) async {
+    if (files.isEmpty) {
+      return const [];
+    }
+
+    final uploaded = <String>[];
+    for (final file in files) {
+      if (file.path.startsWith('http://') || file.path.startsWith('https://')) {
+        uploaded.add(file.path);
+      } else {
+        uploaded.add(await _authRepository.uploadImage(file));
+      }
+    }
+    return uploaded;
+  }
+
   Future<void> pickImage(String imageType) async {
     try {
       final source = await _showImageSourceBottomSheet();
@@ -328,7 +366,7 @@ class ProfileController extends GetxController {
           nidImage.value = imageFile;
           break;
         case 'shop':
-          shopImage.value = imageFile;
+          shopImages.add(imageFile);
           break;
       }
 
@@ -401,6 +439,13 @@ class ProfileController extends GetxController {
     );
   }
 
+  void removeShopImageAt(int index) {
+    if (index < 0 || index >= shopImages.length) {
+      return;
+    }
+    shopImages.removeAt(index);
+  }
+
   void removeImage(String imageType) {
     switch (imageType) {
       case 'drug_license':
@@ -413,7 +458,7 @@ class ProfileController extends GetxController {
         nidImage.value = null;
         break;
       case 'shop':
-        shopImage.value = null;
+        shopImages.clear();
         break;
     }
   }

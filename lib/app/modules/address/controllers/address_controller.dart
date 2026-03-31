@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter/material.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/repositories/address_repository.dart';
 import '../../../services/map_service.dart';
+import '../views/routes.dart';
 
 class AddressController extends GetxController {
   late final AddressRepository addressRepository;
@@ -38,6 +40,12 @@ class AddressController extends GetxController {
   final recipientPhone = ''.obs;
   final addressText = ''.obs;
 
+  final recipientNameController = TextEditingController();
+  final recipientPhoneController = TextEditingController();
+  final editingAddressId = RxnString();
+  final isEditMode = false.obs;
+  bool _formHydrated = false;
+
   bool _locationBootstrapped = false;
 
   @override
@@ -45,6 +53,13 @@ class AddressController extends GetxController {
     super.onInit();
     addressRepository = Get.find<AddressRepository>();
     loadAddresses();
+  }
+
+  @override
+  void onClose() {
+    recipientNameController.dispose();
+    recipientPhoneController.dispose();
+    super.onClose();
   }
 
   void ensureLocationBootstrapped() {
@@ -186,7 +201,9 @@ class AddressController extends GetxController {
 
   /// Save new address
   Future<void> saveAddress() async {
-    if (recipientName.isEmpty || recipientPhone.isEmpty || addressText.isEmpty) {
+    if (recipientNameController.text.trim().isEmpty ||
+        recipientPhoneController.text.trim().isEmpty ||
+        addressText.value.trim().isEmpty) {
       Get.snackbar('Error', 'Please fill all fields');
       return;
     }
@@ -196,39 +213,68 @@ class AddressController extends GetxController {
 
       final coordinates = [currentLng.value, currentLat.value];
       final hasValidCoordinates = currentLat.value != 0.0 || currentLng.value != 0.0;
+      final payloadCoordinates = hasValidCoordinates ? coordinates : const [90.4125, 23.8103];
 
-      final newAddress = await addressRepository.addAddress(
-        addressType: selectedAddressType.value,
-        fullAddress: addressText.value,
-        formattedAddress: addressText.value,
-        coordinates: hasValidCoordinates ? coordinates : const [90.4125, 23.8103],
-      );
+      final isEditing = isEditMode.value && editingAddressId.value != null;
+      final AddressModel saved;
 
-      addresses.insert(0, newAddress);
+      if (isEditing) {
+        saved = await addressRepository.updateAddress(
+          addressId: editingAddressId.value!,
+          addressType: selectedAddressType.value,
+          fullAddress: addressText.value,
+          formattedAddress: addressText.value,
+          coordinates: payloadCoordinates,
+        );
+
+        final index = addresses.indexWhere((addr) => addr.id == saved.id);
+        if (index != -1) {
+          addresses[index] = saved;
+          addresses.refresh();
+        }
+      } else {
+        saved = await addressRepository.addAddress(
+          addressType: selectedAddressType.value,
+          fullAddress: addressText.value,
+          formattedAddress: addressText.value,
+          coordinates: payloadCoordinates,
+        );
+        addresses.insert(0, saved);
+      }
+
+      await loadAddresses();
 
       clearForm();
-      Get.back(result: newAddress);
-      Get.snackbar('Success', 'Address saved successfully');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to save address');
+      Get.back(result: saved);
+      Get.snackbar('Success', isEditing ? 'Address updated successfully' : 'Address saved successfully');
+    } catch (_) {
+      Get.snackbar('Error', isEditMode.value ? 'Failed to update address' : 'Failed to save address');
     } finally {
       isLoading.value = false;
     }
   }
 
-  /// Delete address
-  Future<void> deleteAddress(String addressId) async {
+  Future<void> setDefaultAddress(String addressId) async {
     try {
       isLoading.value = true;
+      await addressRepository.setDefaultAddress(addressId);
 
-      // TODO: Delete from API using addressRepository
-      // await addressRepository.deleteAddress(addressId);
+      final updated = addresses
+          .map((addr) => AddressModel(
+                id: addr.id,
+                addressType: addr.addressType,
+                fullAddress: addr.fullAddress,
+                formattedAddress: addr.formattedAddress,
+                isDefault: addr.id == addressId,
+                coordinates: addr.coordinates,
+              ))
+          .toList();
+      addresses.assignAll(updated);
+      addresses.sort((a, b) => (b.isDefault ? 1 : 0).compareTo(a.isDefault ? 1 : 0));
 
-      addresses.removeWhere((addr) => addr.id == addressId);
-
-      Get.snackbar('Success', 'Address deleted');
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to delete address');
+      Get.snackbar('Success', 'Default address updated');
+    } catch (_) {
+      Get.snackbar('Error', 'Failed to set default address');
     } finally {
       isLoading.value = false;
     }
@@ -236,19 +282,57 @@ class AddressController extends GetxController {
 
   /// Edit address
   void editAddress(AddressModel address) {
-    recipientName.value = address.fullAddress.split(',').first;
-    recipientPhone.value = '';
-    addressText.value = address.fullAddress;
+    editingAddressId.value = address.id;
+    isEditMode.value = true;
+
+    recipientNameController.text = address.fullAddress.split(',').first.trim();
+    recipientPhoneController.text = recipientPhone.value;
+    recipientName.value = recipientNameController.text;
+    recipientPhone.value = recipientPhoneController.text;
+
+    addressText.value = address.details;
     selectedAddressType.value = address.addressType;
     if (address.coordinates.length >= 2) {
       currentLng.value = address.coordinates[0];
       currentLat.value = address.coordinates[1];
     }
-    // Navigate to add address screen with edit mode
+    locationStatus.value = address.details;
+
+    Get.toNamed(AddressRoutes.addAddress, arguments: {'address': address});
+  }
+
+  void hydrateFormFromArguments() {
+    if (_formHydrated) {
+      return;
+    }
+    _formHydrated = true;
+
+    final args = Get.arguments;
+    if (args is Map && args['address'] is AddressModel) {
+      final address = args['address'] as AddressModel;
+      editingAddressId.value = address.id;
+      isEditMode.value = true;
+      recipientNameController.text = address.fullAddress.split(',').first.trim();
+      recipientPhoneController.text = '';
+      recipientName.value = recipientNameController.text;
+      recipientPhone.value = recipientPhoneController.text;
+      addressText.value = address.details;
+      selectedAddressType.value = address.addressType;
+      if (address.coordinates.length >= 2) {
+        currentLng.value = address.coordinates[0];
+        currentLat.value = address.coordinates[1];
+      }
+      locationStatus.value = address.details;
+      return;
+    }
+
+    clearForm();
   }
 
   /// Clear form
   void clearForm() {
+    recipientNameController.clear();
+    recipientPhoneController.clear();
     recipientName.value = '';
     recipientPhone.value = '';
     addressText.value = '';
@@ -256,6 +340,9 @@ class AddressController extends GetxController {
     currentLat.value = 0.0;
     currentLng.value = 0.0;
     searchResults.clear();
+    editingAddressId.value = null;
+    isEditMode.value = false;
+    _formHydrated = false;
   }
 
   /// Select address type
@@ -268,5 +355,18 @@ class AddressController extends GetxController {
     currentLng.value = lng;
     locationStatus.value = 'Resolving address...';
     getReverseGeocode(lat, lng);
+  }
+
+  Future<void> deleteAddress(String addressId) async {
+    try {
+      isLoading.value = true;
+      // TODO: wire delete API when endpoint is available.
+      addresses.removeWhere((addr) => addr.id == addressId);
+      Get.snackbar('Success', 'Address deleted');
+    } catch (_) {
+      Get.snackbar('Error', 'Failed to delete address');
+    } finally {
+      isLoading.value = false;
+    }
   }
 }
