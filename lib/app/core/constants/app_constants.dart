@@ -32,6 +32,7 @@ class AppConstants {
   static const String keyAccountId = 'account_id';
   static const String keyReferenceId = 'reference_id';
   static const String keyUserRole = 'user_role';
+  static const String keyPendingOtp = 'pending_otp';
 
   // Validation
   static const int minPasswordLength = 6;

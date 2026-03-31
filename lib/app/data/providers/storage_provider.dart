@@ -195,12 +195,12 @@ class StorageService extends GetxService {
       'identifier': identifier,
       'timestamp': DateTime.now().millisecondsSinceEpoch,
     };
-    await write('pending_otp', jsonEncode(otpData));
+    await write(AppConstants.keyPendingOtp, jsonEncode(otpData));
   }
 
   /// Get pending OTP state
   Map<String, dynamic>? getPendingOTP() {
-    final otpJson = read<String>('pending_otp');
+    final otpJson = read<String>(AppConstants.keyPendingOtp);
     if (otpJson == null || otpJson.isEmpty) {
       return null;
     }
@@ -213,6 +213,6 @@ class StorageService extends GetxService {
 
   /// Remove pending OTP state
   Future<void> removePendingOTP() async {
-    await remove('pending_otp');
+    await remove(AppConstants.keyPendingOtp);
   }
 }

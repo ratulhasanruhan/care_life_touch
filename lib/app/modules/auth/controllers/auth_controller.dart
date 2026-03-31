@@ -52,10 +52,16 @@ class AuthController extends GetxController {
   String? _pendingAccountId;
 
   @override
+  void onInit() {
+    super.onInit();
+    _tryResumePendingOtp();
+  }
+
+  @override
   void onClose() {
     nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
+    //emailController.dispose();
+    //passwordController.dispose();
     confirmPasswordController.dispose();
     otpController.dispose();
     shopNameController.dispose();
@@ -166,6 +172,12 @@ class AuthController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Registering user: ${emailController.text}');
 
+      final uploadedDrugLicense = drugLicenseImage.value == null
+          ? null
+          : await _authRepository.uploadImage(drugLicenseImage.value!);
+      final uploadedTradeLicense = tradeLicenseImage.value == null
+          ? null
+          : await _authRepository.uploadImage(tradeLicenseImage.value!);
       final uploadedNid = nidImage.value == null
           ? null
           : await _authRepository.uploadImage(nidImage.value!);
@@ -179,8 +191,8 @@ class AuthController extends GetxController {
         phone: phoneController.text,
         password: passwordController.text,
         email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
-        drugLicense: null,
-        tradeLicense: null,
+        drugLicense: uploadedDrugLicense,
+        tradeLicense: uploadedTradeLicense,
         nidImage: uploadedNid,
         shopImages: uploadedShop == null ? null : [uploadedShop],
       );
@@ -200,23 +212,10 @@ class AuthController extends GetxController {
       // Send OTP
       await sendOTP();
 
-      // Show OTP verification dialog
-      Get.dialog(
-        OTPVerificationDialog(
-          email: phoneController.text.isNotEmpty ? phoneController.text : emailController.text,
-          onVerify: (pin) async {
-            otpController.text = pin;
-            await verifyRegistrationOTP();
-          },
-          onResend: () async {
-            otpController.clear();
-            await resendOTP();
-          },
-          resendTimer: resendTimer,
-          isLoading: isLoading,
-          otpLength: 6,
-        ),
-        barrierDismissible: false,
+      _showOtpDialog(
+        identifier: phoneController.text.isNotEmpty
+            ? phoneController.text
+            : emailController.text,
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
@@ -399,6 +398,65 @@ class AuthController extends GetxController {
     } catch (e) {
       _showError(_resolveErrorMessage(e, fallback: 'Failed to resend OTP'));
     }
+  }
+
+  void _showOtpDialog({required String identifier}) {
+    Get.dialog(
+      OTPVerificationDialog(
+        email: identifier,
+        onVerify: (pin) async {
+          otpController.text = pin;
+          await verifyRegistrationOTP();
+        },
+        onResend: () async {
+          otpController.clear();
+          await resendOTP();
+        },
+        resendTimer: resendTimer,
+        isLoading: isLoading,
+        otpLength: 6,
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  void _tryResumePendingOtp() {
+    final args = Get.arguments;
+    Map<String, dynamic>? pending;
+
+    if (args is Map && args['resumePending'] == true && args['pending'] is Map) {
+      pending = Map<String, dynamic>.from(args['pending'] as Map);
+    } else {
+      pending = _storage.getPendingOTP();
+    }
+
+    if (pending == null) {
+      return;
+    }
+
+    final accountId = (pending['accountId'] ?? '').toString().trim();
+    final identifier = (pending['identifier'] ?? '').toString().trim();
+
+    if (accountId.isEmpty || identifier.isEmpty) {
+      _storage.removePendingOTP();
+      return;
+    }
+
+    _pendingAccountId = accountId;
+
+    if (identifier.contains('@')) {
+      emailController.text = identifier;
+    } else {
+      phoneController.text = identifier;
+      emailController.text = '';
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!(Get.isDialogOpen ?? false)) {
+        resendTimer.value = 0;
+        _showOtpDialog(identifier: identifier);
+      }
+    });
   }
 
   String? _extractAccountId(Map<String, dynamic> response) {

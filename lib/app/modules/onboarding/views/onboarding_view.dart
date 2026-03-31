@@ -78,7 +78,7 @@ class OnboardingView extends GetView<OnboardingController> {
                       onPressed: controller.nextPage,
                     ),
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 22),
 
                     // Terms and Privacy Text
                     TermsRichText(
