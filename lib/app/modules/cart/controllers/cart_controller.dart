@@ -288,18 +288,14 @@ class CartController extends GetxController {
 
   /// Convert cart items to order format
   List<Map<String, dynamic>> toOrderItems() {
-    return cartItems.map((item) {
-      return <String, dynamic>{
-        'productId': item.productId,
-        'variantId': item.variantId ?? '',
-        'quantity': item.quantity,
-        'unitPrice': item.unitPrice,
-        'totalPrice': item.totalPrice,
-        'name': item.product.name,
-        'brand': item.product.brand,
-        'image': item.product.imagePath,
-      };
-    }).toList();
+    return cartItems
+        .where((item) => (item.variantId ?? '').trim().isNotEmpty)
+        .map((item) => <String, dynamic>{
+              'productId': item.productId,
+              'variantId': (item.variantId ?? '').trim(),
+              'quantity': item.quantity,
+            })
+        .toList();
   }
 }
 

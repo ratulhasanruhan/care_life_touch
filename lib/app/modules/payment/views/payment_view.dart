@@ -100,20 +100,13 @@ class PaymentView extends GetView<PaymentController> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Recommended Methods Section
+
                   const Text(
-                    'Recommended Methods',
+                    'Payment Method',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
                   ),
                   const SizedBox(height: 12),
-                  ...controller.methods.where((m) => m.isRecommended).map(_buildMethodTile),
-                  const SizedBox(height: 20),
-                  const Text(
-                    'Others Payment Methods',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                  ),
-                  const SizedBox(height: 12),
-                  ...controller.methods.where((m) => !m.isRecommended).map(_buildMethodTile),
+                  _buildCodTile(),
                 ],
               ),
             ),
@@ -124,43 +117,23 @@ class PaymentView extends GetView<PaymentController> {
     );
   }
 
-  Widget _buildMethodTile(PaymentMethodOption method) {
-    return Obx(() {
-      final selected = controller.selectedMethodKey.value == method.key;
-
-      return Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: selected ? const Color(0xFF064E36) : const Color(0xFFE8EAE8)),
-          borderRadius: BorderRadius.circular(4),
+  Widget _buildCodTile() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: const Color(0xFF064E36)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: const ListTile(
+        dense: true,
+        leading: Icon(Icons.payments_outlined, color: Color(0xFF064E36), size: 22),
+        title: Text(
+          'Cash on Delivery (COD)',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF191930)),
         ),
-        child: ListTile(
-          onTap: () => controller.selectMethod(method.key),
-          dense: true,
-          leading: SizedBox(
-            width: 22,
-            height: 22,
-            child: Image.asset(
-              method.iconAsset,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const Icon(
-                Icons.account_balance_wallet,
-                color: Color(0xFF191930),
-                size: 20,
-              ),
-            ),
-          ),
-          title: Text(
-            method.label,
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF191930)),
-          ),
-          trailing: selected
-              ? const Icon(Icons.check_circle, color: Color(0xFF064E36), size: 20)
-              : const Icon(Icons.chevron_right, color: Color(0xFF01060F), size: 20),
-        ),
-      );
-    });
+        trailing: Icon(Icons.check_circle, color: Color(0xFF064E36), size: 20),
+      ),
+    );
   }
 
   Widget _buildBottomSummary() {

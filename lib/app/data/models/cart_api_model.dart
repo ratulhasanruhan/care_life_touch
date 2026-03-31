@@ -26,7 +26,9 @@ class CartApiItem {
         _mapValue(json['productDetails']) ??
         _mapValue(json['snapshot']) ??
         <String, dynamic>{};
-    final variantMap = _mapValue(json['variant']) ?? _mapValue(json['selectedVariant']);
+
+    final rawVariant = json['variant'];
+    final variantMap = _mapValue(rawVariant) ?? _mapValue(json['selectedVariant']);
 
     final productId = (json['productId'] is String || json['productId'] is num)
         ? json['productId'].toString()
@@ -34,11 +36,18 @@ class CartApiItem {
             ? json['product'].toString()
             : (_extractString(productMap, const ['_id', 'id', 'productId']) ?? '');
 
+    final variantIdText = (json['variantId'] is String || json['variantId'] is num)
+        ? json['variantId'].toString()
+        : (rawVariant is String || rawVariant is num)
+            ? rawVariant.toString()
+            : (_extractString(variantMap ?? const <String, dynamic>{}, const ['_id', 'id']) ?? '');
+
     final normalizedProduct = _normalizeCartProduct(
       root: json,
       productMap: productMap,
       variantMap: variantMap,
       fallbackProductId: productId,
+      rawVariantId: variantIdText,
     );
 
     final product = ProductModel.fromJson(normalizedProduct);
@@ -46,8 +55,11 @@ class CartApiItem {
     final resolvedProductId = productId.isNotEmpty
         ? productId
         : (product.id.isNotEmpty ? product.id : (normalizedProduct['_id'] ?? normalizedProduct['id'] ?? '').toString());
-    final variantId = (json['variantId'] ?? variantMap?['_id'] ?? variantMap?['id'] ?? product.defaultVariantId)
-        ?.toString();
+    final variantId = variantIdText.isNotEmpty
+        ? variantIdText
+        : (product.defaultVariantId ?? '').trim().isEmpty
+            ? null
+            : product.defaultVariantId;
 
     final unitPrice = _asDouble(
           json['unitPrice'] ??
@@ -185,6 +197,7 @@ Map<String, dynamic> _normalizeCartProduct({
   required Map<String, dynamic> productMap,
   required Map<String, dynamic>? variantMap,
   required String fallbackProductId,
+  required String rawVariantId,
 }) {
   final result = <String, dynamic>{
     ...productMap,
@@ -195,9 +208,11 @@ Map<String, dynamic> _normalizeCartProduct({
       _extractString(root, const ['name', 'productName', 'title', 'product_title']) ??
       'Product';
 
-  final brand = _extractString(result, const ['brandName', 'manufacturer']) ??
-      _extractString(root, const ['brandName', 'brand', 'manufacturer']) ??
-      (result['brand'] is Map ? _extractString(_mapValue(result['brand']) ?? const {}, const ['name']) : null) ??
+  final brand = (result['brand'] is Map
+          ? _extractString(_mapValue(result['brand']) ?? const {}, const ['name', 'brandName'])
+          : null) ??
+      _extractString(result, const ['brandName', 'manufacturer', 'genericName']) ??
+      _extractString(root, const ['brandName', 'manufacturer', 'genericName']) ??
       '';
 
   final imageUrl = _extractString(result, const ['thumbnail', 'image', 'imagePath', 'imageUrl', 'productImage']) ??
@@ -207,6 +222,11 @@ Map<String, dynamic> _normalizeCartProduct({
       _asDouble(variantMap?['finalPrice'] ?? variantMap?['price']) ??
       _asDouble(root['unitPrice'] ?? root['price'] ?? root['finalPrice']) ??
       0;
+
+  final resolvedUnit = _extractString(
+    variantMap ?? const <String, dynamic>{},
+    const ['unit', 'packSize'],
+  ) ?? _extractString(root, const ['unit']);
 
   result['_id'] = id;
   result['id'] = id;
@@ -220,12 +240,19 @@ Map<String, dynamic> _normalizeCartProduct({
     result['imagePath'] = imageUrl;
   }
 
-  if (variantMap != null && variantMap.isNotEmpty) {
-    final variantId = _extractString(variantMap, const ['_id', 'id']);
+  final normalizedVariantMap = <String, dynamic>{
+    ...?variantMap,
+    if (rawVariantId.trim().isNotEmpty) '_id': rawVariantId.trim(),
+    if (resolvedUnit != null && resolvedUnit.isNotEmpty) 'unit': resolvedUnit,
+    if (resolvedPrice > 0) 'price': resolvedPrice,
+  };
+
+  if (normalizedVariantMap.isNotEmpty) {
+    final variantId = _extractString(normalizedVariantMap, const ['_id', 'id']);
     if (variantId != null && variantId.isNotEmpty) {
       result['defaultVariantId'] = variantId;
     }
-    result['variants'] = <Map<String, dynamic>>[variantMap];
+    result['variants'] = <Map<String, dynamic>>[normalizedVariantMap];
   }
 
   return result;

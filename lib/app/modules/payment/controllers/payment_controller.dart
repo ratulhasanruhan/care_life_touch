@@ -29,33 +29,20 @@ class PaymentController extends GetxController {
   late final CartController cartController;
 
   final isProcessing = false.obs;
-  final selectedMethodKey = 'card'.obs;
+  final selectedMethodKey = 'cod'.obs;
   final selectedDeliveryShift = 'morning'.obs;
+
+  static const String codMethodKey = 'cod';
 
   late final String addressId;
   late final String shippingAddress;
 
   final methods = const <PaymentMethodOption>[
     PaymentMethodOption(
-      key: 'card',
-      label: 'Credit/Debit Card',
+      key: codMethodKey,
+      label: 'Cash on Delivery (COD)',
       iconAsset: 'assets/images/card.png',
       isRecommended: true,
-    ),
-    PaymentMethodOption(
-      key: 'bkash',
-      label: 'Bkash',
-      iconAsset: 'assets/images/bkash.png',
-    ),
-    PaymentMethodOption(
-      key: 'nagad',
-      label: 'Nagad',
-      iconAsset: 'assets/images/nagad.png',
-    ),
-    PaymentMethodOption(
-      key: 'rocket',
-      label: 'Rocket',
-      iconAsset: 'assets/images/rocket.png',
     ),
   ];
 
@@ -78,7 +65,8 @@ class PaymentController extends GetxController {
   double get total => cartController.total;
 
   void selectMethod(String key) {
-    selectedMethodKey.value = key;
+    // Payment is fixed to COD.
+    selectedMethodKey.value = codMethodKey;
   }
 
   void selectDeliveryShift(String shift) {
@@ -118,7 +106,7 @@ class PaymentController extends GetxController {
         items: orderItems,
         addressId: addressId,
         deliveryShift: selectedDeliveryShift.value,
-        paymentMethod: selectedMethodKey.value,
+        paymentMethod: codMethodKey,
       );
 
       await cartController.clearCart();

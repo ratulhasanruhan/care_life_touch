@@ -1351,7 +1351,100 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Add to Cart",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"productId\": \"69b231cfb3f3a8710005072b\",\r\n    \"variantId\": \"69b231cfb3f3a8710005072c\",\r\n    \"quantity\": 10\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{Server}}/cart-add",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "cart-add"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Tue, 31 Mar 2026 15:34:59 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"bd-+jkB9QrBC75TI5TpKnCJGF9AWYc\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"items\": [\n        {\n            \"product\": \"69b231cfb3f3a8710005072b\",\n            \"variant\": \"69b231cfb3f3a8710005072c\",\n            \"unit\": \"1 Strip (10 Tablet)\",\n            \"quantity\": 10,\n            \"price\": 20,\n            \"_id\": \"69cbe9a33252f80912323e42\"\n        }\n    ]\n}"
+            }
+          ]
         },
         {
           "name": "Cart",
@@ -1368,7 +1461,91 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Cart",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/cart",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "cart"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Tue, 31 Mar 2026 15:35:07 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"36d-0S6MntbCurEtxOiDrHBQOplnpy4\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"items\": [\n        {\n            \"product\": {\n                \"discount\": {\n                    \"kind\": null,\n                    \"value\": 0\n                },\n                \"_id\": \"69b231cfb3f3a8710005072b\",\n                \"name\": \"Napa Tablet\",\n                \"slug\": \"napa-tablet-mmn5ihx8\",\n                \"price\": 2,\n                \"genericName\": \"Paracetamol\",\n                \"dosageForm\": \"tablet\",\n                \"variants\": [\n                    {\n                        \"unit\": \"1 Strip (10 Tablet)\",\n                        \"stock\": 98,\n                        \"sku\": \"NAPA-STRIP\",\n                        \"price\": 20,\n                        \"_id\": \"69b231cfb3f3a8710005072c\"\n                    },\n                    {\n                        \"unit\": \"1 Box (100 Tablet)\",\n                        \"stock\": 200,\n                        \"sku\": \"NAPA-BOX\",\n                        \"price\": 180,\n                        \"_id\": \"69b231cfb3f3a8710005072d\"\n                    }\n                ],\n                \"images\": [\n                    {\n                        \"url\": \"https://arhamsahirkhan.com/uploads/1773285680466-napa.jpg\",\n                        \"alt\": \"\",\n                        \"isDefault\": true,\n                        \"_id\": \"69b231cfb3f3a8710005072e\"\n                    },\n                    {\n                        \"url\": \"https://arhamsahirkhan.com/uploads/1773285690606-n-03.jpg\",\n                        \"alt\": \"\",\n                        \"isDefault\": false,\n                        \"_id\": \"69b231cfb3f3a8710005072f\"\n                    }\n                ],\n                \"stockStatus\": \"in-stock\",\n                \"freeDelivery\": false\n            },\n            \"variant\": \"69b231cfb3f3a8710005072c\",\n            \"unit\": \"1 Strip (10 Tablet)\",\n            \"quantity\": 10,\n            \"price\": 20,\n            \"_id\": \"69cbe9a33252f80912323e42\"\n        }\n    ]\n}"
+            }
+          ]
         },
         {
           "name": "Update Cart",
@@ -1377,7 +1554,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n    \"itemId\": \"69b23794b3f3a87100050856\",\r\n    \"quantity\": 15\r\n}",
+              "raw": "{\r\n    \"itemId\": \"69cbe9a33252f80912323e42\",\r\n    \"quantity\": 15\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1394,7 +1571,100 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Update Cart",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"itemId\": \"69cbe9a33252f80912323e42\",\r\n    \"quantity\": 15\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{Server}}/cart-update",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "cart-update"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Tue, 31 Mar 2026 15:36:40 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"bd-atRRIzdZLn86zuEOHXwA+PsDB2I\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"items\": [\n        {\n            \"product\": \"69b231cfb3f3a8710005072b\",\n            \"variant\": \"69b231cfb3f3a8710005072c\",\n            \"unit\": \"1 Strip (10 Tablet)\",\n            \"quantity\": 15,\n            \"price\": 20,\n            \"_id\": \"69cbe9a33252f80912323e42\"\n        }\n    ]\n}"
+            }
+          ]
         },
         {
           "name": "Remove Cart",

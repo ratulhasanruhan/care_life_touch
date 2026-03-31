@@ -25,7 +25,7 @@ class OrderRepository {
         'items': items,
         'addressId': addressId,
         'deliveryShift': deliveryShift,
-        'paymentMethod': paymentMethod,
+        'paymentMethod': 'cod',
         if (couponCode != null && couponCode.trim().isNotEmpty)
           'couponCode': couponCode.trim(),
       },

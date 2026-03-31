@@ -128,7 +128,7 @@ class CartView extends GetView<CartController> {
   Widget _buildCartItem(CartItem item) {
     final resolvedProductId = item.product.id.isNotEmpty ? item.product.id : item.productId;
     final productName = item.product.name.trim().isEmpty ? 'Product' : item.product.name;
-    final brandName = item.product.brand.trim().isEmpty ? 'Unknown brand' : item.product.brand;
+    final brandName = item.product.brand.trim();
     final priceText = item.product.price > 0 ? item.product.priceDisplay : '৳${item.unitPrice.toInt()}';
     final hasImage = item.product.imagePath.trim().isNotEmpty;
 
@@ -199,15 +199,17 @@ class CartView extends GetView<CartController> {
                     color: Color(0xFF01060F),
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  brandName,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF727379),
+                if (brandName.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    brandName,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF727379),
+                    ),
                   ),
-                ),
+                ],
                 const SizedBox(height: 8),
                 Text(
                   priceText,
