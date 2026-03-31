@@ -96,7 +96,6 @@ class AddAddressView extends GetView<AddressController> {
                       child: Obx(() {
                         return SizedBox(
                           width: double.infinity,
-                          height: 44,
                           child: ElevatedButton(
                             onPressed: controller.isLoading.value
                                 ? null

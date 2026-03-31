@@ -1,3 +1,4 @@
+import 'package:care_life_touch/app/global_widgets/primary_appbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/address_controller.dart';
@@ -11,12 +12,9 @@ class AddressListView extends GetView<AddressController> {
     final isPickerMode = args is Map && args['pickerMode'] == true;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(isPickerMode ? 'Choose Address' : 'My Addresses'),
-        centerTitle: true,
-        elevation: 0,
+      appBar: PrimaryAppBar(
+        title: isPickerMode ? 'Choose Address' : 'My Addresses',
         backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

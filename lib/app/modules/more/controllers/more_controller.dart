@@ -4,6 +4,7 @@ import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../legal/routes.dart';
 import '../../../routes/app_pages.dart';
+import '../../address/views/routes.dart';
 
 class MoreController extends GetxController {
   // User information
@@ -59,8 +60,7 @@ class MoreController extends GetxController {
   }
 
   void navigateToAddress() {
-    // TODO: Add address route
-    Get.snackbar('Coming Soon', 'Address management feature');
+    Get.toNamed(AddressRoutes.addresses);
   }
 
   void navigateToOrders() {
@@ -111,4 +111,3 @@ class MoreController extends GetxController {
     navigateToProfile();
   }
 }
-
