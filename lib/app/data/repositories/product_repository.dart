@@ -6,7 +6,8 @@ import '../../modules/home/models/product_model.dart';
 
 class ProductRepository {
   ProductRepository({ApiProvider? apiProvider})
-    : _api = apiProvider ??
+    : _api =
+          apiProvider ??
           (Get.isRegistered<ApiProvider>()
               ? Get.find<ApiProvider>()
               : Get.put(ApiProvider(), permanent: true));
@@ -33,7 +34,10 @@ class ProductRepository {
     } on ApiException catch (error) {
       // Some environments accept only `q` for /search.
       if (error.statusCode == 400) {
-        final fallback = await _api.getData('/search', query: {'q': query.trim()});
+        final fallback = await _api.getData(
+          '/search',
+          query: {'q': query.trim()},
+        );
         return _extractProducts(fallback);
       }
       rethrow;
@@ -79,7 +83,8 @@ class ProductRepository {
       return _extractProducts(response);
     } on ApiException catch (error) {
       // Some environments return 500 when optional filters/pagination are present.
-      final shouldTryStrict = error.statusCode == 400 ||
+      final shouldTryStrict =
+          error.statusCode == 400 ||
           (error.statusCode != null && error.statusCode! >= 500);
 
       if (shouldTryStrict) {
@@ -137,12 +142,14 @@ class ProductRepository {
   }
 
   Future<List<ProductModel>> getOfferProducts({
+    int? page,
     int limit = 10,
     int minDiscount = 1,
   }) async {
     final response = await _api.getData(
       '/offer-products',
       query: {
+        if (page != null) 'page': page,
         'limit': limit,
         'minDiscount': minDiscount,
       },
@@ -184,7 +191,10 @@ class ProductRepository {
   Future<ProductModel> getProductBySlug(String slug) async {
     final response = await _api.getData('/get-product-by-slug/$slug');
     if (response is! Map) {
-      throw ApiException('Invalid product details response.', details: response);
+      throw ApiException(
+        'Invalid product details response.',
+        details: response,
+      );
     }
 
     final map = response.map((key, value) => MapEntry(key.toString(), value));
@@ -204,13 +214,16 @@ class ProductRepository {
   List<ProductModel> _extractProducts(dynamic response) {
     if (response is Map) {
       final map = response.map((key, value) => MapEntry(key.toString(), value));
-      final products = map['products'] ?? map['data'] ?? map['items'] ?? map['result'];
+      final products =
+          map['products'] ?? map['data'] ?? map['items'] ?? map['result'];
       if (products is List) {
         return products
             .whereType<Map>()
-            .map((item) => ProductModel.fromJson(
-                  item.map((key, value) => MapEntry(key.toString(), value)),
-                ))
+            .map(
+              (item) => ProductModel.fromJson(
+                item.map((key, value) => MapEntry(key.toString(), value)),
+              ),
+            )
             .toList();
       }
     }
@@ -218,9 +231,11 @@ class ProductRepository {
     if (response is List) {
       return response
           .whereType<Map>()
-          .map((item) => ProductModel.fromJson(
-                item.map((key, value) => MapEntry(key.toString(), value)),
-              ))
+          .map(
+            (item) => ProductModel.fromJson(
+              item.map((key, value) => MapEntry(key.toString(), value)),
+            ),
+          )
           .toList();
     }
 
@@ -246,10 +261,7 @@ class ProductRepository {
 
     for (final candidate in candidates) {
       if (candidate is List) {
-        return candidate
-            .map(_toMap)
-            .whereType<Map<String, dynamic>>()
-            .toList();
+        return candidate.map(_toMap).whereType<Map<String, dynamic>>().toList();
       }
 
       final nested = _toMap(candidate);

@@ -15,9 +15,11 @@ class ProductCard extends StatelessWidget {
     final cartController = Get.find<CartController>();
 
     return GestureDetector(
-      onTap: onTap ?? () {
-        Get.toNamed('/product-details', arguments: product);
-      },
+      onTap:
+          onTap ??
+          () {
+            Get.toNamed('/product-details', arguments: product);
+          },
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
@@ -178,8 +180,8 @@ class ProductCard extends StatelessWidget {
 
   /// Build price and add to cart button
   Widget _buildPriceAndButton(CartController cartController) {
-    final isInCard = cartController.isInCardState(product.id);
-    final quantity = cartController.getCardQuantity(product.id);
+    final quantity = cartController.getQuantity(product.id);
+    final isInCart = quantity > 0;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,7 +214,7 @@ class ProductCard extends StatelessWidget {
         ),
 
         // Add to Bag / Quantity Button
-        if (isInCard && quantity > 0)
+        if (isInCart)
           _buildQuantityControls(cartController, quantity)
         else
           _buildAddToCartButton(cartController),
@@ -265,7 +267,7 @@ class ProductCard extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           GestureDetector(
-            onTap: () => cartController.decreaseCardQuantity(product),
+            onTap: () => cartController.decreaseQuantity(product.id),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: const Icon(Icons.remove, color: Colors.white, size: 12),
@@ -283,7 +285,7 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           GestureDetector(
-            onTap: () => cartController.increaseCardQuantity(product),
+            onTap: () => cartController.increaseQuantity(product.id),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               child: const Icon(Icons.add, color: Colors.white, size: 12),

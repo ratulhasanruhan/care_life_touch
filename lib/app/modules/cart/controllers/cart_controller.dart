@@ -9,9 +9,11 @@ import '../../home/models/product_model.dart';
 
 /// Cart Controller - Manages shopping cart state and operations
 class CartController extends GetxController {
-  CartController({CartRepository? cartRepository, StorageService? storageService})
-      : _cartRepository = cartRepository ?? Get.find<CartRepository>(),
-        _storage = storageService ?? Get.find<StorageService>();
+  CartController({
+    CartRepository? cartRepository,
+    StorageService? storageService,
+  }) : _cartRepository = cartRepository ?? Get.find<CartRepository>(),
+       _storage = storageService ?? Get.find<StorageService>();
 
   final CartRepository _cartRepository;
   final StorageService _storage;
@@ -21,7 +23,6 @@ class CartController extends GetxController {
   final isMutating = false.obs;
   final errorMessage = ''.obs;
 
-  final _cardQuantities = <String, int>{}.obs;
   final Map<String, ProductModel> _knownProducts = <String, ProductModel>{};
 
   double _subtotal = 0;
@@ -45,7 +46,15 @@ class CartController extends GetxController {
 
   Future<void> loadCart({bool showLoader = true}) async {
     if (!_storage.isLoggedIn) {
-      _applySnapshot(const CartApiSnapshot(items: [], subtotal: 0, discount: 0, deliveryFee: 0, total: 0));
+      _applySnapshot(
+        const CartApiSnapshot(
+          items: [],
+          subtotal: 0,
+          discount: 0,
+          deliveryFee: 0,
+          total: 0,
+        ),
+      );
       return;
     }
 
@@ -58,17 +67,16 @@ class CartController extends GetxController {
       _applySnapshot(snapshot);
     } catch (error, stackTrace) {
       AppLogger.error('Failed to load cart', error, stackTrace);
-      errorMessage.value = _resolveMessage(error, 'Failed to load cart. Please try again.');
+      errorMessage.value = _resolveMessage(
+        error,
+        'Failed to load cart. Please try again.',
+      );
     } finally {
       if (showLoader) {
         isLoading.value = false;
       }
     }
   }
-
-  bool isInCardState(String productId) => (_cardQuantities[productId] ?? 0) > 0;
-
-  int getCardQuantity(String productId) => _cardQuantities[productId] ?? 0;
 
   Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
     final variantId = product.defaultVariantId;
@@ -86,10 +94,6 @@ class CartController extends GetxController {
         quantity: quantity,
       ),
     );
-
-    if (errorMessage.value.isEmpty) {
-      _cardQuantities[product.id] = (_cardQuantities[product.id] ?? 0) + quantity;
-    }
   }
 
   Future<void> removeFromCart(String productId) async {
@@ -116,7 +120,10 @@ class CartController extends GetxController {
     }
 
     await _mutateCart(
-      () => _cartRepository.updateCartItem(itemId: item.itemId, quantity: quantity),
+      () => _cartRepository.updateCartItem(
+        itemId: item.itemId,
+        quantity: quantity,
+      ),
     );
   }
 
@@ -138,13 +145,27 @@ class CartController extends GetxController {
     try {
       isMutating.value = true;
       await _cartRepository.clearCart();
-      _applySnapshot(const CartApiSnapshot(items: [], subtotal: 0, discount: 0, deliveryFee: 0, total: 0));
+      _applySnapshot(
+        const CartApiSnapshot(
+          items: [],
+          subtotal: 0,
+          discount: 0,
+          deliveryFee: 0,
+          total: 0,
+        ),
+      );
       if (notify) {
-        Get.snackbar('Success', 'Cart cleared successfully', snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Success',
+          'Cart cleared successfully',
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (error, stackTrace) {
       AppLogger.error('Failed to clear cart', error, stackTrace);
-      _showError(_resolveMessage(error, 'Failed to clear cart. Please try again.'));
+      _showError(
+        _resolveMessage(error, 'Failed to clear cart. Please try again.'),
+      );
     } finally {
       isMutating.value = false;
     }
@@ -152,7 +173,8 @@ class CartController extends GetxController {
 
   bool isInCart(String productId) => _findByProductId(productId) != null;
 
-  int getQuantity(String productId) => _findByProductId(productId)?.quantity ?? 0;
+  int getQuantity(String productId) =>
+      _findByProductId(productId)?.quantity ?? 0;
 
   CartItem? _findByProductId(String productId) {
     return cartItems.firstWhereOrNull(
@@ -183,11 +205,17 @@ class CartController extends GetxController {
       final snapshot = await action();
       _applySnapshot(snapshot);
       if (successMessage != null && successMessage.isNotEmpty) {
-        Get.snackbar('Success', successMessage, snackPosition: SnackPosition.BOTTOM);
+        Get.snackbar(
+          'Success',
+          successMessage,
+          snackPosition: SnackPosition.BOTTOM,
+        );
       }
     } catch (error, stackTrace) {
       AppLogger.error('Cart mutation failed', error, stackTrace);
-      _showError(_resolveMessage(error, 'Unable to update cart. Please try again.'));
+      _showError(
+        _resolveMessage(error, 'Unable to update cart. Please try again.'),
+      );
     } finally {
       isMutating.value = false;
     }
@@ -220,7 +248,8 @@ class CartController extends GetxController {
     final current = item.product;
 
     if (cached == null) {
-      if (current.name.trim().isNotEmpty && current.name.trim().toLowerCase() != 'product') {
+      if (current.name.trim().isNotEmpty &&
+          current.name.trim().toLowerCase() != 'product') {
         _knownProducts[item.productId] = current;
       }
       return current;
@@ -230,7 +259,9 @@ class CartController extends GetxController {
       id: current.id.isNotEmpty ? current.id : cached.id,
       slug: current.slug ?? cached.slug,
       defaultVariantId: current.defaultVariantId ?? cached.defaultVariantId,
-      name: current.name.trim().isNotEmpty && current.name.trim().toLowerCase() != 'product'
+      name:
+          current.name.trim().isNotEmpty &&
+              current.name.trim().toLowerCase() != 'product'
           ? current.name
           : cached.name,
       brandId: (current.brandId != null && current.brandId!.trim().isNotEmpty)
@@ -245,8 +276,12 @@ class CartController extends GetxController {
       maxPrice: current.maxPrice ?? cached.maxPrice,
       moq: current.moq.trim().isNotEmpty ? current.moq : cached.moq,
       rating: current.rating > 0 ? current.rating : cached.rating,
-      imagePath: current.imagePath.trim().isNotEmpty ? current.imagePath : cached.imagePath,
-      imageUrls: current.imageUrls.isNotEmpty ? current.imageUrls : cached.imageUrls,
+      imagePath: current.imagePath.trim().isNotEmpty
+          ? current.imagePath
+          : cached.imagePath,
+      imageUrls: current.imageUrls.isNotEmpty
+          ? current.imageUrls
+          : cached.imageUrls,
       hasOffer: current.hasOffer || cached.hasOffer,
       offerLabel: current.offerLabel ?? cached.offerLabel,
     );
@@ -266,35 +301,17 @@ class CartController extends GetxController {
     Get.snackbar('Error', message, snackPosition: SnackPosition.BOTTOM);
   }
 
-  Future<void> increaseCardQuantity(ProductModel product) async {
-    await addToCart(product, quantity: 1);
-  }
-
-  Future<void> decreaseCardQuantity(ProductModel product) async {
-    final current = _cardQuantities[product.id] ?? 0;
-    if (current <= 0) {
-      return;
-    }
-
-    final next = current - 1;
-    if (next <= 0) {
-      _cardQuantities.remove(product.id);
-    } else {
-      _cardQuantities[product.id] = next;
-    }
-
-    await decreaseQuantity(product.id);
-  }
-
   /// Convert cart items to order format
   List<Map<String, dynamic>> toOrderItems() {
     return cartItems
         .where((item) => (item.variantId ?? '').trim().isNotEmpty)
-        .map((item) => <String, dynamic>{
-              'productId': item.productId,
-              'variantId': (item.variantId ?? '').trim(),
-              'quantity': item.quantity,
-            })
+        .map(
+          (item) => <String, dynamic>{
+            'productId': item.productId,
+            'variantId': (item.variantId ?? '').trim(),
+            'quantity': item.quantity,
+          },
+        )
         .toList();
   }
 }
