@@ -22,13 +22,19 @@ class WishlistItem {
   factory WishlistItem.fromJson(Map<String, dynamic> json) {
     return WishlistItem(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
-      productId: (json['productId'] ?? json['product'] ?? json['product_id'] ?? '').toString(),
+      productId:
+          (json['productId'] ?? json['product'] ?? json['product_id'] ?? '')
+              .toString(),
       productName: (json['productName'] ?? json['name'] ?? '').toString(),
       price: _toDouble(json['price'] ?? 0),
-      imagePath: (json['imagePath'] ?? json['image'] ?? json['imageUrl']).toString(),
+      imagePath: _toNullableString(
+        json['imagePath'] ?? json['image'] ?? json['imageUrl'],
+      ),
       brand: (json['brand'] ?? '').toString(),
       rating: _toDouble(json['rating'] ?? json['rate'] ?? 0),
-      addedAt: json['addedAt'] != null ? DateTime.tryParse(json['addedAt'].toString()) : null,
+      addedAt: json['addedAt'] != null
+          ? DateTime.tryParse(json['addedAt'].toString())
+          : null,
     );
   }
 
@@ -37,6 +43,13 @@ class WishlistItem {
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value) ?? 0;
     return 0;
+  }
+
+  static String? _toNullableString(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') return null;
+    return text;
   }
 
   Map<String, dynamic> toJson() {
@@ -71,20 +84,44 @@ class WishlistSnapshot {
   factory WishlistSnapshot.fromJson(Map<String, dynamic> json) {
     final itemsRaw = json['data'] ?? json['wishlist'] ?? json['items'] ?? [];
     final items = (itemsRaw is List)
-        ? itemsRaw.map((item) {
-            if (item is Map<String, dynamic>) {
-              return WishlistItem.fromJson(item);
-            }
-            return null;
-          }).whereType<WishlistItem>().toList()
+        ? itemsRaw
+              .map((item) {
+                if (item is Map<String, dynamic>) {
+                  return WishlistItem.fromJson(item);
+                }
+                if (item is Map) {
+                  return WishlistItem.fromJson(
+                    item.map((key, value) => MapEntry(key.toString(), value)),
+                  );
+                }
+                return null;
+              })
+              .whereType<WishlistItem>()
+              .toList()
         : <WishlistItem>[];
 
     return WishlistSnapshot(
       items: items,
-      totalCount: (json['totalCount'] ?? json['total'] ?? json['count'] ?? items.length) as int,
+      totalCount: _toInt(
+        json['totalCount'] ?? json['total'] ?? json['count'] ?? items.length,
+      ),
       success: json['success'] == true || json['status'] == 'success',
-      message: (json['message'] ?? json['msg']).toString(),
+      message: _toNullableString(json['message'] ?? json['msg']),
     );
   }
-}
 
+  static int _toInt(dynamic value) {
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    if (value is num) return value.toInt();
+    return 0;
+  }
+
+  static String? _toNullableString(dynamic value) {
+    if (value == null) return null;
+    final text = value.toString().trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') return null;
+    return text;
+  }
+}

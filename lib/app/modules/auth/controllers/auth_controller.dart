@@ -37,6 +37,7 @@ class AuthController extends GetxController {
   final Rx<File?> drugLicenseImage = Rx<File?>(null);
   final Rx<File?> tradeLicenseImage = Rx<File?>(null);
   final Rx<File?> nidImage = Rx<File?>(null);
+  final Rx<File?> profileImage = Rx<File?>(null);
   final shopImages = <File>[].obs;
 
   // Image picker
@@ -175,6 +176,9 @@ class AuthController extends GetxController {
       final uploadedDrugLicense = drugLicenseImage.value == null
           ? null
           : await _authRepository.uploadImage(drugLicenseImage.value!);
+      final uploadedProfileImage = profileImage.value == null
+          ? null
+          : await _authRepository.uploadImage(profileImage.value!);
       final uploadedTradeLicense = tradeLicenseImage.value == null
           ? null
           : await _authRepository.uploadImage(tradeLicenseImage.value!);
@@ -188,7 +192,10 @@ class AuthController extends GetxController {
         fullName: ownerNameController.text,
         phone: phoneController.text,
         password: passwordController.text,
-        email: emailController.text.trim().isEmpty ? null : emailController.text.trim(),
+        email: emailController.text.trim().isEmpty
+            ? null
+            : emailController.text.trim(),
+        profileImage: uploadedProfileImage,
         drugLicense: uploadedDrugLicense,
         tradeLicense: uploadedTradeLicense,
         nidImage: uploadedNid,
@@ -204,7 +211,9 @@ class AuthController extends GetxController {
       // Save pending OTP state for resumption
       await _storage.savePendingOTP(
         accountId: _pendingAccountId ?? '',
-        identifier: phoneController.text.isNotEmpty ? phoneController.text : emailController.text,
+        identifier: phoneController.text.isNotEmpty
+            ? phoneController.text
+            : emailController.text,
       );
 
       // Send OTP
@@ -217,7 +226,12 @@ class AuthController extends GetxController {
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
-      _showError(_resolveErrorMessage(e, fallback: 'Registration failed. Please try again.'));
+      _showError(
+        _resolveErrorMessage(
+          e,
+          fallback: 'Registration failed. Please try again.',
+        ),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -267,11 +281,12 @@ class AuthController extends GetxController {
 
       await _storage.saveLastLoginIdentifier(identifier);
 
-
       Get.offAllNamed(Routes.HOME);
     } catch (e, stackTrace) {
       AppLogger.error('Login failed', e, stackTrace);
-      _showError(_resolveErrorMessage(e, fallback: 'Login failed. Please try again.'));
+      _showError(
+        _resolveErrorMessage(e, fallback: 'Login failed. Please try again.'),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -315,7 +330,9 @@ class AuthController extends GetxController {
 
       final accountId = _pendingAccountId;
       if (accountId == null || accountId.isEmpty) {
-        throw const ApiException('Unable to verify OTP. Please register again.');
+        throw const ApiException(
+          'Unable to verify OTP. Please register again.',
+        );
       }
 
       await _authRepository.verifyOtp(
@@ -325,7 +342,7 @@ class AuthController extends GetxController {
 
       otpVerified.value = true;
       await _storage.setOnboardingCompleted(true);
-      await _storage.removePendingOTP();  // Clear pending OTP state
+      await _storage.removePendingOTP(); // Clear pending OTP state
 
       AppLogger.success('Registration OTP verified successfully');
 
@@ -344,7 +361,9 @@ class AuthController extends GetxController {
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration OTP verification failed', e, stackTrace);
-      _showError(_resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'));
+      _showError(
+        _resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -370,7 +389,9 @@ class AuthController extends GetxController {
       await verifyRegistrationOTP();
     } catch (e, stackTrace) {
       AppLogger.error('OTP verification failed', e, stackTrace);
-      _showError(_resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'));
+      _showError(
+        _resolveErrorMessage(e, fallback: 'Invalid OTP. Please try again.'),
+      );
     } finally {
       isLoading.value = false;
     }
@@ -422,7 +443,9 @@ class AuthController extends GetxController {
     final args = Get.arguments;
     Map<String, dynamic>? pending;
 
-    if (args is Map && args['resumePending'] == true && args['pending'] is Map) {
+    if (args is Map &&
+        args['resumePending'] == true &&
+        args['pending'] is Map) {
       pending = Map<String, dynamic>.from(args['pending'] as Map);
     } else {
       pending = _storage.getPendingOTP();
@@ -568,6 +591,9 @@ class AuthController extends GetxController {
         final File imageFile = File(pickedFile.path);
 
         switch (imageType) {
+          case 'profile':
+            profileImage.value = imageFile;
+            break;
           case 'drug_license':
             drugLicenseImage.value = imageFile;
             break;
@@ -685,6 +711,9 @@ class AuthController extends GetxController {
   /// Remove image
   void removeImage(String imageType) {
     switch (imageType) {
+      case 'profile':
+        profileImage.value = null;
+        break;
       case 'drug_license':
         drugLicenseImage.value = null;
         break;

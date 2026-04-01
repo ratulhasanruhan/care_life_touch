@@ -43,10 +43,7 @@ class MoreView extends GetView<MoreController> {
               width: 120,
               height: 120,
               decoration: BoxDecoration(
-                border: Border.all(
-                  color: const Color(0xFF6EE7BF),
-                  width: 1.5,
-                ),
+                border: Border.all(color: const Color(0xFF6EE7BF), width: 1.5),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: ClipRRect(
@@ -172,11 +169,25 @@ class MoreView extends GetView<MoreController> {
       return Image.asset(imagePath, fit: BoxFit.cover);
     }
 
+    final isRemote =
+        imagePath.startsWith('http://') || imagePath.startsWith('https://');
+    if (isRemote) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _fallbackProfileImage(),
+      );
+    }
+
     final file = File(imagePath);
     if (file.existsSync()) {
       return Image.file(file, fit: BoxFit.cover);
     }
 
+    return _fallbackProfileImage();
+  }
+
+  Widget _fallbackProfileImage() {
     return Container(
       color: const Color(0xFFF6F6F6),
       child: const Icon(
@@ -187,4 +198,3 @@ class MoreView extends GetView<MoreController> {
     );
   }
 }
-

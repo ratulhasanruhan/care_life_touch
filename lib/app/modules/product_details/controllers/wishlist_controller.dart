@@ -7,8 +7,8 @@ class WishlistController extends GetxController {
   final WishlistRepository _wishlistRepository;
 
   WishlistController({WishlistRepository? wishlistRepository})
-      : _wishlistRepository =
-            wishlistRepository ?? Get.find<WishlistRepository>();
+    : _wishlistRepository =
+          wishlistRepository ?? Get.find<WishlistRepository>();
 
   final wishlistItems = <WishlistItem>[].obs;
   final isLoading = false.obs;
@@ -36,6 +36,7 @@ class WishlistController extends GetxController {
 
   Future<void> toggleWishlist(String productId) async {
     isMutating.value = true;
+    errorMessage.value = '';
     try {
       final snapshot = await _wishlistRepository.toggleWishlist(productId);
       wishlistItems.value = snapshot.items;
@@ -113,5 +114,3 @@ class WishlistController extends GetxController {
     // Consider adding toast notification here
   }
 }
-
-

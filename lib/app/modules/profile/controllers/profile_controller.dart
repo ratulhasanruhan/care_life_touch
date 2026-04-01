@@ -26,6 +26,7 @@ class ProfileController extends GetxController {
   final Rx<File?> drugLicenseImage = Rx<File?>(null);
   final Rx<File?> tradeLicenseImage = Rx<File?>(null);
   final Rx<File?> nidImage = Rx<File?>(null);
+  final Rx<File?> profileImage = Rx<File?>(null);
   final shopImages = <File>[].obs;
 
   final ImagePicker _picker = ImagePicker();
@@ -46,14 +47,15 @@ class ProfileController extends GetxController {
     }
 
     shopNameController.text = (user['shopName'] ?? '').toString();
-    ownerNameController.text =
-        (user['ownerName'] ?? user['name'] ?? '').toString();
+    ownerNameController.text = (user['ownerName'] ?? user['name'] ?? '')
+        .toString();
     phoneController.text = (user['phone'] ?? '').toString();
     emailController.text = (user['email'] ?? '').toString();
 
     _setImageFromPath(user['drugLicenseImage'], drugLicenseImage);
     _setImageFromPath(user['tradeLicenseImage'], tradeLicenseImage);
     _setImageFromPath(user['nidImage'], nidImage);
+    _setImagePath(user['profileImage'], profileImage);
 
     shopImages.clear();
     final dynamic rawShopImages = user['shopImages'];
@@ -67,11 +69,19 @@ class ProfileController extends GetxController {
     }
 
     if (shopImages.isEmpty) {
-      final legacyPath = (user['shopImage'] ?? user['profileImage'] ?? '').toString().trim();
+      final legacyPath = (user['shopImage'] ?? '').toString().trim();
       if (legacyPath.isNotEmpty) {
         shopImages.add(File(legacyPath));
       }
     }
+  }
+
+  void _setImagePath(dynamic path, Rx<File?> target) {
+    final imagePath = path?.toString().trim() ?? '';
+    if (imagePath.isEmpty || imagePath.toLowerCase() == 'null') {
+      return;
+    }
+    target.value = File(imagePath);
   }
 
   void _setImageFromPath(dynamic path, Rx<File?> target) {
@@ -101,23 +111,39 @@ class ProfileController extends GetxController {
   }) async {
     // Validate inputs
     if (oldPassword.isEmpty) {
-      Get.snackbar('Error', 'Please enter your current password',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Please enter your current password',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
     if (newPassword.isEmpty) {
-      Get.snackbar('Error', 'Please enter your new password',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Please enter your new password',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
     if (newPassword != confirmPassword) {
-      Get.snackbar('Error', 'Passwords do not match',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Passwords do not match',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
     if (newPassword.length < 6) {
-      Get.snackbar('Error', 'Password must be at least 6 characters',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Password must be at least 6 characters',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     }
 
@@ -127,19 +153,31 @@ class ProfileController extends GetxController {
         oldPassword: oldPassword,
         newPassword: newPassword,
       );
-      Get.snackbar('Success', 'Password changed successfully',
-          backgroundColor: Colors.green, colorText: Colors.white);
+      Get.snackbar(
+        'Success',
+        'Password changed successfully',
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
       // Clear password fields
       passwordController.clear();
       confirmPasswordController.clear();
       return true;
     } on ApiException catch (e) {
-      Get.snackbar('Error', e.message,
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        e.message,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     } catch (e) {
-      Get.snackbar('Error', 'Failed to change password. Please try again.',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Failed to change password. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return false;
     } finally {
       isLoading.value = false;
@@ -156,8 +194,12 @@ class ProfileController extends GetxController {
       Get.offAllNamed('/login');
     } catch (e) {
       AppLogger.error('Logout failed', e);
-      Get.snackbar('Error', 'Failed to logout. Please try again.',
-          backgroundColor: Colors.red, colorText: Colors.white);
+      Get.snackbar(
+        'Error',
+        'Failed to logout. Please try again.',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isLoading.value = false;
     }
@@ -240,12 +282,14 @@ class ProfileController extends GetxController {
 
       final existingUser = _storage.getUser() ?? <String, dynamic>{};
 
+      final uploadedProfileImage = await _resolveUpload(profileImage.value);
       final uploadedNid = await _resolveUpload(nidImage.value);
       final uploadedShopImages = await _resolveUploads(shopImages);
 
       await _authRepository.updateBuyerProfile(
         shopName: shopNameController.text.trim(),
         fullName: ownerNameController.text.trim(),
+        profileImage: uploadedProfileImage,
         nidImage: uploadedNid,
         shopImages: uploadedShopImages.isEmpty ? null : uploadedShopImages,
       );
@@ -258,6 +302,7 @@ class ProfileController extends GetxController {
         'ownerName': ownerNameController.text.trim(),
         'phone': phoneController.text.trim(),
         'email': emailController.text.trim(),
+        'profileImage': uploadedProfileImage ?? existingUser['profileImage'],
         'nidImage': uploadedNid ?? existingUser['nidImage'],
         'shopImages': uploadedShopImages.isEmpty
             ? (existingUser['shopImages'] ?? const <String>[])
@@ -356,6 +401,9 @@ class ProfileController extends GetxController {
 
       final imageFile = File(pickedFile.path);
       switch (imageType) {
+        case 'profile':
+          profileImage.value = imageFile;
+          break;
         case 'drug_license':
           drugLicenseImage.value = imageFile;
           break;
@@ -448,6 +496,9 @@ class ProfileController extends GetxController {
 
   void removeImage(String imageType) {
     switch (imageType) {
+      case 'profile':
+        profileImage.value = null;
+        break;
       case 'drug_license':
         drugLicenseImage.value = null;
         break;
@@ -474,4 +525,3 @@ class ProfileController extends GetxController {
     super.onClose();
   }
 }
-

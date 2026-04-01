@@ -52,6 +52,8 @@ class ProfileView extends GetView<ProfileController> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 24),
+                _buildProfileImageSection(),
+                const SizedBox(height: 24),
                 CustomTextField(
                   controller: controller.shopNameController,
                   hintText: 'Shop Name *',
@@ -251,6 +253,119 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 
+  Widget _buildProfileImageSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const Text(
+          'Profile Image',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            height: 1.43,
+            color: Color(0xFF01060F),
+          ),
+        ),
+        const SizedBox(height: 8),
+        Obx(() {
+          final selectedImage = controller.profileImage.value;
+          return Stack(
+            clipBehavior: Clip.none,
+            children: [
+              GestureDetector(
+                onTap: () => controller.pickImage('profile'),
+                child: CircleAvatar(
+                  radius: 50,
+                  backgroundColor: const Color(0xFFF6F6F6),
+                  child: ClipOval(
+                    child: SizedBox(
+                      width: 96,
+                      height: 96,
+                      child: selectedImage == null
+                          ? const Icon(
+                              Icons.person_outline,
+                              size: 48,
+                              color: Color(0xFF064E36),
+                            )
+                          : _buildProfilePreview(selectedImage),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -4,
+                right: -2,
+                child: GestureDetector(
+                  onTap: () => controller.pickImage('profile'),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF064E36),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.camera_alt,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
+              if (selectedImage != null)
+                Positioned(
+                  top: -6,
+                  right: -6,
+                  child: GestureDetector(
+                    onTap: () => controller.removeImage('profile'),
+                    child: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        color: Colors.red,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 1.5),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 14,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          );
+        }),
+      ],
+    );
+  }
+
+  Widget _buildProfilePreview(File imageFile) {
+    final path = imageFile.path;
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
+
+    if (isRemote) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.person_outline,
+          size: 48,
+          color: Color(0xFF064E36),
+        ),
+      );
+    }
+
+    return Image.file(
+      imageFile,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) =>
+          const Icon(Icons.person_outline, size: 48, color: Color(0xFF064E36)),
+    );
+  }
+
   Widget _buildShopImagesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -382,4 +497,3 @@ class ProfileView extends GetView<ProfileController> {
     );
   }
 }
-

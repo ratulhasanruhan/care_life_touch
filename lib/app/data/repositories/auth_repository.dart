@@ -19,7 +19,8 @@ class AuthRepository {
   ];
 
   AuthRepository({ApiProvider? apiProvider})
-    : _api = apiProvider ??
+    : _api =
+          apiProvider ??
           (Get.isRegistered<ApiProvider>()
               ? Get.find<ApiProvider>()
               : Get.put(ApiProvider(), permanent: true));
@@ -32,10 +33,7 @@ class AuthRepository {
   }) async {
     final response = await _api.postData(
       '/login-account',
-      body: {
-        'identifier': identifier.trim(),
-        'password': password,
-      },
+      body: {'identifier': identifier.trim(), 'password': password},
     );
 
     return _normalizeSession(response);
@@ -47,6 +45,7 @@ class AuthRepository {
     required String phone,
     required String password,
     String? email,
+    String? profileImage,
     String? drugLicense,
     String? tradeLicense,
     String? nidImage,
@@ -60,12 +59,15 @@ class AuthRepository {
         'phone': phone.trim(),
         if (email != null && email.trim().isNotEmpty) 'email': email.trim(),
         'password': password,
+        if (profileImage != null && profileImage.isNotEmpty)
+          'profileImage': profileImage,
         if (drugLicense != null && drugLicense.isNotEmpty)
           'drugLicense': drugLicense,
         if (tradeLicense != null && tradeLicense.isNotEmpty)
           'tradeLicense': tradeLicense,
         if (nidImage != null && nidImage.isNotEmpty) 'nidImage': nidImage,
-        if (shopImages != null && shopImages.isNotEmpty) 'shopImages': shopImages,
+        if (shopImages != null && shopImages.isNotEmpty)
+          'shopImages': shopImages,
       },
     );
 
@@ -78,10 +80,7 @@ class AuthRepository {
   }) async {
     final response = await _api.postData(
       '/verify-otp',
-      body: {
-        'accountId': accountId,
-        'otp': otp,
-      },
+      body: {'accountId': accountId, 'otp': otp},
     );
 
     return _asMap(response);
@@ -139,16 +138,14 @@ class AuthRepository {
   }) async {
     await _api.putData(
       '/buyer-change-password',
-      body: {
-        'oldPassword': oldPassword,
-        'newPassword': newPassword,
-      },
+      body: {'oldPassword': oldPassword, 'newPassword': newPassword},
     );
   }
 
   Future<Map<String, dynamic>> updateBuyerProfile({
     required String shopName,
     required String fullName,
+    String? profileImage,
     String? drugLicense,
     String? tradeLicense,
     String? nidImage,
@@ -159,12 +156,15 @@ class AuthRepository {
       body: {
         'shopName': shopName.trim(),
         'fullName': fullName.trim(),
+        if (profileImage != null && profileImage.isNotEmpty)
+          'profileImage': profileImage,
         if (drugLicense != null && drugLicense.isNotEmpty)
           'drugLicense': drugLicense,
         if (tradeLicense != null && tradeLicense.isNotEmpty)
           'tradeLicense': tradeLicense,
         if (nidImage != null && nidImage.isNotEmpty) 'nidImage': nidImage,
-        if (shopImages != null && shopImages.isNotEmpty) 'shopImages': shopImages,
+        if (shopImages != null && shopImages.isNotEmpty)
+          'shopImages': shopImages,
       },
     );
 
@@ -200,17 +200,14 @@ class AuthRepository {
         return directUrl.trim();
       }
 
-      final imageUrl = _extractString(
-        map,
-        const [
-          'url',
-          'image',
-          'path',
-          'imageUrl',
-          'secureUrl',
-          'location',
-        ],
-      );
+      final imageUrl = _extractString(map, const [
+        'url',
+        'image',
+        'path',
+        'imageUrl',
+        'secureUrl',
+        'location',
+      ]);
 
       if (imageUrl != null && imageUrl.isNotEmpty) {
         return imageUrl;
@@ -219,23 +216,22 @@ class AuthRepository {
       final nestedData = _firstNestedMap(map, const ['data', 'result', 'file']);
       final nestedUrl = nestedData == null
           ? null
-          : _extractString(
-              nestedData,
-              const [
-                'url',
-                'image',
-                'path',
-                'imageUrl',
-                'secureUrl',
-                'location',
-              ],
-            );
+          : _extractString(nestedData, const [
+              'url',
+              'image',
+              'path',
+              'imageUrl',
+              'secureUrl',
+              'location',
+            ]);
 
       if (nestedUrl != null && nestedUrl.isNotEmpty) {
         return nestedUrl;
       }
 
-      throw const ApiException('Image upload succeeded but no image URL was returned.');
+      throw const ApiException(
+        'Image upload succeeded but no image URL was returned.',
+      );
     } on ApiException catch (error) {
       final normalizedMessage = error.message.toLowerCase();
       if (normalizedMessage.contains('unsupported file type') ||
@@ -257,11 +253,15 @@ class AuthRepository {
 
   Future<File> _prepareFileForUpload(File originalFile) async {
     if (!originalFile.existsSync()) {
-      throw const ApiException('Selected image could not be found. Please pick again.');
+      throw const ApiException(
+        'Selected image could not be found. Please pick again.',
+      );
     }
 
     if (!_isSupportedUploadType(originalFile.path)) {
-      throw const ApiException('Unsupported file type. Please choose a PNG or JPEG image.');
+      throw const ApiException(
+        'Unsupported file type. Please choose a PNG or JPEG image.',
+      );
     }
 
     final originalSize = await originalFile.length();
@@ -269,7 +269,9 @@ class AuthRepository {
       return originalFile;
     }
 
-    final tempDirectory = await Directory.systemTemp.createTemp('care_life_upload_');
+    final tempDirectory = await Directory.systemTemp.createTemp(
+      'care_life_upload_',
+    );
 
     File? bestCandidate;
     var bestSize = originalSize;
@@ -313,10 +315,16 @@ class AuthRepository {
   _UploadMeta _buildUploadMeta(File file) {
     final lowerPath = file.path.toLowerCase();
     if (lowerPath.endsWith('.png')) {
-      return _UploadMeta(fileName: file.uri.pathSegments.last, contentType: 'image/png');
+      return _UploadMeta(
+        fileName: file.uri.pathSegments.last,
+        contentType: 'image/png',
+      );
     }
 
-    return _UploadMeta(fileName: file.uri.pathSegments.last, contentType: 'image/jpeg');
+    return _UploadMeta(
+      fileName: file.uri.pathSegments.last,
+      contentType: 'image/jpeg',
+    );
   }
 
   bool _isSupportedUploadType(String path) {
@@ -328,23 +336,28 @@ class AuthRepository {
     final map = _asMap(response);
 
     // Extract account ID
-    final accountId = _extractString(map, const ['accountId', 'account_id']) ?? '';
+    final accountId =
+        _extractString(map, const ['accountId', 'account_id']) ?? '';
 
     // Extract reference ID
-    final referenceId = _extractString(map, const ['referenceId', 'reference_id']) ?? '';
+    final referenceId =
+        _extractString(map, const ['referenceId', 'reference_id']) ?? '';
 
     // Extract role
-    final role = _extractString(map, const ['role', 'userRole', 'user_role']) ?? '';
+    final role =
+        _extractString(map, const ['role', 'userRole', 'user_role']) ?? '';
 
     // Try to extract token (may not exist in new format)
     final token = _extractToken(map);
 
     // Extract or create user data
-    final user = _extractUserMap(map) ?? <String, dynamic>{
-      'accountId': accountId,
-      'referenceId': referenceId,
-      'role': role,
-    };
+    final user =
+        _extractUserMap(map) ??
+        <String, dynamic>{
+          'accountId': accountId,
+          'referenceId': referenceId,
+          'role': role,
+        };
 
     // If token is missing, use accountId as fallback token
     final finalToken = (token != null && token.isNotEmpty)
@@ -373,20 +386,35 @@ class AuthRepository {
       return response;
     }
     if (response is Map) {
-      return response.map(
-        (key, value) => MapEntry(key.toString(), value),
-      );
+      return response.map((key, value) => MapEntry(key.toString(), value));
     }
-    throw ApiException(
-      'Unexpected server response format.',
-      details: response,
-    );
+    throw ApiException('Unexpected server response format.', details: response);
   }
 
   String? _extractToken(Map<String, dynamic> data) {
-    final directToken = _extractString(
-      data,
-      const [
+    final directToken = _extractString(data, const [
+      'buyer_token',
+      'buyerToken',
+      'token',
+      'accessToken',
+      'access_token',
+      'jwt',
+      'bearerToken',
+      'authToken',
+      'auth_token',
+    ]);
+    if (directToken != null && directToken.isNotEmpty) {
+      return directToken;
+    }
+
+    final nestedData = _firstNestedMap(data, const [
+      'data',
+      'result',
+      'session',
+      'auth',
+    ]);
+    if (nestedData != null) {
+      return _extractString(nestedData, const [
         'buyer_token',
         'buyerToken',
         'token',
@@ -396,28 +424,7 @@ class AuthRepository {
         'bearerToken',
         'authToken',
         'auth_token',
-      ],
-    );
-    if (directToken != null && directToken.isNotEmpty) {
-      return directToken;
-    }
-
-    final nestedData = _firstNestedMap(data, const ['data', 'result', 'session', 'auth']);
-    if (nestedData != null) {
-      return _extractString(
-        nestedData,
-        const [
-          'buyer_token',
-          'buyerToken',
-          'token',
-          'accessToken',
-          'access_token',
-          'jwt',
-          'bearerToken',
-          'authToken',
-          'auth_token',
-        ],
-      );
+      ]);
     }
 
     return null;
@@ -497,4 +504,3 @@ class _UploadMeta {
   final String fileName;
   final String contentType;
 }
-
