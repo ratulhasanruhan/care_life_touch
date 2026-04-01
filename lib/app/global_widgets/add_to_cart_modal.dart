@@ -28,7 +28,23 @@ class AddToCartModal extends StatefulWidget {
 class _AddToCartModalState extends State<AddToCartModal> {
   int selectedQuantity = 1;
   bool showCustomInput = false;
-  final TextEditingController customQuantityController = TextEditingController();
+  final TextEditingController customQuantityController =
+      TextEditingController();
+  String? selectedVariantId;
+
+  @override
+  void initState() {
+    super.initState();
+    selectedVariantId =
+        (widget.product.defaultVariantId ??
+                (widget.product.variants.isNotEmpty
+                    ? widget.product.variants.first.id
+                    : ''))
+            .trim();
+    if (selectedVariantId != null && selectedVariantId!.isEmpty) {
+      selectedVariantId = null;
+    }
+  }
 
   @override
   void dispose() {
@@ -38,6 +54,12 @@ class _AddToCartModalState extends State<AddToCartModal> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedVariant = _selectedVariant;
+    final selectedUnit = selectedVariant?.unit ?? widget.product.moq;
+    final selectedPrice = selectedVariant?.price ?? widget.product.price;
+    final selectedComparePrice =
+        selectedVariant?.comparePrice ?? widget.product.maxPrice;
+
     return Container(
       margin: const EdgeInsets.only(left: 16, right: 16, bottom: 20),
       decoration: BoxDecoration(
@@ -118,7 +140,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
 
                       // Quantity Info
                       Text(
-                        'Quantity: $selectedQuantity (${widget.product.moq})',
+                        'Quantity: $selectedQuantity ($selectedUnit)',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w400,
@@ -129,7 +151,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
 
                       // Price
                       Text(
-                        widget.product.priceDisplay,
+                        _buildPriceDisplay(selectedPrice, selectedComparePrice),
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
@@ -149,8 +171,21 @@ class _AddToCartModalState extends State<AddToCartModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (widget.product.variants.length > 1) ...[
+                  const Text(
+                    'Order Unit',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xFF01060F),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildVariantSelector(),
+                  const SizedBox(height: 12),
+                ],
                 Text(
-                  'Quantity (${widget.product.moq})',
+                  'Quantity ($selectedUnit)',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -202,6 +237,7 @@ class _AddToCartModalState extends State<AddToCartModal> {
                       await cartController.addToCart(
                         widget.product,
                         quantity: selectedQuantity,
+                        variantId: selectedVariantId,
                       );
 
                       if (!mounted) {
@@ -247,9 +283,13 @@ class _AddToCartModalState extends State<AddToCartModal> {
               width: 57.5,
               height: 24,
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF064E36) : const Color(0xFFFAFAFA),
+                color: isSelected
+                    ? const Color(0xFF064E36)
+                    : const Color(0xFFFAFAFA),
                 border: Border.all(
-                  color: isSelected ? const Color(0xFF064E36) : const Color(0xFFE8EAE8),
+                  color: isSelected
+                      ? const Color(0xFF064E36)
+                      : const Color(0xFFE8EAE8),
                   width: 0.75,
                 ),
                 borderRadius: BorderRadius.circular(2),
@@ -284,9 +324,13 @@ class _AddToCartModalState extends State<AddToCartModal> {
             width: 57.5,
             height: 24,
             decoration: BoxDecoration(
-              color: showCustomInput ? const Color(0xFF064E36) : const Color(0xFFFAFAFA),
+              color: showCustomInput
+                  ? const Color(0xFF064E36)
+                  : const Color(0xFFFAFAFA),
               border: Border.all(
-                color: showCustomInput ? const Color(0xFF064E36) : const Color(0xFFE8EAE8),
+                color: showCustomInput
+                    ? const Color(0xFF064E36)
+                    : const Color(0xFFE8EAE8),
                 width: 0.75,
               ),
               borderRadius: BorderRadius.circular(2),
@@ -303,6 +347,49 @@ class _AddToCartModalState extends State<AddToCartModal> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildVariantSelector() {
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: widget.product.variants.map((variant) {
+        final isSelected = variant.id == selectedVariantId;
+
+        return GestureDetector(
+          onTap: () {
+            setState(() {
+              selectedVariantId = variant.id;
+            });
+          },
+          child: Container(
+            height: 30,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              color: isSelected
+                  ? const Color(0xFF064E36)
+                  : const Color(0xFFFAFAFA),
+              border: Border.all(
+                color: isSelected
+                    ? const Color(0xFF064E36)
+                    : const Color(0xFFE8EAE8),
+                width: 0.75,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              variant.unit,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : const Color(0xFF01060F),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 
@@ -331,12 +418,21 @@ class _AddToCartModalState extends State<AddToCartModal> {
             color: Color(0xFFA2A8AF),
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
           suffixIcon: customQuantityController.text.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.check, color: Color(0xFF064E36), size: 20),
+                  icon: const Icon(
+                    Icons.check,
+                    color: Color(0xFF064E36),
+                    size: 20,
+                  ),
                   onPressed: () {
-                    final customQty = int.tryParse(customQuantityController.text);
+                    final customQty = int.tryParse(
+                      customQuantityController.text,
+                    );
                     if (customQty != null && customQty > 0) {
                       setState(() {
                         selectedQuantity = customQty;
@@ -360,7 +456,35 @@ class _AddToCartModalState extends State<AddToCartModal> {
       ),
     );
   }
+
+  ProductVariant? get _selectedVariant {
+    if (widget.product.variants.isEmpty) {
+      return null;
+    }
+
+    final id = selectedVariantId;
+    if (id == null || id.isEmpty) {
+      return widget.product.variants.first;
+    }
+
+    for (final variant in widget.product.variants) {
+      if (variant.id == id) {
+        return variant;
+      }
+    }
+
+    return widget.product.variants.first;
+  }
+
+  String _buildPriceDisplay(double price, double? comparePrice) {
+    final base = '৳${_formatMoney(price)}';
+    if (comparePrice != null && comparePrice > price + 0.0001) {
+      return '$base-৳${_formatMoney(comparePrice)}';
+    }
+    return base;
+  }
+
+  String _formatMoney(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+  }
 }
-
-
-

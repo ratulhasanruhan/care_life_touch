@@ -1,3 +1,17 @@
+class ProductVariant {
+  final String id;
+  final String unit;
+  final double? price;
+  final double? comparePrice;
+
+  const ProductVariant({
+    required this.id,
+    required this.unit,
+    this.price,
+    this.comparePrice,
+  });
+}
+
 /// Product Model
 class ProductModel {
   final String id;
@@ -14,6 +28,7 @@ class ProductModel {
   final double rating;
   final String imagePath;
   final List<String> imageUrls;
+  final List<ProductVariant> variants;
   final bool hasOffer;
   final String? offerLabel;
 
@@ -32,6 +47,7 @@ class ProductModel {
     this.rating = 4.9,
     required this.imagePath,
     this.imageUrls = const [],
+    this.variants = const [],
     this.hasOffer = false,
     this.offerLabel,
   });
@@ -56,13 +72,17 @@ class ProductModel {
     final categoryName = (json['category'] is Map)
         ? (json['category']['name'] ?? '').toString()
         : '';
-    final variants = json['variants'] is List
+    final variantsRaw = json['variants'] is List
         ? (json['variants'] as List)
         : const [];
-    final firstVariant = variants.isNotEmpty && variants.first is Map
-        ? (variants.first as Map).map(
-            (key, value) => MapEntry(key.toString(), value),
-          )
+    final variantMaps = variantsRaw
+        .whereType<Map>()
+        .map(
+          (item) => item.map((key, value) => MapEntry(key.toString(), value)),
+        )
+        .toList();
+    final firstVariant = variantMaps.isNotEmpty
+        ? variantMaps.first
         : const <String, dynamic>{};
     final rawVariantId =
         json['defaultVariantId'] ??
@@ -70,6 +90,35 @@ class ProductModel {
         firstVariant['_id'] ??
         firstVariant['id'];
     final defaultVariantId = rawVariantId?.toString().trim();
+
+    final parsedVariants = variantMaps
+        .map(
+          (variant) => ProductVariant(
+            id: (variant['_id'] ?? variant['id'] ?? '').toString().trim(),
+            unit: (variant['unit'] ?? variant['packSize'] ?? '1 unit')
+                .toString(),
+            price: _toDouble(
+              variant['finalPrice'] ?? variant['salePrice'] ?? variant['price'],
+            ),
+            comparePrice: _toDouble(
+              variant['comparePrice'] ??
+                  variant['regularPrice'] ??
+                  variant['mrp'],
+            ),
+          ),
+        )
+        .where((variant) => variant.id.isNotEmpty)
+        .toList();
+
+    final selectedVariantMap =
+        (defaultVariantId != null && defaultVariantId.isNotEmpty)
+        ? variantMaps.firstWhere(
+            (variant) =>
+                (variant['_id'] ?? variant['id'] ?? '').toString().trim() ==
+                defaultVariantId,
+            orElse: () => firstVariant,
+          )
+        : firstVariant;
     final imageList = <String>[];
     final images = json['images'];
     if (images is List) {
@@ -87,8 +136,22 @@ class ProductModel {
         ? imageList.first
         : (thumbnail.isNotEmpty ? thumbnail : 'assets/demo/product_1.png');
 
-    final finalPrice = _toDouble(json['finalPrice'] ?? json['price']) ?? 0;
-    final comparePrice = _toDouble(json['comparePrice']);
+    final variantPrice = _toDouble(
+      selectedVariantMap['finalPrice'] ??
+          selectedVariantMap['salePrice'] ??
+          selectedVariantMap['price'],
+    );
+    final productPrice = _toDouble(json['finalPrice'] ?? json['price']);
+    final finalPrice = variantPrice ?? productPrice ?? 0;
+
+    final variantComparePrice = _toDouble(
+      selectedVariantMap['comparePrice'] ??
+          selectedVariantMap['regularPrice'] ??
+          selectedVariantMap['mrp'],
+    );
+    final comparePrice =
+        variantComparePrice ??
+        _toDouble(json['comparePrice'] ?? json['regularPrice'] ?? json['mrp']);
     final ratingValue = (json['ratings'] is Map)
         ? json['ratings']['average']
         : json['rating'];
@@ -126,13 +189,16 @@ class ProductModel {
           ?.toString(),
       price: finalPrice,
       maxPrice: comparePrice,
-      moq: variants.isNotEmpty
-          ? (firstVariant['unit'] ?? firstVariant['packSize'] ?? '1 unit')
+      moq: variantMaps.isNotEmpty
+          ? (selectedVariantMap['unit'] ??
+                    selectedVariantMap['packSize'] ??
+                    '1 unit')
                 .toString()
           : '1 unit',
       rating: (ratingValue is num) ? ratingValue.toDouble() : 4.9,
       imagePath: primaryImage,
       imageUrls: imageList,
+      variants: parsedVariants,
       hasOffer:
           (discountValue is num ? discountValue > 0 : false) ||
           (comparePrice != null && comparePrice > finalPrice + 0.0001),
@@ -215,6 +281,16 @@ class ProductModel {
       'rating': rating,
       'imagePath': imagePath,
       'imageUrls': imageUrls,
+      'variants': variants
+          .map(
+            (variant) => {
+              'id': variant.id,
+              'unit': variant.unit,
+              'price': variant.price,
+              'comparePrice': variant.comparePrice,
+            },
+          )
+          .toList(),
       'hasOffer': hasOffer,
       'offerLabel': offerLabel,
     };

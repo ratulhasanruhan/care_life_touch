@@ -21,6 +21,7 @@ import '../modules/product_details/views/medicine_overview_view.dart';
 import '../modules/product_details/views/product_reviews_view.dart';
 import '../modules/review/bindings/write_review_binding.dart';
 import '../modules/review/views/write_review_view.dart';
+import '../modules/cart/views/cart_view.dart';
 import '../modules/checkout/bindings/checkout_binding.dart';
 import '../modules/checkout/views/checkout_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
@@ -107,6 +108,7 @@ class AppPages {
       page: () => const WriteReviewView(),
       binding: WriteReviewBinding(),
     ),
+    GetPage(name: _Paths.CART, page: () => const CartView()),
     GetPage(
       name: _Paths.CHECKOUT,
       page: () => const CheckoutView(),

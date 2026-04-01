@@ -20,7 +20,8 @@ class CartApiItem {
   });
 
   factory CartApiItem.fromJson(Map<String, dynamic> json) {
-    final productMap = _mapValue(json['product']) ??
+    final productMap =
+        _mapValue(json['product']) ??
         _mapValue(json['productId']) ??
         _mapValue(json['item']) ??
         _mapValue(json['productDetails']) ??
@@ -28,19 +29,25 @@ class CartApiItem {
         <String, dynamic>{};
 
     final rawVariant = json['variant'];
-    final variantMap = _mapValue(rawVariant) ?? _mapValue(json['selectedVariant']);
+    final variantMap =
+        _mapValue(rawVariant) ?? _mapValue(json['selectedVariant']);
 
     final productId = (json['productId'] is String || json['productId'] is num)
         ? json['productId'].toString()
         : (json['product'] is String || json['product'] is num)
-            ? json['product'].toString()
-            : (_extractString(productMap, const ['_id', 'id', 'productId']) ?? '');
+        ? json['product'].toString()
+        : (_extractString(productMap, const ['_id', 'id', 'productId']) ?? '');
 
-    final variantIdText = (json['variantId'] is String || json['variantId'] is num)
+    final variantIdText =
+        (json['variantId'] is String || json['variantId'] is num)
         ? json['variantId'].toString()
         : (rawVariant is String || rawVariant is num)
-            ? rawVariant.toString()
-            : (_extractString(variantMap ?? const <String, dynamic>{}, const ['_id', 'id']) ?? '');
+        ? rawVariant.toString()
+        : (_extractString(variantMap ?? const <String, dynamic>{}, const [
+                '_id',
+                'id',
+              ]) ??
+              '');
 
     final normalizedProduct = _normalizeCartProduct(
       root: json,
@@ -54,14 +61,18 @@ class CartApiItem {
     final quantity = _asInt(json['quantity']) ?? 1;
     final resolvedProductId = productId.isNotEmpty
         ? productId
-        : (product.id.isNotEmpty ? product.id : (normalizedProduct['_id'] ?? normalizedProduct['id'] ?? '').toString());
+        : (product.id.isNotEmpty
+              ? product.id
+              : (normalizedProduct['_id'] ?? normalizedProduct['id'] ?? '')
+                    .toString());
     final variantId = variantIdText.isNotEmpty
         ? variantIdText
         : (product.defaultVariantId ?? '').trim().isEmpty
-            ? null
-            : product.defaultVariantId;
+        ? null
+        : product.defaultVariantId;
 
-    final unitPrice = _asDouble(
+    final unitPrice =
+        _asDouble(
           json['unitPrice'] ??
               json['price'] ??
               json['finalPrice'] ??
@@ -71,10 +82,13 @@ class CartApiItem {
         ) ??
         product.price;
 
-    final totalPrice = _asDouble(json['totalPrice'] ?? json['subtotal']) ?? (unitPrice * quantity);
+    final totalPrice =
+        _asDouble(json['totalPrice'] ?? json['subtotal']) ??
+        (unitPrice * quantity);
 
     return CartApiItem(
-      itemId: (json['_id'] ?? json['id'] ?? json['itemId'] ?? resolvedProductId).toString(),
+      itemId: (json['_id'] ?? json['id'] ?? json['itemId'] ?? resolvedProductId)
+          .toString(),
       productId: resolvedProductId,
       variantId: variantId,
       quantity: quantity,
@@ -122,7 +136,11 @@ class CartApiSnapshot {
 
   factory CartApiSnapshot.fromJson(Map<String, dynamic> json) {
     final cartMap = _mapValue(json['cart']) ?? _mapValue(json['data']) ?? json;
-    final itemsRaw = cartMap['items'] ?? cartMap['cartItems'] ?? cartMap['products'] ?? json['items'];
+    final itemsRaw =
+        cartMap['items'] ??
+        cartMap['cartItems'] ??
+        cartMap['products'] ??
+        json['items'];
 
     final items = <CartApiItem>[];
     if (itemsRaw is List) {
@@ -134,17 +152,53 @@ class CartApiSnapshot {
       }
     }
 
-    final computedSubtotal = items.fold<double>(0, (sum, item) => sum + item.totalPrice);
-    final subtotal = _asDouble(
-          cartMap['subtotal'] ?? cartMap['subTotal'] ?? cartMap['totalPrice'] ?? json['subtotal'],
+    final computedSubtotal = items.fold<double>(
+      0,
+      (sum, item) => sum + item.totalPrice,
+    );
+    final subtotal =
+        _asDouble(
+          cartMap['subtotal'] ??
+              cartMap['subTotal'] ??
+              cartMap['subTotalPrice'] ??
+              cartMap['totalPrice'] ??
+              cartMap['itemsTotal'] ??
+              json['subtotal'],
         ) ??
         computedSubtotal;
-    final discount = _asDouble(cartMap['discount'] ?? json['discount']) ?? 0;
-    final deliveryFee = _asDouble(cartMap['deliveryFee'] ?? cartMap['shippingFee'] ?? json['deliveryFee']) ?? 0;
-    final total = _asDouble(
-          cartMap['total'] ?? cartMap['totalPayable'] ?? cartMap['grandTotal'] ?? json['total'],
+
+    final rawDiscount = _asDouble(
+      cartMap['discount'] ??
+          cartMap['totalDiscount'] ??
+          cartMap['discountAmount'] ??
+          cartMap['couponDiscount'] ??
+          json['discount'] ??
+          json['totalDiscount'] ??
+          json['discountAmount'],
+    );
+
+    final deliveryFee =
+        _asDouble(
+          cartMap['deliveryFee'] ??
+              cartMap['shippingFee'] ??
+              cartMap['deliveryCharge'] ??
+              json['deliveryFee'],
         ) ??
-        (subtotal - discount + deliveryFee);
+        0;
+    final total =
+        _asDouble(
+          cartMap['total'] ??
+              cartMap['totalAmount'] ??
+              cartMap['totalPayable'] ??
+              cartMap['grandTotal'] ??
+              cartMap['payableAmount'] ??
+              json['total'],
+        ) ??
+        (subtotal + deliveryFee);
+
+    final inferredDiscount = (subtotal + deliveryFee) - total;
+    final discount =
+        rawDiscount ?? (inferredDiscount > 0 ? inferredDiscount : 0);
 
     return CartApiSnapshot(
       items: items,
@@ -199,39 +253,100 @@ Map<String, dynamic> _normalizeCartProduct({
   required String fallbackProductId,
   required String rawVariantId,
 }) {
-  final result = <String, dynamic>{
-    ...productMap,
-  };
+  final result = <String, dynamic>{...productMap};
 
   final id = _extractString(result, const ['_id', 'id']) ?? fallbackProductId;
-  final name = _extractString(result, const ['name', 'productName', 'title', 'product_title']) ??
-      _extractString(root, const ['name', 'productName', 'title', 'product_title']) ??
+  final name =
+      _extractString(result, const [
+        'name',
+        'productName',
+        'title',
+        'product_title',
+      ]) ??
+      _extractString(root, const [
+        'name',
+        'productName',
+        'title',
+        'product_title',
+      ]) ??
       'Product';
 
-  final brand = (result['brand'] is Map
-          ? _extractString(_mapValue(result['brand']) ?? const {}, const ['name', 'brandName'])
+  final brand =
+      (result['brand'] is Map
+          ? _extractString(_mapValue(result['brand']) ?? const {}, const [
+              'name',
+              'brandName',
+            ])
           : null) ??
-      _extractString(result, const ['brandName', 'manufacturer', 'genericName']) ??
-      _extractString(root, const ['brandName', 'manufacturer', 'genericName']) ??
+      (result['company'] is Map
+          ? _extractString(_mapValue(result['company']) ?? const {}, const [
+              'name',
+              'title',
+              'companyName',
+            ])
+          : null) ??
+      (root['brand'] is Map
+          ? _extractString(_mapValue(root['brand']) ?? const {}, const [
+              'name',
+              'brandName',
+            ])
+          : null) ??
+      (root['company'] is Map
+          ? _extractString(_mapValue(root['company']) ?? const {}, const [
+              'name',
+              'title',
+              'companyName',
+            ])
+          : null) ??
+      _extractString(result, const [
+        'brandName',
+        'manufacturer',
+        'genericName',
+      ]) ??
+      _extractString(result, const ['companyName', 'company', 'brand']) ??
+      _extractString(root, const [
+        'brandName',
+        'manufacturer',
+        'genericName',
+      ]) ??
+      _extractString(root, const ['companyName', 'company', 'brand']) ??
       '';
 
-  final imageUrl = _extractString(result, const ['thumbnail', 'image', 'imagePath', 'imageUrl', 'productImage']) ??
-      _extractString(root, const ['thumbnail', 'image', 'imagePath', 'imageUrl', 'productImage']);
+  final sanitizedBrand = _looksLikeObjectId(brand) ? '' : brand;
 
-  final resolvedPrice = _asDouble(result['finalPrice'] ?? result['price']) ??
+  final imageUrl =
+      _extractString(result, const [
+        'thumbnail',
+        'image',
+        'imagePath',
+        'imageUrl',
+        'productImage',
+      ]) ??
+      _extractString(root, const [
+        'thumbnail',
+        'image',
+        'imagePath',
+        'imageUrl',
+        'productImage',
+      ]);
+
+  final resolvedPrice =
+      _asDouble(result['finalPrice'] ?? result['price']) ??
       _asDouble(variantMap?['finalPrice'] ?? variantMap?['price']) ??
       _asDouble(root['unitPrice'] ?? root['price'] ?? root['finalPrice']) ??
       0;
 
-  final resolvedUnit = _extractString(
-    variantMap ?? const <String, dynamic>{},
-    const ['unit', 'packSize'],
-  ) ?? _extractString(root, const ['unit']);
+  final resolvedUnit =
+      _extractString(variantMap ?? const <String, dynamic>{}, const [
+        'unit',
+        'packSize',
+      ]) ??
+      _extractString(root, const ['unit']);
 
   result['_id'] = id;
   result['id'] = id;
   result['name'] = name;
-  result['brand'] = brand;
+  result['brand'] = sanitizedBrand;
   result['price'] = resolvedPrice;
   result['finalPrice'] = resolvedPrice;
 
@@ -268,4 +383,10 @@ String? _extractString(Map<String, dynamic> map, List<String> keys) {
     }
   }
   return null;
+}
+
+bool _looksLikeObjectId(String value) {
+  final text = value.trim();
+  if (text.isEmpty) return false;
+  return RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(text);
 }

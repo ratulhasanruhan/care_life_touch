@@ -31,7 +31,8 @@ class CartView extends GetView<CartController> {
           );
         }
 
-        if (controller.errorMessage.value.isNotEmpty && controller.cartItems.isEmpty) {
+        if (controller.errorMessage.value.isNotEmpty &&
+            controller.cartItems.isEmpty) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -126,10 +127,14 @@ class CartView extends GetView<CartController> {
 
   /// Build cart item widget
   Widget _buildCartItem(CartItem item) {
-    final resolvedProductId = item.product.id.isNotEmpty ? item.product.id : item.productId;
-    final productName = item.product.name.trim().isEmpty ? 'Product' : item.product.name;
+    final resolvedProductId = item.product.id.isNotEmpty
+        ? item.product.id
+        : item.productId;
+    final productName = item.product.name.trim().isEmpty
+        ? 'Product'
+        : item.product.name;
     final brandName = item.product.brand.trim();
-    final priceText = item.product.price > 0 ? item.product.priceDisplay : '৳${item.unitPrice.toInt()}';
+    final priceText = '৳${_money(item.unitPrice)}';
     final hasImage = item.product.imagePath.trim().isNotEmpty;
 
     return Container(
@@ -165,22 +170,22 @@ class CartView extends GetView<CartController> {
                       },
                     )
                   : hasImage
-                      ? Image.asset(
-                          item.product.imagePath,
-                          fit: BoxFit.contain,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Icon(
-                              Icons.image_not_supported,
-                              size: 32,
-                              color: Color(0xFFE8EAE8),
-                            );
-                          },
-                        )
-                      : const Icon(
+                  ? Image.asset(
+                      item.product.imagePath,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
                           Icons.image_not_supported,
                           size: 32,
                           color: Color(0xFFE8EAE8),
-                        ),
+                        );
+                      },
+                    )
+                  : const Icon(
+                      Icons.image_not_supported,
+                      size: 32,
+                      color: Color(0xFFE8EAE8),
+                    ),
             ),
           ),
 
@@ -236,7 +241,8 @@ class CartView extends GetView<CartController> {
                     IconButton(
                       onPressed: controller.isMutating.value
                           ? null
-                          : () => controller.decreaseQuantity(resolvedProductId),
+                          : () =>
+                                controller.decreaseQuantity(resolvedProductId),
                       icon: const Icon(Icons.remove, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -258,7 +264,8 @@ class CartView extends GetView<CartController> {
                     IconButton(
                       onPressed: controller.isMutating.value
                           ? null
-                          : () => controller.increaseQuantity(resolvedProductId),
+                          : () =>
+                                controller.increaseQuantity(resolvedProductId),
                       icon: const Icon(Icons.add, size: 16),
                       padding: const EdgeInsets.all(4),
                       constraints: const BoxConstraints(
@@ -312,7 +319,7 @@ class CartView extends GetView<CartController> {
                   ),
                 ),
                 Text(
-                  '৳${controller.subtotal.toStringAsFixed(0)}',
+                  '৳${_money(controller.subtotal)}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -321,6 +328,31 @@ class CartView extends GetView<CartController> {
                 ),
               ],
             ),
+
+            if (controller.discount > 0) ...[
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Discount',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF727379),
+                    ),
+                  ),
+                  Text(
+                    '-৳${_money(controller.discount)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                ],
+              ),
+            ],
 
             const SizedBox(height: 8),
 
@@ -339,7 +371,7 @@ class CartView extends GetView<CartController> {
                 Text(
                   controller.deliveryFee == 0
                       ? 'FREE'
-                      : '৳${controller.deliveryFee.toStringAsFixed(0)}',
+                      : '৳${_money(controller.deliveryFee)}',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -366,7 +398,7 @@ class CartView extends GetView<CartController> {
                   ),
                 ),
                 Text(
-                  '৳${controller.total.toStringAsFixed(0)}',
+                  '৳${_money(controller.total)}',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -408,5 +440,9 @@ class CartView extends GetView<CartController> {
         ),
       ),
     );
+  }
+
+  String _money(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
   }
 }

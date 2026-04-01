@@ -78,9 +78,14 @@ class CartController extends GetxController {
     }
   }
 
-  Future<void> addToCart(ProductModel product, {int quantity = 1}) async {
-    final variantId = product.defaultVariantId;
-    if (variantId == null || variantId.isEmpty) {
+  Future<void> addToCart(
+    ProductModel product, {
+    int quantity = 1,
+    String? variantId,
+  }) async {
+    final resolvedVariantId = (variantId ?? product.defaultVariantId ?? '')
+        .trim();
+    if (resolvedVariantId.isEmpty) {
       _showError('This product is not available for cart yet.');
       return;
     }
@@ -90,7 +95,7 @@ class CartController extends GetxController {
     await _mutateCart(
       () => _cartRepository.addToCart(
         productId: product.id,
-        variantId: variantId,
+        variantId: resolvedVariantId,
         quantity: quantity,
       ),
     );
@@ -267,7 +272,7 @@ class CartController extends GetxController {
       brandId: (current.brandId != null && current.brandId!.trim().isNotEmpty)
           ? current.brandId
           : cached.brandId,
-      brand: current.brand.trim().isNotEmpty ? current.brand : cached.brand,
+      brand: _isMeaningfulBrand(current.brand) ? current.brand : cached.brand,
       categoryName: current.categoryName.trim().isNotEmpty
           ? current.categoryName
           : cached.categoryName,
@@ -282,6 +287,9 @@ class CartController extends GetxController {
       imageUrls: current.imageUrls.isNotEmpty
           ? current.imageUrls
           : cached.imageUrls,
+      variants: current.variants.isNotEmpty
+          ? current.variants
+          : cached.variants,
       hasOffer: current.hasOffer || cached.hasOffer,
       offerLabel: current.offerLabel ?? cached.offerLabel,
     );
@@ -299,6 +307,14 @@ class CartController extends GetxController {
 
   void _showError(String message) {
     Get.snackbar('Error', message, snackPosition: SnackPosition.BOTTOM);
+  }
+
+  bool _isMeaningfulBrand(String value) {
+    final text = value.trim();
+    if (text.isEmpty || text.toLowerCase() == 'unknown brand') {
+      return false;
+    }
+    return !RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(text);
   }
 
   /// Convert cart items to order format
