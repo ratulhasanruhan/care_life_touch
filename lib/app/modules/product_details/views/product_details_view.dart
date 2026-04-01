@@ -35,18 +35,14 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               _buildProductDetails(),
               const Divider(height: 1, color: Color(0xFFE8EAE8)),
               _buildMedicineOverview(),
-              _buildAlternativeBrands(),
+              _buildAlternativeProducts(),
               _buildMoreFromBrand(),
+              _buildRelatedProducts(),
             ],
           ),
 
           // Bottom Add to Cart Bar
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: _buildBottomBar(),
-          ),
+          Positioned(left: 20, right: 20, bottom: 20, child: _buildBottomBar()),
         ],
       ),
     );
@@ -78,7 +74,10 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
             ),
             items: controller.images.map((imagePath) {
               return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 61.5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 61.5,
+                ),
                 child: _buildProductImage(imagePath),
               );
             }).toList(),
@@ -139,8 +138,9 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   Obx(
                     () => IconButton(
                       visualDensity: VisualDensity.compact,
-                      onPressed:
-                          controller.isWishlistBusy.value ? null : controller.toggleWishlist,
+                      onPressed: controller.isWishlistBusy.value
+                          ? null
+                          : controller.toggleWishlist,
                       icon: Icon(
                         controller.isWishlisted.value
                             ? Icons.favorite
@@ -166,7 +166,11 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.star, color: Color(0xFFF1B71B), size: 14),
+                            const Icon(
+                              Icons.star,
+                              color: Color(0xFFF1B71B),
+                              size: 14,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               controller.product.rating.toStringAsFixed(1),
@@ -296,7 +300,9 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               ),
               child: Obx(
                 () => Text(
-                  controller.isDescriptionExpanded.value ? 'Read less' : 'Read more',
+                  controller.isDescriptionExpanded.value
+                      ? 'Read less'
+                      : 'Read more',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w400,
@@ -315,15 +321,16 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     return Container(
       height: 48,
       margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      decoration: const BoxDecoration(
-        color: Color(0xFFFAFAFA),
-      ),
+      decoration: const BoxDecoration(color: Color(0xFFFAFAFA)),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
             // Navigate to medicine overview screen
-            Get.toNamed(Routes.MEDICINE_OVERVIEW, arguments: controller.product);
+            Get.toNamed(
+              Routes.MEDICINE_OVERVIEW,
+              arguments: controller.product,
+            );
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -358,32 +365,57 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
     );
   }
 
-  /// Alternative brands section
-  Widget _buildAlternativeBrands() {
+  /// Alternative products section
+  Widget _buildAlternativeProducts() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Alternative Brands For ${controller.product.name}',
-            style: const TextStyle(
+          const Text(
+            'Alternative Products',
+            style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: Color(0xB301060F),
+              color: Color(0xFF01060F),
             ),
           ),
           const SizedBox(height: 16),
-          Obx(
-            () => Column(
+          Obx(() {
+            if (controller.isRelatedLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF064E36)),
+                ),
+              );
+            }
+
+            if (controller.alternativeProducts.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'No alternative products found right now.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xB301060F),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
               children: controller.alternativeProducts
-                  .map((product) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: OfferProductTile(product: product),
-                      ))
+                  .map(
+                    (product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: OfferProductTile(product: product),
+                    ),
+                  )
                   .toList(),
-            ),
-          ),
+            );
+          }),
         ],
       ),
     );
@@ -412,8 +444,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                 onTap: () {
                   final brandKeyword =
                       (controller.product.brandId ?? '').trim().isNotEmpty
-                          ? controller.product.brandId!
-                          : controller.product.brand;
+                      ? controller.product.brandId!
+                      : controller.product.brand;
 
                   Get.toNamed(
                     Routes.PRODUCTS,
@@ -452,6 +484,62 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  /// Related products section (shown at bottom)
+  Widget _buildRelatedProducts() {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Related Products',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF01060F),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Obx(() {
+            if (controller.isRelatedLoading.value) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Center(
+                  child: CircularProgressIndicator(color: Color(0xFF064E36)),
+                ),
+              );
+            }
+
+            if (controller.relatedProducts.isEmpty) {
+              return const Padding(
+                padding: EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'No related products found right now.',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                    color: Color(0xB301060F),
+                  ),
+                ),
+              );
+            }
+
+            return Column(
+              children: controller.relatedProducts
+                  .map(
+                    (product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: OfferProductTile(product: product),
+                    ),
+                  )
+                  .toList(),
+            );
+          }),
         ],
       ),
     );

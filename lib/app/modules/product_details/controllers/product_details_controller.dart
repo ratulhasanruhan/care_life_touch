@@ -13,13 +13,16 @@ class ProductDetailsController extends GetxController {
     ProductRepository? productRepository,
     WishlistController? wishlistController,
   }) : _productRepository = productRepository ?? Get.find<ProductRepository>(),
-       _wishlistController = wishlistController ?? Get.find<WishlistController>();
+       _wishlistController =
+           wishlistController ?? Get.find<WishlistController>();
 
   // Observable properties
   final currentImageIndex = 0.obs;
   final isDescriptionExpanded = false.obs;
   final alternativeProducts = <ProductModel>[].obs;
+  final relatedProducts = <ProductModel>[].obs;
   final brandProducts = <ProductModel>[].obs;
+  final isRelatedLoading = false.obs;
   final isWishlisted = false.obs;
   final isWishlistBusy = false.obs;
 
@@ -49,14 +52,15 @@ class ProductDetailsController extends GetxController {
     _syncWishlistState();
   }
 
-  /// Load alternative and brand products
+  /// Load alternative, related, and brand products
   Future<void> _loadData() async {
+    isRelatedLoading.value = true;
     final slug = product.slug;
 
     try {
       if (slug != null && slug.isNotEmpty) {
         final related = await _productRepository.getRelatedProducts(slug);
-        alternativeProducts.assignAll(
+        relatedProducts.assignAll(
           related.where((item) => item.id != product.id).take(3),
         );
       }
@@ -64,21 +68,78 @@ class ProductDetailsController extends GetxController {
       // Fall back to local filtering below when related API fails.
     }
 
-    final allProducts = await _productRepository.getAllProducts();
+    try {
+      final allProducts = await _productRepository.getAllProducts();
 
-    if (alternativeProducts.isEmpty) {
-      alternativeProducts.assignAll(
+      if (alternativeProducts.isEmpty) {
+        alternativeProducts.assignAll(
+          allProducts
+              .where((p) => p.id != product.id && p.brand != product.brand)
+              .take(3),
+        );
+      }
+
+      if (relatedProducts.isEmpty) {
+        relatedProducts.assignAll(
+          allProducts
+              .where(
+                (p) =>
+                    p.id != product.id &&
+                    p.categoryName.trim().isNotEmpty &&
+                    p.categoryName == product.categoryName,
+              )
+              .take(3),
+        );
+      }
+
+      // Ensure related section includes some same-brand products when available.
+      final relatedIds = relatedProducts.map((p) => p.id).toSet();
+
+      if (relatedProducts.length < 3) {
+        final sameBrand = allProducts
+            .where(
+              (p) =>
+                  p.id != product.id &&
+                  p.brand == product.brand &&
+                  !relatedIds.contains(p.id),
+            )
+            .take(3 - relatedProducts.length)
+            .toList();
+
+        if (sameBrand.isNotEmpty) {
+          relatedProducts.addAll(sameBrand);
+          relatedIds.addAll(sameBrand.map((p) => p.id));
+        }
+      }
+
+      if (relatedProducts.length < 3) {
+        final sameCategory = allProducts
+            .where(
+              (p) =>
+                  p.id != product.id &&
+                  p.categoryName.trim().isNotEmpty &&
+                  p.categoryName == product.categoryName &&
+                  !relatedIds.contains(p.id),
+            )
+            .take(3 - relatedProducts.length)
+            .toList();
+
+        if (sameCategory.isNotEmpty) {
+          relatedProducts.addAll(sameCategory);
+        }
+      }
+
+      brandProducts.assignAll(
         allProducts
-            .where((p) => p.id != product.id && p.brand != product.brand)
-            .take(3),
+            .where((p) => p.id != product.id && p.brand == product.brand)
+            .take(4),
       );
+    } catch (_) {
+      // Keep any related products already loaded from the related endpoint.
+      brandProducts.clear();
+    } finally {
+      isRelatedLoading.value = false;
     }
-
-    brandProducts.assignAll(
-      allProducts
-          .where((p) => p.id != product.id && p.brand == product.brand)
-          .take(4),
-    );
   }
 
   /// Toggle description expanded state
@@ -114,4 +175,3 @@ class ProductDetailsController extends GetxController {
     }
   }
 }
-

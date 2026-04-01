@@ -36,14 +36,15 @@ class ProductModel {
     this.offerLabel,
   });
 
-  bool get hasRemoteImage => imagePath.startsWith('http://') || imagePath.startsWith('https://');
+  bool get hasRemoteImage =>
+      imagePath.startsWith('http://') || imagePath.startsWith('https://');
 
   /// Get price display string
   String get priceDisplay {
     if (maxPrice != null) {
-      return '৳${price.toInt()}-৳${maxPrice!.toInt()}';
+      return '৳${_formatMoney(price)}-৳${_formatMoney(maxPrice!)}';
     }
-    return '৳${price.toInt()}';
+    return '৳${_formatMoney(price)}';
   }
 
   /// Get MOQ display string
@@ -55,18 +56,27 @@ class ProductModel {
     final categoryName = (json['category'] is Map)
         ? (json['category']['name'] ?? '').toString()
         : '';
-    final variants = json['variants'] is List ? (json['variants'] as List) : const [];
+    final variants = json['variants'] is List
+        ? (json['variants'] as List)
+        : const [];
     final firstVariant = variants.isNotEmpty && variants.first is Map
-        ? (variants.first as Map).map((key, value) => MapEntry(key.toString(), value))
+        ? (variants.first as Map).map(
+            (key, value) => MapEntry(key.toString(), value),
+          )
         : const <String, dynamic>{};
     final rawVariantId =
-        json['defaultVariantId'] ?? json['variantId'] ?? firstVariant['_id'] ?? firstVariant['id'];
+        json['defaultVariantId'] ??
+        json['variantId'] ??
+        firstVariant['_id'] ??
+        firstVariant['id'];
     final defaultVariantId = rawVariantId?.toString().trim();
     final imageList = <String>[];
     final images = json['images'];
     if (images is List) {
       for (final image in images) {
-        if (image is Map && image['url'] is String && (image['url'] as String).trim().isNotEmpty) {
+        if (image is Map &&
+            image['url'] is String &&
+            (image['url'] as String).trim().isNotEmpty) {
           imageList.add((image['url'] as String).trim());
         }
       }
@@ -77,8 +87,8 @@ class ProductModel {
         ? imageList.first
         : (thumbnail.isNotEmpty ? thumbnail : 'assets/demo/product_1.png');
 
-    final finalPrice = (json['finalPrice'] ?? json['price'] ?? 0);
-    final comparePrice = json['comparePrice'];
+    final finalPrice = _toDouble(json['finalPrice'] ?? json['price']) ?? 0;
+    final comparePrice = _toDouble(json['comparePrice']);
     final ratingValue = (json['ratings'] is Map)
         ? json['ratings']['average']
         : json['rating'];
@@ -95,14 +105,16 @@ class ProductModel {
     final resolvedBrandId = _isValidBrandId(brandIdFromObject)
         ? brandIdFromObject!
         : _isValidBrandId(brandIdFromField)
-            ? brandIdFromField
-            : _isValidBrandId(brandIdFromRaw)
-                ? brandIdFromRaw
-                : '';
+        ? brandIdFromField
+        : _isValidBrandId(brandIdFromRaw)
+        ? brandIdFromRaw
+        : '';
 
     return ProductModel(
       id: id,
-      slug: (json['slug'] ?? '').toString().isEmpty ? null : json['slug'].toString(),
+      slug: (json['slug'] ?? '').toString().isEmpty
+          ? null
+          : json['slug'].toString(),
       defaultVariantId: defaultVariantId == null || defaultVariantId.isEmpty
           ? null
           : defaultVariantId,
@@ -110,20 +122,35 @@ class ProductModel {
       brandId: resolvedBrandId.isEmpty ? null : resolvedBrandId,
       brand: _resolveBrandText(json),
       categoryName: categoryName,
-      description: (json['description'] ?? json['shortDescription'])?.toString(),
-      price: (finalPrice is num) ? finalPrice.toDouble() : 0,
-      maxPrice: comparePrice is num ? comparePrice.toDouble() : null,
+      description: (json['description'] ?? json['shortDescription'])
+          ?.toString(),
+      price: finalPrice,
+      maxPrice: comparePrice,
       moq: variants.isNotEmpty
-          ? (firstVariant['unit'] ?? firstVariant['packSize'] ?? '1 unit').toString()
+          ? (firstVariant['unit'] ?? firstVariant['packSize'] ?? '1 unit')
+                .toString()
           : '1 unit',
       rating: (ratingValue is num) ? ratingValue.toDouble() : 4.9,
       imagePath: primaryImage,
       imageUrls: imageList,
-      hasOffer: (discountValue is num ? discountValue > 0 : false) || (comparePrice is num && comparePrice > (finalPrice is num ? finalPrice : 0)),
+      hasOffer:
+          (discountValue is num ? discountValue > 0 : false) ||
+          (comparePrice != null && comparePrice > finalPrice + 0.0001),
       offerLabel: (discountValue is num && discountValue > 0)
           ? '${discountValue.toInt()} OFF'
           : json['offerLabel'],
     );
+  }
+
+  static double? _toDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    final text = value?.toString().trim() ?? '';
+    if (text.isEmpty || text.toLowerCase() == 'null') return null;
+    return double.tryParse(text);
+  }
+
+  static String _formatMoney(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
   }
 
   static String _resolveBrandText(Map<String, dynamic> json) {
@@ -136,7 +163,9 @@ class ProductModel {
       }
     }
 
-    final brandName = (json['brandName'] ?? json['brand_name'] ?? '').toString().trim();
+    final brandName = (json['brandName'] ?? json['brand_name'] ?? '')
+        .toString()
+        .trim();
     if (_isValidBrand(brandName)) {
       return brandName;
     }
