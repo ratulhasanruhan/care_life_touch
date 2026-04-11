@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:flutter/material.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
+import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/address_repository.dart';
 import '../../../services/map_service.dart';
 import '../views/routes.dart';
 
 class AddressController extends GetxController {
   late final AddressRepository addressRepository;
+  late final StorageService storageService;
 
   /// Address list
   final addresses = <AddressModel>[].obs;
@@ -36,12 +37,9 @@ class AddressController extends GetxController {
 
   /// Form fields
   final selectedAddressType = 'Home'.obs; // Home, Office, Other
-  final recipientName = ''.obs;
-  final recipientPhone = ''.obs;
+  final profileName = ''.obs;
+  final profilePhone = ''.obs;
   final addressText = ''.obs;
-
-  final recipientNameController = TextEditingController();
-  final recipientPhoneController = TextEditingController();
   final editingAddressId = RxnString();
   final isEditMode = false.obs;
   bool _formHydrated = false;
@@ -52,14 +50,9 @@ class AddressController extends GetxController {
   void onInit() {
     super.onInit();
     addressRepository = Get.find<AddressRepository>();
+    storageService = Get.find<StorageService>();
+    _loadProfileIdentity();
     loadAddresses();
-  }
-
-  @override
-  void onClose() {
-    recipientNameController.dispose();
-    recipientPhoneController.dispose();
-    super.onClose();
   }
 
   void ensureLocationBootstrapped() {
@@ -108,8 +101,10 @@ class AddressController extends GetxController {
       }
 
       final position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 30),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 30),
+        ),
       ).timeout(
         const Duration(seconds: 35),
         onTimeout: () {
@@ -201,9 +196,7 @@ class AddressController extends GetxController {
 
   /// Save new address
   Future<void> saveAddress() async {
-    if (recipientNameController.text.trim().isEmpty ||
-        recipientPhoneController.text.trim().isEmpty ||
-        addressText.value.trim().isEmpty) {
+    if (addressText.value.trim().isEmpty) {
       Get.snackbar('Error', 'Please fill all fields');
       return;
     }
@@ -285,11 +278,6 @@ class AddressController extends GetxController {
     editingAddressId.value = address.id;
     isEditMode.value = true;
 
-    recipientNameController.text = address.fullAddress.split(',').first.trim();
-    recipientPhoneController.text = recipientPhone.value;
-    recipientName.value = recipientNameController.text;
-    recipientPhone.value = recipientPhoneController.text;
-
     addressText.value = address.details;
     selectedAddressType.value = address.addressType;
     if (address.coordinates.length >= 2) {
@@ -312,10 +300,6 @@ class AddressController extends GetxController {
       final address = args['address'] as AddressModel;
       editingAddressId.value = address.id;
       isEditMode.value = true;
-      recipientNameController.text = address.fullAddress.split(',').first.trim();
-      recipientPhoneController.text = '';
-      recipientName.value = recipientNameController.text;
-      recipientPhone.value = recipientPhoneController.text;
       addressText.value = address.details;
       selectedAddressType.value = address.addressType;
       if (address.coordinates.length >= 2) {
@@ -331,10 +315,6 @@ class AddressController extends GetxController {
 
   /// Clear form
   void clearForm() {
-    recipientNameController.clear();
-    recipientPhoneController.clear();
-    recipientName.value = '';
-    recipientPhone.value = '';
     addressText.value = '';
     selectedAddressType.value = 'Home';
     currentLat.value = 0.0;
@@ -368,5 +348,32 @@ class AddressController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  void _loadProfileIdentity() {
+    final user = storageService.getUser() ?? const <String, dynamic>{};
+    profileName.value = _firstNonEmptyString([
+          user['name'],
+          user['fullName'],
+          user['ownerName'],
+          user['shopName'],
+        ]) ??
+        'Your profile';
+    profilePhone.value = _firstNonEmptyString([
+          user['phone'],
+          user['phoneNumber'],
+          user['mobile'],
+        ]) ??
+        '';
+  }
+
+  String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = (value ?? '').toString().trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return null;
   }
 }

@@ -46,6 +46,17 @@ class AddAddressView extends GetView<AddressController> {
                     /// Divider
                     const Divider(height: 1),
 
+                    /// Profile Identity
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Obx(
+                        () => _ProfileIdentityCard(
+                          name: controller.profileName.value,
+                          phone: controller.profilePhone.value,
+                        ),
+                      ),
+                    ),
+
                     /// Address Type Selector
                     Padding(
                       padding: const EdgeInsets.all(16),
@@ -61,32 +72,6 @@ class AddAddressView extends GetView<AddressController> {
                           ),
                           const SizedBox(height: 16),
                           const AddressTypeSelector(),
-                        ],
-                      ),
-                    ),
-
-                    /// Form Fields
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        children: [
-                          /// Recipient Name
-                          _buildTextField(
-                            label: 'Recipient Name',
-                            placeholder: 'Enter full name',
-                            textController: controller.recipientNameController,
-                            onChanged: (value) => controller.recipientName.value = value,
-                          ),
-                          const SizedBox(height: 16),
-
-                          /// Recipient Phone
-                          _buildTextField(
-                            label: 'Recipient Phone Number',
-                            placeholder: 'Enter phone number',
-                            keyboardType: TextInputType.phone,
-                            textController: controller.recipientPhoneController,
-                            onChanged: (value) => controller.recipientPhone.value = value,
-                          ),
                         ],
                       ),
                     ),
@@ -141,52 +126,68 @@ class AddAddressView extends GetView<AddressController> {
     );
   }
 
-  Widget _buildTextField({
-    required String label,
-    required String placeholder,
-    required TextEditingController textController,
-    TextInputType keyboardType = TextInputType.text,
-    required Function(String) onChanged,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 16,
+}
+
+class _ProfileIdentityCard extends StatelessWidget {
+  const _ProfileIdentityCard({required this.name, required this.phone});
+
+  final String name;
+  final String phone;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAF9),
+        border: Border.all(color: const Color(0xFFE8EAE8)),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      child: Row(
+        children: [
+          const CircleAvatar(
+            radius: 20,
+            backgroundColor: Color(0xFFE6F3EE),
+            child: Icon(Icons.person, color: Color(0xFF064E36)),
           ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: textController,
-          keyboardType: keyboardType,
-          onChanged: onChanged,
-          decoration: InputDecoration(
-            hintText: placeholder,
-            hintStyle: const TextStyle(color: Color(0xFFA2A8AF)),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: const BorderSide(color: Color(0xFFE8EAE8)),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: const BorderSide(color: Color(0xFFE8EAE8)),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(4),
-              borderSide: const BorderSide(
-                color: Color(0xFF064E36),
-              ),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 16,
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name.isEmpty ? 'Your profile' : name,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF01060F),
+                  ),
+                ),
+                if (phone.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    phone,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xB301060F),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
-        ),
-      ],
+          const SizedBox(width: 8),
+          const Text(
+            'Used automatically',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF064E36),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
