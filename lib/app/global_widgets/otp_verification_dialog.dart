@@ -115,53 +115,17 @@ class OTPVerificationDialog extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
-
-            // Description
-            Text(
-              'Enter the $otpLength-digit code sent we sent to',
-              style: const TextStyle(
+            const SizedBox(height: 8),
+            const Text(
+              'Care Life Touch will contact you for your OTP.',
+              style: TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
                 height: 1.43,
-                color: Color.fromRGBO(25, 25, 48, 0.6),
+                color: Color.fromRGBO(25, 25, 48, 0.7),
               ),
               textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 4),
-
-            // Email with Edit option
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  email,
-                  style: const TextStyle(
-                    fontFamily: 'DM Sans',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    height: 1.43,
-                    color: Color(0xFF01060F),
-                  ),
-                ),
-                if (onEdit != null) ...[
-                  const SizedBox(width: 8),
-                  GestureDetector(
-                    onTap: onEdit,
-                    child: const Text(
-                      'Edit',
-                      style: TextStyle(
-                        fontFamily: 'DM Sans',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        height: 1.43,
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ],
-              ],
             ),
             const SizedBox(height: 32),
 
