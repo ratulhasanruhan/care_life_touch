@@ -210,7 +210,7 @@ class OrderHistoryView extends GetView<OrderController> {
     );
   }
 
-  void _openReview(Map<String, dynamic> order) {
+  Future<void> _openReview(Map<String, dynamic> order) async {
     final productId = controller.firstProductIdOf(order);
     final orderId = controller.orderIdOf(order);
     final variantId = controller.firstVariantIdOf(order);
@@ -221,15 +221,20 @@ class OrderHistoryView extends GetView<OrderController> {
       return;
     }
 
-    Get.toNamed(
+    final result = await Get.toNamed(
       Routes.WRITE_REVIEW,
       arguments: {
         'productId': productId,
         'orderId': orderId,
         'variantId': variantId,
         'item': item,
+        'canReview': controller.canReviewOrder(order),
       },
     );
+
+    if (result == true) {
+      await controller.loadMyOrders();
+    }
   }
 
   void _showComingSoon(String message) {
@@ -376,7 +381,7 @@ class _OrderCard extends StatelessWidget {
 
     if (activeTab == OrderTab.completed) {
       leftButtonText = 'Return Order';
-      rightButtonText = 'Review';
+      rightButtonText = canReview ? 'Review' : 'Reviewed';
       leftAction = canReturn ? onReturn : null;
       rightAction = canReview ? onReview : null;
     } else {

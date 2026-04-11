@@ -26,6 +26,8 @@ class WriteReviewView extends GetView<WriteReviewController> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProductCard(),
+            const SizedBox(height: 12),
+            _buildReviewerCard(),
             const SizedBox(height: 20),
             _buildRatingPicker(),
             const SizedBox(height: 20),
@@ -87,11 +89,65 @@ class WriteReviewView extends GetView<WriteReviewController> {
         minimum: const EdgeInsets.fromLTRB(20, 8, 20, 12),
         child: Obx(
           () => CustomButton(
-            text: controller.isSubmitting.value ? 'Submitting...' : 'Confirm',
-            onPressed: controller.isSubmitting.value ? null : controller.submit,
+            text: controller.isSubmitting.value
+                ? 'Submitting...'
+                : (controller.canSubmitReview.value ? 'Confirm' : 'Reviewed'),
+            onPressed: controller.isSubmitting.value || !controller.canSubmitReview.value
+                ? null
+                : controller.submit,
             size: ButtonSize.medium,
             fullWidth: true,
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildReviewerCard() {
+    return Obx(
+      () => Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: const Color(0xFFE8EAE8)),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Row(
+          children: [
+            _ReviewerAvatar(
+              imagePath: controller.reviewerImage.value,
+              name: controller.reviewerName.value,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    controller.reviewerName.value,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF01060F),
+                    ),
+                  ),
+                  if (controller.reviewerPhone.value.isNotEmpty) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      controller.reviewerPhone.value,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        color: Color(0xB301060F),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -304,6 +360,53 @@ class WriteReviewView extends GetView<WriteReviewController> {
                 ),
         ),
       ],
+    );
+  }
+}
+
+class _ReviewerAvatar extends StatelessWidget {
+  const _ReviewerAvatar({required this.imagePath, required this.name});
+
+  final String imagePath;
+  final String name;
+
+  @override
+  Widget build(BuildContext context) {
+    final trimmedPath = imagePath.trim();
+    final initial = name.trim().isEmpty ? 'G' : name.trim()[0].toUpperCase();
+
+    if (trimmedPath.isNotEmpty) {
+      final isRemote =
+          trimmedPath.startsWith('http://') || trimmedPath.startsWith('https://');
+      if (isRemote) {
+        return CircleAvatar(
+          radius: 20,
+          backgroundImage: NetworkImage(trimmedPath),
+          onBackgroundImageError: (_, __) {},
+          child: const SizedBox.shrink(),
+        );
+      }
+
+      final file = File(trimmedPath);
+      if (file.existsSync()) {
+        return CircleAvatar(
+          radius: 20,
+          backgroundImage: FileImage(file),
+        );
+      }
+    }
+
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: const Color(0xFFE6F3EE),
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF064E36),
+        ),
+      ),
     );
   }
 }

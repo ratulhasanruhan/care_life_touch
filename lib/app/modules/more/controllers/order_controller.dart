@@ -2,14 +2,19 @@ import 'package:get/get.dart';
 
 import '../../../core/utils/app_logger.dart';
 import '../../../data/repositories/order_repository.dart';
+import '../../../data/repositories/review_repository.dart';
 
 enum OrderTab { current, completed, canceled }
 
 class OrderController extends GetxController {
-  OrderController({OrderRepository? orderRepository})
-    : _orderRepository = orderRepository ?? Get.find<OrderRepository>();
+  OrderController({
+    OrderRepository? orderRepository,
+    ReviewRepository? reviewRepository,
+  }) : _orderRepository = orderRepository ?? Get.find<OrderRepository>(),
+       _reviewRepository = reviewRepository ?? Get.find<ReviewRepository>();
 
   final OrderRepository _orderRepository;
+  final ReviewRepository _reviewRepository;
 
   final orders = <Map<String, dynamic>>[].obs;
   final selectedOrder = Rxn<Map<String, dynamic>>();
@@ -17,6 +22,8 @@ class OrderController extends GetxController {
   final isMutating = false.obs;
   final errorMessage = ''.obs;
   final activeTab = OrderTab.current.obs;
+  final reviewEligibilityReady = false.obs;
+  final reviewableProductKeys = <String>{}.obs;
 
   @override
   void onInit() {
@@ -55,10 +62,13 @@ class OrderController extends GetxController {
       errorMessage.value = '';
       final data = await _orderRepository.getMyOrders(page: page, limit: limit);
       orders.assignAll(data);
+      await _loadReviewableProducts();
     } catch (error, stackTrace) {
       AppLogger.error('Failed to load orders', error, stackTrace);
       errorMessage.value = _resolveError(error);
       orders.clear();
+      reviewEligibilityReady.value = false;
+      reviewableProductKeys.clear();
     } finally {
       isLoading.value = false;
     }
@@ -210,7 +220,26 @@ class OrderController extends GetxController {
   }
 
   bool canReviewOrder(Map<String, dynamic> order) {
-    return _isCompletedOrder(order);
+    if (!_isCompletedOrder(order)) return false;
+
+    final item = firstItemOf(order);
+    if (item.isEmpty || _isItemAlreadyReviewed(item)) {
+      return false;
+    }
+
+    final productId = firstProductIdOf(order);
+    final orderId = orderIdOf(order);
+    final variantId = firstVariantIdOf(order);
+    if (productId.isEmpty || orderId.isEmpty) return false;
+
+    if (!reviewEligibilityReady.value) {
+      // Keep UX unblocked if eligibility list is not available yet.
+      return true;
+    }
+
+    return reviewableProductKeys.contains(_reviewKey(productId, orderId, variantId)) ||
+        reviewableProductKeys.contains(_reviewKey(productId, orderId, '')) ||
+        reviewableProductKeys.contains(_reviewKey(productId, '', ''));
   }
 
   String firstProductIdOf(Map<String, dynamic> order) {
@@ -337,6 +366,78 @@ class OrderController extends GetxController {
       return 'Something went wrong. Please try again.';
     }
     return message;
+  }
+
+  Future<void> _loadReviewableProducts() async {
+    try {
+      final raw = await _reviewRepository.getReviewableProducts();
+      final keys = <String>{};
+
+      for (final item in raw) {
+        final productId = _firstNonEmptyString([
+          item['productId'],
+          item['product'],
+          _toMap(item['product'])?['_id'],
+          _toMap(item['product'])?['id'],
+        ]);
+        if (productId == null) continue;
+
+        final orderId = _firstNonEmptyString([
+          item['orderId'],
+          item['order'],
+          _toMap(item['order'])?['_id'],
+          _toMap(item['order'])?['id'],
+        ]);
+        final variantId = _firstNonEmptyString([
+          item['variantId'],
+          item['variant'],
+          _toMap(item['variant'])?['_id'],
+          _toMap(item['variant'])?['id'],
+        ]);
+
+        keys.add(_reviewKey(productId, orderId ?? '', variantId ?? ''));
+        if (orderId != null) {
+          keys.add(_reviewKey(productId, orderId, ''));
+        }
+        keys.add(_reviewKey(productId, '', ''));
+      }
+
+      reviewableProductKeys
+        ..clear()
+        ..addAll(keys);
+      reviewEligibilityReady.value = true;
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to load reviewable products', error, stackTrace);
+      reviewEligibilityReady.value = false;
+      reviewableProductKeys.clear();
+    }
+  }
+
+  bool _isItemAlreadyReviewed(Map<String, dynamic> item) {
+    final reviewedFlag = item['isReviewed'] ?? item['reviewed'];
+    if (reviewedFlag is bool && reviewedFlag) return true;
+
+    final reviewId = _firstNonEmptyString([
+      item['reviewId'],
+      item['review'],
+      _toMap(item['review'])?['_id'],
+      _toMap(item['review'])?['id'],
+    ]);
+    return reviewId != null;
+  }
+
+  String _reviewKey(String productId, String orderId, String variantId) {
+    return '${productId.trim()}|${orderId.trim()}|${variantId.trim()}';
+  }
+
+  String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = value?.toString().trim() ?? '';
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return null;
   }
 }
 

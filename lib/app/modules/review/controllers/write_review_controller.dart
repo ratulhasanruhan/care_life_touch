@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../data/models/api_exception.dart';
+import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/review_repository.dart';
 
@@ -12,11 +14,14 @@ class WriteReviewController extends GetxController {
   WriteReviewController({
     ReviewRepository? reviewRepository,
     AuthRepository? authRepository,
+    StorageService? storageService,
   }) : _reviewRepository = reviewRepository ?? Get.find<ReviewRepository>(),
-       _authRepository = authRepository ?? Get.find<AuthRepository>();
+       _authRepository = authRepository ?? Get.find<AuthRepository>(),
+       _storage = storageService ?? Get.find<StorageService>();
 
   final ReviewRepository _reviewRepository;
   final AuthRepository _authRepository;
+  final StorageService _storage;
   final ImagePicker _picker = ImagePicker();
 
   final productId = ''.obs;
@@ -29,6 +34,10 @@ class WriteReviewController extends GetxController {
   final priceText = ''.obs;
   final oldPriceText = ''.obs;
   final imageUrl = ''.obs;
+  final reviewerName = 'Guest User'.obs;
+  final reviewerPhone = ''.obs;
+  final reviewerImage = ''.obs;
+  final canSubmitReview = true.obs;
 
   final rating = 0.obs;
   final isSubmitting = false.obs;
@@ -42,6 +51,7 @@ class WriteReviewController extends GetxController {
   void onInit() {
     super.onInit();
     _resolveArguments();
+    _loadReviewerInfo();
   }
 
   @override
@@ -95,6 +105,17 @@ class WriteReviewController extends GetxController {
   }
 
   Future<void> submit() async {
+    if (!canSubmitReview.value) {
+      Get.snackbar(
+        'Already reviewed',
+        'You can submit a review for this product only one time after order completion.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
     if (productId.value.isEmpty || orderId.value.isEmpty || variantId.value.isEmpty) {
       Get.snackbar(
         'Error',
@@ -157,6 +178,7 @@ class WriteReviewController extends GetxController {
         images: imageUrls,
       );
 
+      canSubmitReview.value = false;
       Get.back(result: true);
       Get.snackbar(
         'Success',
@@ -167,6 +189,17 @@ class WriteReviewController extends GetxController {
       );
     } catch (error, stackTrace) {
       AppLogger.error('Failed to submit review', error, stackTrace);
+      if (_isDuplicateReviewError(error)) {
+        canSubmitReview.value = false;
+        Get.snackbar(
+          'Already reviewed',
+          'You have already submitted a review for this product.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
       Get.snackbar(
         'Failed',
         'Could not submit your review. Please try again.',
@@ -186,6 +219,7 @@ class WriteReviewController extends GetxController {
     productId.value = args['productId']?.toString() ?? '';
     orderId.value = args['orderId']?.toString() ?? '';
     variantId.value = args['variantId']?.toString() ?? '';
+    canSubmitReview.value = args['canReview'] != false;
 
     final item = _asMap(args['item']);
     if (item == null) return;
@@ -234,6 +268,43 @@ class WriteReviewController extends GetxController {
         '';
   }
 
+  Future<void> _loadReviewerInfo() async {
+    final localUser = _storage.getUser();
+    if (localUser != null) {
+      _applyReviewer(localUser);
+    }
+
+    try {
+      final freshUser = await _authRepository.accessMe();
+      _applyReviewer(freshUser);
+      if (freshUser.isNotEmpty) {
+        await _storage.saveUser(freshUser);
+      }
+    } catch (error, stackTrace) {
+      AppLogger.error('Failed to refresh reviewer profile', error, stackTrace);
+    }
+  }
+
+  void _applyReviewer(Map<String, dynamic> user) {
+    final name = _firstNonEmpty([
+      user['name'],
+      user['fullName'],
+      user['userName'],
+      user['shopName'],
+    ]);
+    final phone = _firstNonEmpty([user['phone'], user['mobile']]);
+    final image = _firstNonEmpty([
+      user['profileImage'],
+      user['profile_image'],
+      user['avatar'],
+      user['image'],
+    ]);
+
+    if (name != null) reviewerName.value = name;
+    reviewerPhone.value = phone ?? '';
+    reviewerImage.value = image ?? '';
+  }
+
   Map<String, dynamic>? _asMap(dynamic value) {
     if (value is Map<String, dynamic>) return value;
     if (value is Map) {
@@ -265,5 +336,16 @@ class WriteReviewController extends GetxController {
   double? _toDouble(dynamic value) {
     if (value is num) return value.toDouble();
     return double.tryParse(value?.toString() ?? '');
+  }
+
+  bool _isDuplicateReviewError(Object error) {
+    if (error is ApiException) {
+      final normalized = error.message.toLowerCase();
+      return normalized.contains('already') &&
+          normalized.contains('review');
+    }
+
+    final normalized = error.toString().toLowerCase();
+    return normalized.contains('already') && normalized.contains('review');
   }
 }
