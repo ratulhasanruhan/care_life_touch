@@ -183,6 +183,7 @@ class StorageService extends GetxService {
     await remove(AppConstants.keyReferenceId);
     await remove(AppConstants.keyUserRole);
     await removePendingOTP();
+    await removePendingRegistration();
   }
 
   /// Save pending OTP state (accountId waiting for OTP verification)
@@ -214,5 +215,33 @@ class StorageService extends GetxService {
   /// Remove pending OTP state
   Future<void> removePendingOTP() async {
     await remove(AppConstants.keyPendingOtp);
+  }
+
+  Future<void> savePendingRegistration({
+    required String accountId,
+    required String identifier,
+  }) async {
+    final registrationData = {
+      'accountId': accountId,
+      'identifier': identifier,
+      'timestamp': DateTime.now().millisecondsSinceEpoch,
+    };
+    await write(AppConstants.keyPendingRegistration, jsonEncode(registrationData));
+  }
+
+  Map<String, dynamic>? getPendingRegistration() {
+    final registrationJson = read<String>(AppConstants.keyPendingRegistration);
+    if (registrationJson == null || registrationJson.isEmpty) {
+      return null;
+    }
+    try {
+      return jsonDecode(registrationJson) as Map<String, dynamic>;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<void> removePendingRegistration() async {
+    await remove(AppConstants.keyPendingRegistration);
   }
 }

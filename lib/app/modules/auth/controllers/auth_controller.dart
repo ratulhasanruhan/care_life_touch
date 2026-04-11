@@ -7,6 +7,7 @@ import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_pages.dart';
+import '../../address/views/routes.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../../../global_widgets/otp_verification_dialog.dart';
 
@@ -27,7 +28,6 @@ class AuthController extends GetxController {
   final shopNameController = TextEditingController();
   final ownerNameController = TextEditingController();
   final phoneController = TextEditingController();
-  final addressController = TextEditingController();
 
   // Form keys
   final registerFormKey = GlobalKey<FormState>();
@@ -68,7 +68,6 @@ class AuthController extends GetxController {
     shopNameController.dispose();
     ownerNameController.dispose();
     phoneController.dispose();
-    addressController.dispose();
     super.onClose();
   }
 
@@ -203,26 +202,33 @@ class AuthController extends GetxController {
       );
 
       _pendingAccountId = _extractAccountId(response);
+      if (_pendingAccountId == null || _pendingAccountId!.isEmpty) {
+        throw const ApiException(
+          'Registration succeeded but account id is missing. Please try again.',
+        );
+      }
 
       AppLogger.success('Registration successful');
 
-      isLoading.value = false;
-
-      // Save pending OTP state for resumption
-      await _storage.savePendingOTP(
+      // Save pending registration state so the app can resume at address entry.
+      await _storage.savePendingRegistration(
         accountId: _pendingAccountId ?? '',
         identifier: phoneController.text.isNotEmpty
             ? phoneController.text
             : emailController.text,
       );
 
-      // Send OTP
-      await sendOTP();
+      isLoading.value = false;
 
-      _showOtpDialog(
-        identifier: phoneController.text.isNotEmpty
-            ? phoneController.text
-            : emailController.text,
+      Get.toNamed(
+        AddressRoutes.addAddress,
+        arguments: {
+          'fromRegistration': true,
+          'accountId': _pendingAccountId,
+          'identifier': phoneController.text.isNotEmpty
+              ? phoneController.text.trim()
+              : emailController.text.trim(),
+        },
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
@@ -293,9 +299,9 @@ class AuthController extends GetxController {
   }
 
   /// Send OTP
-  Future<void> sendOTP() async {
+  Future<void> sendOTP({String? identifier}) async {
     try {
-      AppLogger.info('Sending OTP to: ${emailController.text}');
+      AppLogger.info('Sending OTP to: ${identifier ?? emailController.text}');
 
       if (_pendingAccountId == null || _pendingAccountId!.isEmpty) {
         throw const ApiException('Missing account id for OTP verification.');
@@ -309,6 +315,21 @@ class AuthController extends GetxController {
       AppLogger.error('Failed to send OTP', e, stackTrace);
       rethrow;
     }
+  }
+
+  Future<void> startRegistrationOtpAfterAddress({
+    required String accountId,
+    required String identifier,
+  }) async {
+    _pendingAccountId = accountId.trim();
+    otpController.clear();
+    otpVerified.value = false;
+
+    await _storage.removePendingRegistration();
+    await _storage.savePendingOTP(accountId: accountId, identifier: identifier);
+
+    await sendOTP(identifier: identifier);
+    _showOtpDialog(identifier: identifier);
   }
 
   /// Verify Registration OTP and show success modal
@@ -343,6 +364,7 @@ class AuthController extends GetxController {
       otpVerified.value = true;
       await _storage.setOnboardingCompleted(true);
       await _storage.removePendingOTP(); // Clear pending OTP state
+      await _storage.removePendingRegistration();
 
       AppLogger.success('Registration OTP verified successfully');
 
@@ -440,6 +462,10 @@ class AuthController extends GetxController {
   }
 
   void _tryResumePendingOtp() {
+    if (_storage.getPendingRegistration() != null) {
+      return;
+    }
+
     final args = Get.arguments;
     Map<String, dynamic>? pending;
 

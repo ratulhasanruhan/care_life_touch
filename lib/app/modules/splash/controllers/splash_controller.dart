@@ -4,6 +4,7 @@ import '../../../routes/app_pages.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/page_repository.dart';
+import '../../address/views/routes.dart';
 
 class SplashController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
@@ -75,6 +76,21 @@ class SplashController extends GetxController {
   /// Navigate to next screen after delay
   Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 2));
+
+    final pendingRegistration = _storage.getPendingRegistration();
+    if (pendingRegistration != null && pendingRegistration['accountId'] != null) {
+      AppLogger.info('Resuming pending registration address step');
+      Get.offNamed(
+        AddressRoutes.addAddress,
+        arguments: {
+          'fromRegistration': true,
+          'accountId': pendingRegistration['accountId'],
+          'identifier': pendingRegistration['identifier'],
+          'resumePendingRegistration': true,
+        },
+      );
+      return;
+    }
 
     // Check if there's a pending OTP verification (registration in progress)
     final pendingOTP = _storage.getPendingOTP();

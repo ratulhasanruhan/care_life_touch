@@ -6,6 +6,7 @@ import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/address_repository.dart';
+import '../../auth/controllers/auth_controller.dart';
 import '../../../services/map_service.dart';
 import '../views/routes.dart';
 
@@ -40,6 +41,9 @@ class AddressController extends GetxController {
   final profileName = ''.obs;
   final profilePhone = ''.obs;
   final addressText = ''.obs;
+  final isRegistrationFlow = false.obs;
+  final registrationAccountId = ''.obs;
+  final registrationIdentifier = ''.obs;
   final editingAddressId = RxnString();
   final isEditMode = false.obs;
   bool _formHydrated = false;
@@ -237,6 +241,32 @@ class AddressController extends GetxController {
 
       await loadAddresses();
 
+      final shouldTriggerOtp = isRegistrationFlow.value &&
+          registrationAccountId.value.isNotEmpty &&
+          registrationIdentifier.value.isNotEmpty;
+
+      if (shouldTriggerOtp) {
+        final accountId = registrationAccountId.value;
+        final identifier = registrationIdentifier.value;
+        clearForm();
+        Get.back(result: saved);
+
+        Future.microtask(() async {
+          try {
+            final authController = Get.find<AuthController>();
+            await authController.startRegistrationOtpAfterAddress(
+              accountId: accountId,
+              identifier: identifier,
+            );
+          } catch (error, stackTrace) {
+            AppLogger.error('Failed to start registration OTP flow', error, stackTrace);
+            Get.snackbar('Error', 'Address saved, but OTP could not be sent.');
+          }
+        });
+
+        return;
+      }
+
       clearForm();
       Get.back(result: saved);
       Get.snackbar('Success', isEditing ? 'Address updated successfully' : 'Address saved successfully');
@@ -310,7 +340,15 @@ class AddressController extends GetxController {
       return;
     }
 
-    clearForm();
+    if (args is Map) {
+      isRegistrationFlow.value = args['fromRegistration'] == true;
+      registrationAccountId.value = (args['accountId'] ?? '').toString().trim();
+      registrationIdentifier.value = (args['identifier'] ?? '').toString().trim();
+    }
+
+    if (!isRegistrationFlow.value) {
+      clearForm();
+    }
   }
 
   /// Clear form
@@ -323,6 +361,10 @@ class AddressController extends GetxController {
     editingAddressId.value = null;
     isEditMode.value = false;
     _formHydrated = false;
+    if (!isRegistrationFlow.value) {
+      registrationAccountId.value = '';
+      registrationIdentifier.value = '';
+    }
   }
 
   /// Select address type

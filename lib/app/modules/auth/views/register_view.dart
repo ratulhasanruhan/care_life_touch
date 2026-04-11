@@ -84,16 +84,6 @@ class RegisterView extends GetView<AuthController> {
                 ),
                 const SizedBox(height: 16),
 
-                // Address field
-                CustomTextField(
-                  controller: controller.addressController,
-                  hintText: 'Delivery Address',
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 2,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: 16),
 
                 // Email field
                 CustomTextField(
