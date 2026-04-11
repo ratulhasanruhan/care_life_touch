@@ -70,7 +70,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Terms of Service",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/termsAndConditions",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "termsAndConditions"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:19:04 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"96-TjHUqVmhUJ1rwbSs2WyTYNiUm2o\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"title\": \"Terms & Condition\",\n        \"lastUpdated\": \"\",\n        \"content\": \"Supports basic formatting: **bold**, ## headings, - lists\\n**bold**\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Privacy Policy",
@@ -88,7 +173,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Privacy Policy",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/privacyPolicy",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "privacyPolicy"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:18:57 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"89-jlmE05p7iEF/IfkOyJWnfMdviyE\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"title\": \"Privacy Policy\",\n        \"lastUpdated\": \"\",\n        \"content\": \"Supports basic formatting: **bold**, ## headings, - lists\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Cookie Policy",
@@ -124,7 +294,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Shipping & Delivery",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/shippingDelivery",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "shippingDelivery"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:18:44 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"8e-UygF8zvSUaUZnIAzgmvCNn+dTGc\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"title\": \"Shipping & Delivery\",\n        \"lastUpdated\": \"\",\n        \"content\": \"Supports basic formatting: **bold**, ## headings, - lists\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Return & Refund",
@@ -142,7 +397,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Return & Refund",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/returnRefund",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "returnRefund"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:18:34 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"8a-pWLP0ZAOqXO9dC024v1qAWICF4I\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"title\": \"Return & Refund\",\n        \"lastUpdated\": \"\",\n        \"content\": \"Supports basic formatting: **bold**, ## headings, - lists\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "App Banners",
@@ -178,7 +518,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "About Us",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/aboutUs",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "aboutUs"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:18:02 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"230-rB3GaQMWVFH8w3jBOrOV+6JmoMc\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"mission\": {\n            \"title\": \"Our Mission\",\n            \"description\": \"Description\"\n        },\n        \"vision\": {\n            \"title\": \"Our Vision\",\n            \"description\": \"Description Vision\"\n        },\n        \"story\": {\n            \"title\": \"Our Story\",\n            \"description\": \"Description\",\n            \"image\": \"https://arhamsahirkhan.com/uploads/1773222533353-Bg-3.jpg\"\n        },\n        \"heroTitle\": \"Hero Title\",\n        \"heroDescription\": \"Hero Description\",\n        \"heroImage\": \"https://arhamsahirkhan.com/uploads/1773222440624-bg.jpeg\",\n        \"team\": [\n            {\n                \"name\": \"Name\",\n                \"role\": \"Role\",\n                \"image\": \"https://arhamsahirkhan.com/uploads/1773222553596-247.png\"\n            }\n        ],\n        \"stats\": [\n            {\n                \"label\": \"Happy\",\n                \"value\": \"10\"\n            }\n        ]\n    }\n}"
+            }
+          ]
         }
       ]
     },
@@ -644,11 +1069,51 @@
         {
           "name": "Add Address",
           "request": {
+            "auth": {
+              "type": "jwt",
+              "jwt": [
+                {
+                  "key": "algorithm",
+                  "value": "HS256",
+                  "type": "string"
+                },
+                {
+                  "key": "isSecretBase64Encoded",
+                  "value": false,
+                  "type": "boolean"
+                },
+                {
+                  "key": "payload",
+                  "value": "{}",
+                  "type": "string"
+                },
+                {
+                  "key": "addTokenTo",
+                  "value": "header",
+                  "type": "string"
+                },
+                {
+                  "key": "headerPrefix",
+                  "value": "Bearer",
+                  "type": "string"
+                },
+                {
+                  "key": "queryParamKey",
+                  "value": "token",
+                  "type": "string"
+                },
+                {
+                  "key": "header",
+                  "value": "{}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\r\n  \"addressType\": \"Home\",\r\n  \"location\": {\r\n    \"type\": \"Point\",\r\n    \"coordinates\": [90.4125, 23.8103],\r\n    \"formattedAddress\": \"Mirpur, Dhaka\"\r\n  },\r\n  \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka\"\r\n}",
+              "raw": "{\r\n\"name\": \"Ratul\",\r\n\"phone\" : \"014545454\",\r\n  \"addressType\": \"Home\",\r\n  \"location\": {\r\n    \"type\": \"Point\",\r\n    \"coordinates\": [90.4125, 23.8103],\r\n    \"formattedAddress\": \"Mirpur, Dhaka\"\r\n  },\r\n  \"fullAddress\": \"House 12, Road 5, Mirpur-10, Dhaka\"\r\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -663,7 +1128,8 @@
               "path": [
                 "add-address"
               ]
-            }
+            },
+            "description": "enum: \\[\"Home\", \"Office\", \"Other\"\\]"
           },
           "response": []
         },

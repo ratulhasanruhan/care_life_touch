@@ -57,7 +57,7 @@ class LegalController extends GetxController {
   }) async {
     try {
       final content = await _pageRepository.getPageBodyText(key);
-      final normalized = _stripHtml(content);
+      final normalized = _normalizeContent(content);
       if (normalized.isNotEmpty) {
         return normalized;
       }
@@ -69,7 +69,7 @@ class LegalController extends GetxController {
     for (final fallbackKey in fallbacks) {
       try {
         final fallbackContent = await _pageRepository.getPageBodyText(fallbackKey);
-        final normalized = _stripHtml(fallbackContent);
+        final normalized = _normalizeContent(fallbackContent);
         if (normalized.isNotEmpty) {
           return normalized;
         }
@@ -81,17 +81,7 @@ class LegalController extends GetxController {
     return '';
   }
 
-  String _stripHtml(String text) {
-    if (text.trim().isEmpty) {
-      return '';
-    }
-    return text
-        .replaceAll(RegExp(r'<[^>]*>'), ' ')
-        .replaceAll('&nbsp;', ' ')
-        .replaceAll('&amp;', '&')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-  }
+  String _normalizeContent(String text) => text.trim();
 
   @override
   void onClose() {

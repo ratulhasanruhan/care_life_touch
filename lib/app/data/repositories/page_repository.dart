@@ -18,29 +18,38 @@ class PageRepository {
 
   Future<String> getPageBodyText(String key) async {
     final data = await getPageSettings(key);
-    final content = _extractString(data, const [
-      'content',
-      'body',
-      'description',
-      'value',
-      'text',
-      'html',
-    ]);
+    final nested = _unwrapPayload(data);
 
-    if (content != null) {
-      return content;
-    }
-
-    final nested = _toMap(data['data']) ?? _toMap(data['result']) ?? data;
-    return _extractString(nested, const [
+    final directContent = _extractString(data, const [
           'content',
           'body',
           'description',
           'value',
           'text',
           'html',
+          'markdown',
         ]) ??
-        '';
+        _extractString(nested, const [
+          'content',
+          'body',
+          'description',
+          'value',
+          'text',
+          'html',
+          'markdown',
+        ]);
+
+    if (directContent != null && directContent.trim().isNotEmpty) {
+      return directContent.trim();
+    }
+
+    // aboutUs can be a structured object (mission/vision/story/hero/team/stats).
+    final structured = _buildStructuredPageText(nested);
+    if (structured.isNotEmpty) {
+      return structured;
+    }
+
+    return '';
   }
 
   Future<List<String>> getHomeBanners() async {
@@ -79,7 +88,15 @@ class PageRepository {
         return;
       }
 
-      for (final key in const ['url', 'image', 'imageUrl', 'thumbnail', 'banner']) {
+      for (final key in const [
+        'url',
+        'image',
+        'imageUrl',
+        'thumbnail',
+        'banner',
+        'mobileImage',
+        'desktopImage',
+      ]) {
         collect(map[key]);
       }
 
@@ -91,6 +108,80 @@ class PageRepository {
 
     collect(source);
     return urls;
+  }
+
+  Map<String, dynamic> _unwrapPayload(Map<String, dynamic> source) {
+    return _toMap(source['data']) ??
+        _toMap(source['result']) ??
+        _toMap(source['settings']) ??
+        _toMap(source['setting']) ??
+        source;
+  }
+
+  String _buildStructuredPageText(Map<String, dynamic> payload) {
+    final parts = <String>[];
+
+    final heroTitle = (payload['heroTitle'] ?? '').toString().trim();
+    final heroDescription = (payload['heroDescription'] ?? '').toString().trim();
+    if (heroTitle.isNotEmpty) {
+      parts.add('## $heroTitle');
+    }
+    if (heroDescription.isNotEmpty) {
+      parts.add(heroDescription);
+    }
+
+    for (final key in const ['mission', 'vision', 'story']) {
+      final section = _toMap(payload[key]);
+      if (section == null) {
+        continue;
+      }
+      final title = (section['title'] ?? '').toString().trim();
+      final description = (section['description'] ?? section['content'] ?? '')
+          .toString()
+          .trim();
+      if (title.isNotEmpty) {
+        parts.add('## $title');
+      }
+      if (description.isNotEmpty) {
+        parts.add(description);
+      }
+    }
+
+    final team = payload['team'];
+    if (team is List && team.isNotEmpty) {
+      final members = <String>[];
+      for (final entry in team) {
+        final map = _toMap(entry);
+        if (map == null) continue;
+        final name = (map['name'] ?? '').toString().trim();
+        final role = (map['role'] ?? '').toString().trim();
+        if (name.isEmpty && role.isEmpty) continue;
+        members.add(role.isEmpty ? '- $name' : '- $name - $role');
+      }
+      if (members.isNotEmpty) {
+        parts.add('## Team');
+        parts.add(members.join('\n'));
+      }
+    }
+
+    final stats = payload['stats'];
+    if (stats is List && stats.isNotEmpty) {
+      final rows = <String>[];
+      for (final entry in stats) {
+        final map = _toMap(entry);
+        if (map == null) continue;
+        final label = (map['label'] ?? '').toString().trim();
+        final value = (map['value'] ?? '').toString().trim();
+        if (label.isEmpty && value.isEmpty) continue;
+        rows.add('- ${label.isEmpty ? 'Item' : label}: $value');
+      }
+      if (rows.isNotEmpty) {
+        parts.add('## Stats');
+        parts.add(rows.join('\n'));
+      }
+    }
+
+    return parts.where((part) => part.trim().isNotEmpty).join('\n\n').trim();
   }
 
   String? _extractString(Map<String, dynamic> source, List<String> keys) {

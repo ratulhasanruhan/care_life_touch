@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widgets/primary_appbar.dart';
@@ -19,15 +20,17 @@ class AboutView extends GetView<LegalController> {
         final content = controller.aboutText.value;
         return SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Text(
-            content.isEmpty
+          child: MarkdownBody(
+            data: content.isEmpty
                 ? 'About page data is not available right now. Please try again later.'
                 : content,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w400,
-              color: AppColors.textSecondary,
-              height: 1.6,
+            styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+              p: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: AppColors.textSecondary,
+                height: 1.6,
+              ),
             ),
           ),
         );
