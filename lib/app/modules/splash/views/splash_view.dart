@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import '../../../core/values/app_colors.dart';
+import '../controllers/splash_controller.dart';
 
-class SplashView extends StatelessWidget {
+class SplashView extends GetView<SplashController> {
   const SplashView({super.key});
 
   @override
@@ -11,12 +13,29 @@ class SplashView extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Center icon
+            // Center icon with branding logo or fallback
             Expanded(
               child: Center(
                 child: Padding(
                   padding: const EdgeInsets.all(40),
-                  child: Image.asset('assets/images/splash_icon.png'),
+                  child: Obx(() {
+                    // If logo URL is available, use it; otherwise use fallback
+                    if (controller.splashLogo.value.isNotEmpty) {
+                      return Image.network(
+                        controller.splashLogo.value,
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) =>
+                            _buildFallbackImage(),
+                        loadingBuilder: (context, child, loadingProgress) {
+                          if (loadingProgress == null) {
+                            return child;
+                          }
+                          return _buildFallbackImage();
+                        },
+                      );
+                    }
+                    return _buildFallbackImage();
+                  }),
                 ),
               ),
             ),
@@ -24,19 +43,28 @@ class SplashView extends StatelessWidget {
             // Bottom text
             Padding(
               padding: const EdgeInsets.only(bottom: 48),
-              child: Text(
-                'Care You Trust. Medicines You Need.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textSecondary,
+              child: Obx(
+                () => Text(
+                  controller.splashText.value,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFallbackImage() {
+    return Image.asset(
+      'assets/images/splash_icon.png',
+      fit: BoxFit.contain,
     );
   }
 }

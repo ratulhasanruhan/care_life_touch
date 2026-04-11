@@ -1,16 +1,75 @@
 import 'package:get/get.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../../../routes/app_pages.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/providers/storage_provider.dart';
+import '../../../data/repositories/page_repository.dart';
 
 class SplashController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
+  late PageRepository _pageRepository;
+  final splashLogo = ''.obs;
+  final splashText = 'Care You Trust. Medicines You Need.'.obs;
+  final isLoadingLogo = true.obs;
 
   @override
   void onInit() {
     super.onInit();
     AppLogger.info('Splash screen initialized');
-    _navigateToNextScreen();
+    _pageRepository = Get.find<PageRepository>();
+    _loadAndCacheLogo();
+  }
+
+  /// Load logo from API and cache it
+  Future<void> _loadAndCacheLogo() async {
+    try {
+      isLoadingLogo.value = true;
+
+      // Fetch branding payload from API so we can use both logo and site name.
+      final branding = await _pageRepository.getPageSettings('branding');
+      final payload = branding['data'] is Map<String, dynamic>
+          ? branding['data'] as Map<String, dynamic>
+          : const <String, dynamic>{};
+
+      final siteName = (payload['siteName'] ?? '').toString().trim();
+      if (siteName.isNotEmpty) {
+        splashText.value = siteName;
+      }
+
+      final logoUrl = (payload['logos'] is List && (payload['logos'] as List).isNotEmpty)
+          ? (() {
+              final firstLogo = (payload['logos'] as List).first;
+              if (firstLogo is Map<String, dynamic>) {
+                final url = firstLogo['url'];
+                return url is String ? url.trim() : '';
+              }
+              if (firstLogo is Map) {
+                final url = firstLogo['url'];
+                return url is String ? url.trim() : '';
+              }
+              return '';
+            })()
+          : '';
+
+      if (logoUrl.isNotEmpty) {
+        splashLogo.value = logoUrl;
+        AppLogger.success('Splash logo loaded: $logoUrl');
+
+        // Pre-cache the image for better performance
+        try {
+          await DefaultCacheManager().getSingleFile(logoUrl);
+          AppLogger.success('Splash logo cached successfully');
+        } catch (e) {
+          AppLogger.warning('Failed to cache splash logo', e);
+        }
+      }
+    } catch (e) {
+      AppLogger.warning('Failed to load splash logo', e);
+    } finally {
+      isLoadingLogo.value = false;
+      // Navigate after logo is loaded or after a timeout
+      _navigateToNextScreen();
+    }
   }
 
   /// Navigate to next screen after delay

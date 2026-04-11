@@ -34,7 +34,96 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Branding",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": ""
+                },
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/branding",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "branding"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:26:09 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"c1-NoQS1QZjoU6L61UkS2FC5JFfmNc\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": {\n        \"logos\": [\n            {\n                \"url\": \"https://arhamsahirkhan.com/uploads/1773216693381-logo.png\",\n                \"label\": \"English\",\n                \"order\": 0,\n                \"_id\": \"69b123f1ec1cfde87f2de897\"\n            }\n        ],\n        \"siteName\": \"Care life Touch\"\n    }\n}"
+            }
+          ]
         },
         {
           "name": "Home Page",
@@ -52,7 +141,92 @@
               ]
             }
           },
-          "response": []
+          "response": [
+            {
+              "name": "Home Page",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{Server}}/get-page-settings/homeBanners",
+                  "host": [
+                    "{{Server}}"
+                  ],
+                  "path": [
+                    "get-page-settings",
+                    "homeBanners"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": null,
+              "header": [
+                {
+                  "key": ":status",
+                  "value": 200
+                },
+                {
+                  "key": "server",
+                  "value": "nginx"
+                },
+                {
+                  "key": "date",
+                  "value": "Sat, 11 Apr 2026 10:26:24 GMT"
+                },
+                {
+                  "key": "content-type",
+                  "value": "application/json; charset=utf-8"
+                },
+                {
+                  "key": "vary",
+                  "value": "Accept-Encoding, Origin"
+                },
+                {
+                  "key": "x-powered-by",
+                  "value": "Express"
+                },
+                {
+                  "key": "access-control-allow-credentials",
+                  "value": "true"
+                },
+                {
+                  "key": "etag",
+                  "value": "W/\"2e0-SP92r+TlZKPSYoYZUhVf6IpyBLE\""
+                },
+                {
+                  "key": "x-frame-options",
+                  "value": "SAMEORIGIN"
+                },
+                {
+                  "key": "x-content-type-options",
+                  "value": "nosniff"
+                },
+                {
+                  "key": "x-xss-protection",
+                  "value": "1; mode=block"
+                },
+                {
+                  "key": "x-permitted-cross-domain-policies",
+                  "value": "master-only"
+                },
+                {
+                  "key": "referrer-policy",
+                  "value": "same-origin"
+                },
+                {
+                  "key": "alt-svc",
+                  "value": "h3=\":443\"; ma=86400"
+                },
+                {
+                  "key": "content-encoding",
+                  "value": "br"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n    \"success\": true,\n    \"data\": [\n        {\n            \"image\": \"https://arhamsahirkhan.com/uploads/1773218379786-Bg-1.jpg\",\n            \"title\": \"Trusted Medical Knowledge\",\n            \"description\": \"Access accurate, evidence based health information anytime, anywhere.\",\n            \"buttonText\": \"Get Started\",\n            \"order\": 0\n        },\n        {\n            \"image\": \"https://arhamsahirkhan.com/uploads/1773218430420-Bg-2.jpg\",\n            \"title\": \"Authentic Medicines Delivered\",\n            \"description\": \"Order verified medicines and healthcare products with secure, reliable delivery.\",\n            \"buttonText\": \"Get Started\",\n            \"order\": 1\n        },\n        {\n            \"image\": \"https://arhamsahirkhan.com/uploads/1773218498090-Bg-3.jpg\",\n            \"title\": \"Your Complete Health Platform\",\n            \"description\": \"Manage your health with trusted information and seamless medical shopping.\",\n            \"buttonText\": \"Get Started\",\n            \"order\": 2\n        }\n    ]\n}"
+            }
+          ]
         },
         {
           "name": "Terms of Service",

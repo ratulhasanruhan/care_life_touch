@@ -64,6 +64,59 @@ class PageRepository {
     return merged.toList();
   }
 
+  /// Get branding logo URL
+  Future<String?> getBrandingLogo() async {
+    try {
+      final branding = await getPageSettings('branding');
+      final data = _unwrapPayload(branding);
+
+      // Try to get logos array
+      final logos = data['logos'];
+      if (logos is List && logos.isNotEmpty) {
+        final firstLogo = _toMap(logos[0]);
+        if (firstLogo != null) {
+          final url = firstLogo['url'];
+          if (url is String && url.trim().isNotEmpty) {
+            return url.trim();
+          }
+        }
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Get onboarding banners as structured data
+  Future<List<Map<String, dynamic>>> getOnboardingBanners() async {
+    try {
+      final home = await getPageSettings('homeBanners');
+      final banners = <Map<String, dynamic>>[];
+
+      final directItems = home['data'];
+      final fallbackPayload = _unwrapPayload(home);
+      final items = directItems is List
+          ? directItems
+          : fallbackPayload['items'] is List
+              ? fallbackPayload['items'] as List
+              : fallbackPayload['data'] is List
+                  ? fallbackPayload['data'] as List
+                  : const [];
+
+      for (final item in items) {
+        final banner = _toMap(item);
+        if (banner != null) {
+          banners.add(banner);
+        }
+      }
+
+      return banners;
+    } catch (_) {
+      return [];
+    }
+  }
+
   List<String> _extractImageUrls(Map<String, dynamic> source) {
     final urls = <String>[];
 
