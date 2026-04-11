@@ -6,9 +6,11 @@ import '../../../data/repositories/address_repository.dart';
 import '../../../data/repositories/page_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../global_widgets/info_modal.dart';
+import '../../../routes/app_pages.dart';
 import '../../address/views/routes.dart';
 import '../models/product_model.dart';
 import '../../cart/controllers/cart_controller.dart';
+import '../../products/models/products_query.dart';
 
 /// Home Controller - Manages home screen state and logic
 class HomeController extends GetxController {
@@ -303,8 +305,20 @@ class HomeController extends GetxController {
 
   /// Handle search
   void onSearch(String query) {
+    if (query.trim().isEmpty) {
+      Get.snackbar('Search', 'Please enter a search query');
+      return;
+    }
+
     AppLogger.debug('Search query: $query');
-    // TODO: Navigate to search results
+    Get.toNamed(
+      Routes.PRODUCTS,
+      arguments: ProductsQuery(
+        type: ProductListingType.all,
+        title: 'Search Results',
+        keyword: query.trim(),
+      ),
+    );
   }
 
   @override

@@ -132,9 +132,40 @@ class ProductModel {
     }
 
     final thumbnail = (json['thumbnail'] ?? json['imagePath'] ?? '').toString();
-    final primaryImage = imageList.isNotEmpty
+    
+    // Try to extract primary image from various sources
+    var primaryImage = imageList.isNotEmpty
         ? imageList.first
-        : (thumbnail.isNotEmpty ? thumbnail : 'assets/demo/product_1.png');
+        : '';
+    
+    // If no images array, try alternative image fields
+    if (primaryImage.isEmpty && thumbnail.isNotEmpty) {
+      primaryImage = thumbnail;
+    }
+    
+    // Try additional image sources if still empty
+    if (primaryImage.isEmpty) {
+      final alternativeImages = [
+        'image',
+        'imageUrl',
+        'productImage',
+        'icon',
+        'photo',
+        'picture',
+      ];
+      for (final key in alternativeImages) {
+        final value = json[key];
+        if (value is String && value.trim().isNotEmpty) {
+          primaryImage = value.trim();
+          break;
+        }
+      }
+    }
+    
+    // Fall back to default image only if truly no image found
+    if (primaryImage.isEmpty) {
+      primaryImage = 'assets/demo/product_1.png';
+    }
 
     final variantPrice = _toDouble(
       selectedVariantMap['finalPrice'] ??

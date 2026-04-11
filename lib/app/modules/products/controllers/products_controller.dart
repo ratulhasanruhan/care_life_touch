@@ -30,6 +30,10 @@ class ProductsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Initialize search text from query keyword if it's a search query
+    if (query.type == ProductListingType.all && query.keyword != null && query.keyword!.isNotEmpty) {
+      searchText.value = query.keyword!.trim().toLowerCase();
+    }
     _loadInitialProducts();
     _loadFilterOptions();
     // Auto-search on text change

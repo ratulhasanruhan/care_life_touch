@@ -132,7 +132,8 @@ class HomeHeader extends StatelessWidget {
               const SizedBox(height: 16),
 
               TextField(
-                onChanged: onSearch,
+                onSubmitted: onSearch,
+                textInputAction: TextInputAction.search,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,

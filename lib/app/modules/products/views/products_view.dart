@@ -69,10 +69,11 @@ class _ProductsViewState extends State<ProductsView> {
       body: Column(
         children: [
           const SizedBox(height: 16),
-          _SearchAndFilterBar(
-            onSearch: _controller.onSearchChanged,
-            onFilterTap: _openFilterModal,
-          ),
+           _SearchAndFilterBar(
+             initialSearch: _controller.searchText.value,
+             onSearch: _controller.onSearchChanged,
+             onFilterTap: _openFilterModal,
+           ),
           const SizedBox(height: 16),
           Expanded(
             child: Obx(() {
@@ -183,11 +184,35 @@ class _ProductsStatusView extends StatelessWidget {
   }
 }
 
-class _SearchAndFilterBar extends StatelessWidget {
+class _SearchAndFilterBar extends StatefulWidget {
   final ValueChanged<String> onSearch;
   final VoidCallback onFilterTap;
+  final String initialSearch;
 
-  const _SearchAndFilterBar({required this.onSearch, required this.onFilterTap});
+  const _SearchAndFilterBar({
+    required this.onSearch,
+    required this.onFilterTap,
+    this.initialSearch = '',
+  });
+
+  @override
+  State<_SearchAndFilterBar> createState() => _SearchAndFilterBarState();
+}
+
+class _SearchAndFilterBarState extends State<_SearchAndFilterBar> {
+  late TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: widget.initialSearch);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -199,7 +224,8 @@ class _SearchAndFilterBar extends StatelessWidget {
             child: SizedBox(
               height: 44,
               child: TextField(
-                onChanged: onSearch,
+                controller: _searchController,
+                onChanged: widget.onSearch,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w400,
@@ -251,7 +277,7 @@ class _SearchAndFilterBar extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           GestureDetector(
-            onTap: onFilterTap,
+            onTap: widget.onFilterTap,
             child: Container(
               width: 44,
               height: 44,
