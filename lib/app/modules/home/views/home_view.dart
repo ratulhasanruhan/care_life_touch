@@ -29,9 +29,8 @@ class HomeView extends GetView<HomeController> {
               isLocationLoading: controller.isResolvingLocation.value,
               hasLocationError: controller.hasLocationError.value,
               onLocationTap: controller.onLocationTap,
-              onNotificationTap: () {
-                Get.toNamed(Routes.NOTIFICATION);
-              },
+              unreadNotificationCount: controller.unreadNotificationCount.value,
+              onNotificationTap: controller.onNotificationTap,
               onSearch: controller.onSearch,
             ),
           ),

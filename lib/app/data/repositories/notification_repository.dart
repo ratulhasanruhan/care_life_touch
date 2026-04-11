@@ -19,24 +19,38 @@ class NotificationRepository {
   }
 
   Future<int> getUnreadCount() async {
-    final response = await _api.getData('/get-unread-count');
-    final map = _toMap(response) ?? const <String, dynamic>{};
-    final data = _toMap(map['data']) ?? map;
+    int parseCount(dynamic response) {
+      final map = _toMap(response) ?? const <String, dynamic>{};
+      final data = _toMap(map['data']) ?? map;
 
-    for (final key in const ['unreadCount', 'count', 'total']) {
-      final value = data[key];
-      if (value is num) {
-        return value.toInt();
-      }
-      if (value is String) {
-        final parsed = int.tryParse(value);
-        if (parsed != null) {
-          return parsed;
+      for (final key in const ['unreadCount', 'count', 'total']) {
+        final value = data[key];
+        if (value is num) {
+          return value.toInt();
+        }
+        if (value is String) {
+          final parsed = int.tryParse(value);
+          if (parsed != null) {
+            return parsed;
+          }
         }
       }
+
+      return 0;
     }
 
-    return 0;
+    try {
+      final response = await _api.getData('/get-unread-count');
+      final count = parseCount(response);
+      if (count > 0) {
+        return count;
+      }
+    } catch (_) {
+      // Fall back to list-based unread calculation below.
+    }
+
+    final notifications = await getBuyerNotifications();
+    return notifications.where((notification) => !notification.isRead).length;
   }
 
   Future<void> markNotificationRead(String id) async {

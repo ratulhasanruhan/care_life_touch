@@ -53,15 +53,8 @@ class PageRepository {
   }
 
   Future<List<String>> getHomeBanners() async {
-    final home = await getPageSettings('homeBanners');
     final app = await getPageSettings('appBanners');
-
-    final merged = <String>{
-      ..._extractImageUrls(home),
-      ..._extractImageUrls(app),
-    };
-
-    return merged.toList();
+    return _extractImageUrls(app);
   }
 
   /// Get branding logo URL

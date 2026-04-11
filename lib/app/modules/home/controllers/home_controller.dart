@@ -3,6 +3,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/repositories/address_repository.dart';
+import '../../../data/repositories/notification_repository.dart';
 import '../../../data/repositories/page_repository.dart';
 import '../../../data/repositories/product_repository.dart';
 import '../../../global_widgets/info_modal.dart';
@@ -31,10 +32,12 @@ class HomeController extends GetxController {
   final categories = <Map<String, String>>[].obs;
   final brands = <Map<String, String>>[].obs;
   final banners = <String>[].obs;
+  final unreadNotificationCount = 0.obs;
 
   // Cart controller
   late CartController cartController;
   final ProductRepository _productRepository = Get.find<ProductRepository>();
+  final NotificationRepository _notificationRepository = Get.find<NotificationRepository>();
   final PageRepository _pageRepository = Get.find<PageRepository>();
   final AddressRepository _addressRepository = Get.find<AddressRepository>();
 
@@ -62,6 +65,7 @@ class HomeController extends GetxController {
     super.onInit();
     cartController = Get.find<CartController>();
     loadData();
+    _loadUnreadNotifications();
     _requestLocationPermission();
     resolveHomeLocation();
   }
@@ -133,6 +137,15 @@ class HomeController extends GetxController {
       AppLogger.error('Failed to load home data', e, stackTrace);
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> _loadUnreadNotifications() async {
+    try {
+      unreadNotificationCount.value = await _notificationRepository.getUnreadCount();
+    } catch (e) {
+      unreadNotificationCount.value = 0;
+      AppLogger.warning('Failed to load unread notification count', e);
     }
   }
 
@@ -216,7 +229,7 @@ class HomeController extends GetxController {
 
   /// Refresh data
   Future<void> onRefresh() async {
-    await Future.wait([loadData(), resolveHomeLocation()]);
+    await Future.wait([loadData(), resolveHomeLocation(), _loadUnreadNotifications()]);
   }
 
   /// Navigate to category
@@ -301,6 +314,10 @@ class HomeController extends GetxController {
     AppLogger.debug('Brand tapped: $brand');
     // TODO: Navigate to brand page
     Get.snackbar('Brand', 'Navigating to $brand');
+  }
+
+  void onNotificationTap() {
+    Get.toNamed(Routes.NOTIFICATION)?.then((_) => _loadUnreadNotifications());
   }
 
   /// Handle search

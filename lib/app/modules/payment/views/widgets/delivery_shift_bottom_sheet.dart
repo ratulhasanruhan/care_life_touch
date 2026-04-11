@@ -53,8 +53,8 @@ class DeliveryShiftBottomSheet extends StatelessWidget {
             // Morning Option
             Obx(
               () => _buildDeliveryOption(
-                label: 'Morning',
-                description: 'Delivery between 8 AM - 12 PM',
+                label: '10 Am - 2 pm',
+                description: 'Delivery between 10 AM - 2 PM',
                 isSelected: controller.selectedDeliveryShift.value == 'morning',
                 onTap: () => controller.selectDeliveryShift('morning'),
               ),
@@ -64,8 +64,8 @@ class DeliveryShiftBottomSheet extends StatelessWidget {
             // Evening Option
             Obx(
               () => _buildDeliveryOption(
-                label: 'Evening',
-                description: 'Delivery between 2 PM - 6 PM',
+                label: '4 pm - 12 Am',
+                description: 'Delivery between 4 PM - 12 AM',
                 isSelected: controller.selectedDeliveryShift.value == 'evening',
                 onTap: () => controller.selectDeliveryShift('evening'),
               ),

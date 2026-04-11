@@ -72,8 +72,8 @@ class PaymentView extends GetView<PaymentController> {
                               children: [
                                 Text(
                                   controller.selectedDeliveryShift.value == 'morning'
-                                      ? 'Morning'
-                                      : 'Evening',
+                                      ? '10 Am - 2 pm'
+                                      : '4 pm - 12 Am',
                                   style: const TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
@@ -83,8 +83,8 @@ class PaymentView extends GetView<PaymentController> {
                                 const SizedBox(height: 4),
                                 Text(
                                   controller.selectedDeliveryShift.value == 'morning'
-                                      ? 'Delivery between 8 AM - 12 PM'
-                                      : 'Delivery between 2 PM - 6 PM',
+                                      ? 'Delivery between 10 AM - 2 PM'
+                                      : 'Delivery between 4 PM - 12 AM',
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w400,

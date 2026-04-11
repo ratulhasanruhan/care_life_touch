@@ -6,6 +6,7 @@ class HomeHeader extends StatelessWidget {
   final VoidCallback? onLocationTap;
   final VoidCallback? onNotificationTap;
   final Function(String)? onSearch;
+  final int unreadNotificationCount;
   final String locationText;
   final bool isLocationLoading;
   final bool hasLocationError;
@@ -15,6 +16,7 @@ class HomeHeader extends StatelessWidget {
     this.onLocationTap,
     this.onNotificationTap,
     this.onSearch,
+    this.unreadNotificationCount = 0,
     required this.locationText,
     required this.isLocationLoading,
     required this.hasLocationError,
@@ -116,15 +118,42 @@ class HomeHeader extends StatelessWidget {
                   // Notification Button
                   GestureDetector(
                     onTap: onNotificationTap,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: SvgPicture.asset('assets/svg/ic_notification.svg'),
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: unreadNotificationCount > 0
+                              ? SvgPicture.asset('assets/svg/ic_notification.svg')
+                              : const Icon(
+                                  Icons.notifications_outlined,
+                                  color: Colors.white,
+                                  size: 22,
+                                ),
+                        ),
+                        if (unreadNotificationCount > 0)
+                          Positioned(
+                            right: -1,
+                            top: -1,
+                            child: Container(
+                              width: 12,
+                              height: 12,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFD400),
+                                border: Border.fromBorderSide(
+                                  BorderSide(color: Colors.white, width: 2),
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
