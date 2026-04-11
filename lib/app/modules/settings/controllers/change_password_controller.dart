@@ -82,7 +82,7 @@ class ChangePasswordController extends GetxController {
       Get.snackbar(
         'Success',
         'Password changed successfully',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -95,7 +95,7 @@ class ChangePasswordController extends GetxController {
         e is ApiException && e.message.trim().isNotEmpty
             ? e.message
             : 'Failed to change password. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );

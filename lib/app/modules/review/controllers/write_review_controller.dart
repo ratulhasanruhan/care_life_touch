@@ -60,14 +60,26 @@ class WriteReviewController extends GetxController {
 
       final remaining = 5 - selectedImages.length;
       if (remaining <= 0) {
-        Get.snackbar('Limit reached', 'You can upload up to 5 images.');
+        Get.snackbar(
+          'Limit reached',
+          'You can upload up to 5 images.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
         return;
       }
 
       selectedImages.addAll(files.take(remaining).map((f) => File(f.path)));
     } catch (error, stackTrace) {
       AppLogger.error('Failed to pick review images', error, stackTrace);
-      Get.snackbar('Failed', 'Could not pick images. Please try again.');
+      Get.snackbar(
+        'Failed',
+        'Could not pick images. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isPickingImages.value = false;
     }
@@ -84,19 +96,43 @@ class WriteReviewController extends GetxController {
 
   Future<void> submit() async {
     if (productId.value.isEmpty || orderId.value.isEmpty || variantId.value.isEmpty) {
-      Get.snackbar('Error', 'Missing product or order details for review.');
+      Get.snackbar(
+        'Error',
+        'Missing product or order details for review.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
     if (rating.value < 1 || rating.value > 5) {
-      Get.snackbar('Validation', 'Please select a rating.');
+      Get.snackbar(
+        'Validation',
+        'Please select a rating.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
     if (titleController.text.trim().isEmpty) {
-      Get.snackbar('Validation', 'Please write a review title.');
+      Get.snackbar(
+        'Validation',
+        'Please write a review title.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
     if (commentController.text.trim().isEmpty) {
-      Get.snackbar('Validation', 'Please write your comment.');
+      Get.snackbar(
+        'Validation',
+        'Please write your comment.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
       return;
     }
 
@@ -122,10 +158,22 @@ class WriteReviewController extends GetxController {
       );
 
       Get.back(result: true);
-      Get.snackbar('Success', 'Review submitted successfully.');
+      Get.snackbar(
+        'Success',
+        'Review submitted successfully.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (error, stackTrace) {
       AppLogger.error('Failed to submit review', error, stackTrace);
-      Get.snackbar('Failed', 'Could not submit your review. Please try again.');
+      Get.snackbar(
+        'Failed',
+        'Could not submit your review. Please try again.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
     } finally {
       isSubmitting.value = false;
     }

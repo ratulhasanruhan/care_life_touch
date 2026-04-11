@@ -236,14 +236,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    controller.product.priceDisplay,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF064E36),
-                    ),
-                  ),
+                  _buildHeaderPriceText(),
                   const SizedBox(height: 2),
                   Text(
                     controller.product.moqDisplay,
@@ -591,16 +584,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
-                    isInCart
-                        ? '৳${(controller.product.price * quantity).toInt()}'
-                        : controller.product.priceDisplay,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF064E36),
-                    ),
-                  ),
+                  _buildBottomPriceText(isInCart, quantity),
                 ],
               ),
             ),
@@ -651,6 +635,74 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         size: 42,
       ),
     );
+  }
+
+  Widget _buildHeaderPriceText() {
+    final product = controller.product;
+    final hasCompare = product.maxPrice != null && product.maxPrice! > product.price;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '৳${_money(product.price)}',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF064E36),
+          ),
+        ),
+        if (hasCompare) ...[
+          const SizedBox(width: 6),
+          Text(
+            '৳${_money(product.maxPrice!)}',
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF8D949D),
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildBottomPriceText(bool isInCart, int quantity) {
+    final product = controller.product;
+    final current = isInCart ? product.price * quantity : product.price;
+    final compare = product.maxPrice;
+    final hasCompare = compare != null && compare > product.price;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          '৳${_money(current)}',
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xFF064E36),
+          ),
+        ),
+        if (hasCompare) ...[
+          const SizedBox(width: 6),
+          Text(
+            '৳${_money(isInCart ? compare * quantity : compare)}',
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF8D949D),
+              decoration: TextDecoration.lineThrough,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _money(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
   }
 
   void _openProductDetails(ProductModel product) {

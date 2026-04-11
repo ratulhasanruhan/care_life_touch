@@ -110,14 +110,7 @@ class OfferProductTile extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                product.priceDisplay,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF064E36),
-                ),
-              ),
+              _buildPriceText(),
               Text(
                 product.moqDisplay,
                 style: const TextStyle(
@@ -198,5 +191,43 @@ class OfferProductTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildPriceText() {
+    final hasCompare =
+        product.maxPrice != null && product.maxPrice! > product.price;
+
+    return Row(
+      children: [
+        Text(
+          '৳${_money(product.price)}',
+          style: const TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF064E36),
+          ),
+        ),
+        if (hasCompare) ...[
+          const SizedBox(width: 4),
+          Flexible(
+            child: Text(
+              '৳${_money(product.maxPrice!)}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF8D949D),
+                decoration: TextDecoration.lineThrough,
+              ),
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  String _money(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
   }
 }

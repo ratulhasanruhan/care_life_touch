@@ -116,18 +116,6 @@ class ProfileController extends GetxController {
     return null;
   }
 
-  void _setImageFromPath(dynamic path, Rx<File?> target) {
-    final imagePath = path?.toString();
-    if (imagePath == null || imagePath.isEmpty) {
-      return;
-    }
-
-    final file = File(imagePath);
-    if (file.existsSync()) {
-      target.value = file;
-    }
-  }
-
   Future<bool> changePassword({
     required String oldPassword,
     required String newPassword,
@@ -138,6 +126,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Please enter your current password',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -147,6 +136,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Please enter your new password',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -156,6 +146,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Passwords do not match',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -165,6 +156,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Password must be at least 6 characters',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -180,6 +172,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Success',
         'Password changed successfully',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -188,6 +181,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         e.message,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -196,6 +190,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to change password. Please try again.',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -218,6 +213,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to logout. Please try again.',
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -292,7 +288,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Success',
         'Profile updated successfully',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
@@ -305,7 +301,7 @@ class ProfileController extends GetxController {
         e is ApiException && e.message.trim().isNotEmpty
             ? e.message
             : 'Failed to update profile. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
@@ -398,7 +394,7 @@ class ProfileController extends GetxController {
       Get.snackbar(
         'Error',
         'Failed to pick image. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
