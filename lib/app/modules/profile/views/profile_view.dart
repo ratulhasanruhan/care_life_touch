@@ -80,55 +80,6 @@ class ProfileView extends GetView<ProfileController> {
                   validator: controller.validatePhone,
                   textInputAction: TextInputAction.next,
                 ),
-                const SizedBox(height: 16),
-                CustomTextField(
-                  controller: controller.emailController,
-                  hintText: 'Enter Your Email Address',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: controller.validateEmail,
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: 16),
-                Obx(
-                  () => CustomTextField(
-                    controller: controller.passwordController,
-                    hintText: 'Enter New Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    obscureText: !controller.isPasswordVisible.value,
-                    validator: controller.validatePassword,
-                    textInputAction: TextInputAction.next,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        controller.isPasswordVisible.value
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        size: 20,
-                      ),
-                      onPressed: controller.togglePasswordVisibility,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Obx(
-                  () => CustomTextField(
-                    controller: controller.confirmPasswordController,
-                    hintText: 'Retype New Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    obscureText: !controller.isConfirmPasswordVisible.value,
-                    validator: controller.validateConfirmPassword,
-                    textInputAction: TextInputAction.done,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        controller.isConfirmPasswordVisible.value
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        size: 20,
-                      ),
-                      onPressed: controller.toggleConfirmPasswordVisibility,
-                    ),
-                  ),
-                ),
                 const SizedBox(height: 24),
                 _buildDocumentUploadSection(
                   title: 'Drug License',
@@ -203,13 +154,7 @@ class ProfileView extends GetView<ProfileController> {
                   children: [
                     ClipRRect(
                       borderRadius: BorderRadius.circular(8),
-                      child: Image.file(
-                        selectedImage,
-                        width: double.infinity,
-                        height: 112,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => _buildUploadPlaceholder(),
-                      ),
+                      child: _buildDocumentPreview(selectedImage),
                     ),
                     Positioned(
                       top: 8,
@@ -363,6 +308,29 @@ class ProfileView extends GetView<ProfileController> {
       fit: BoxFit.cover,
       errorBuilder: (_, __, ___) =>
           const Icon(Icons.person_outline, size: 48, color: Color(0xFF064E36)),
+    );
+  }
+
+  Widget _buildDocumentPreview(File imageFile) {
+    final path = imageFile.path;
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
+
+    if (isRemote) {
+      return Image.network(
+        path,
+        width: double.infinity,
+        height: 112,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => _buildUploadPlaceholder(),
+      );
+    }
+
+    return Image.file(
+      imageFile,
+      width: double.infinity,
+      height: 112,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => _buildUploadPlaceholder(),
     );
   }
 

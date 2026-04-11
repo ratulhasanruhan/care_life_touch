@@ -260,6 +260,15 @@ class CartController extends GetxController {
       return current;
     }
 
+    final currentImage = current.imagePath.trim();
+    final cachedImage = cached.imagePath.trim();
+    final resolvedImagePath =
+        _isMeaningfulImagePath(currentImage)
+            ? current.imagePath
+            : _isMeaningfulImagePath(cachedImage)
+            ? cached.imagePath
+            : (currentImage.isNotEmpty ? current.imagePath : cached.imagePath);
+
     final merged = ProductModel(
       id: current.id.isNotEmpty ? current.id : cached.id,
       slug: current.slug ?? cached.slug,
@@ -281,9 +290,7 @@ class CartController extends GetxController {
       maxPrice: current.maxPrice ?? cached.maxPrice,
       moq: current.moq.trim().isNotEmpty ? current.moq : cached.moq,
       rating: current.rating > 0 ? current.rating : cached.rating,
-      imagePath: current.imagePath.trim().isNotEmpty
-          ? current.imagePath
-          : cached.imagePath,
+      imagePath: resolvedImagePath,
       imageUrls: current.imageUrls.isNotEmpty
           ? current.imageUrls
           : cached.imageUrls,
@@ -315,6 +322,16 @@ class CartController extends GetxController {
       return false;
     }
     return !RegExp(r'^[a-fA-F0-9]{24}$').hasMatch(text);
+  }
+
+  bool _isMeaningfulImagePath(String value) {
+    final text = value.trim();
+    if (text.isEmpty || text.toLowerCase() == 'null') {
+      return false;
+    }
+
+    // Ignore demo placeholders when we have a real cached product image.
+    return text != 'assets/demo/product_1.png';
   }
 
   /// Convert cart items to order format

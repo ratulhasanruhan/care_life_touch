@@ -11,17 +11,12 @@ import '../../../data/repositories/auth_repository.dart';
 
 class ProfileController extends GetxController {
   final isLoading = false.obs;
-  final isPasswordVisible = false.obs;
-  final isConfirmPasswordVisible = false.obs;
 
   final profileFormKey = GlobalKey<FormState>();
 
   final shopNameController = TextEditingController();
   final ownerNameController = TextEditingController();
   final phoneController = TextEditingController();
-  final emailController = TextEditingController();
-  final passwordController = TextEditingController();
-  final confirmPasswordController = TextEditingController();
 
   final Rx<File?> drugLicenseImage = Rx<File?>(null);
   final Rx<File?> tradeLicenseImage = Rx<File?>(null);
@@ -46,16 +41,43 @@ class ProfileController extends GetxController {
       return;
     }
 
-    shopNameController.text = (user['shopName'] ?? '').toString();
-    ownerNameController.text = (user['ownerName'] ?? user['name'] ?? '')
-        .toString();
-    phoneController.text = (user['phone'] ?? '').toString();
-    emailController.text = (user['email'] ?? '').toString();
+    shopNameController.text =
+        _firstNonEmptyString(<dynamic>[user['shopName'], user['shop_name']]) ?? '';
+    ownerNameController.text = _firstNonEmptyString(<dynamic>[
+          user['ownerName'],
+          user['owner_name'],
+          user['fullName'],
+          user['full_name'],
+          user['name'],
+        ]) ??
+        '';
+    phoneController.text =
+        _firstNonEmptyString(<dynamic>[user['phone'], user['phoneNumber'], user['phone_number']]) ?? '';
 
-    _setImageFromPath(user['drugLicenseImage'], drugLicenseImage);
-    _setImageFromPath(user['tradeLicenseImage'], tradeLicenseImage);
-    _setImageFromPath(user['nidImage'], nidImage);
-    _setImagePath(user['profileImage'], profileImage);
+    _setImagePath(
+      _firstNonEmptyString(<dynamic>[
+        user['drugLicenseImage'],
+        user['drugLicense'],
+        user['drug_license'],
+      ]),
+      drugLicenseImage,
+    );
+    _setImagePath(
+      _firstNonEmptyString(<dynamic>[
+        user['tradeLicenseImage'],
+        user['tradeLicense'],
+        user['trade_license'],
+      ]),
+      tradeLicenseImage,
+    );
+    _setImagePath(
+      _firstNonEmptyString(<dynamic>[user['nidImage'], user['nid_image'], user['nid']]),
+      nidImage,
+    );
+    _setImagePath(
+      _firstNonEmptyString(<dynamic>[user['profileImage'], user['profile_image'], user['avatar']]),
+      profileImage,
+    );
 
     shopImages.clear();
     final dynamic rawShopImages = user['shopImages'];
@@ -69,7 +91,7 @@ class ProfileController extends GetxController {
     }
 
     if (shopImages.isEmpty) {
-      final legacyPath = (user['shopImage'] ?? '').toString().trim();
+      final legacyPath = _firstNonEmptyString(<dynamic>[user['shopImage'], user['shop_image']]) ?? '';
       if (legacyPath.isNotEmpty) {
         shopImages.add(File(legacyPath));
       }
@@ -77,11 +99,21 @@ class ProfileController extends GetxController {
   }
 
   void _setImagePath(dynamic path, Rx<File?> target) {
-    final imagePath = path?.toString().trim() ?? '';
+    final imagePath = (path ?? '').toString().trim();
     if (imagePath.isEmpty || imagePath.toLowerCase() == 'null') {
       return;
     }
     target.value = File(imagePath);
+  }
+
+  String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = (value ?? '').toString().trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return null;
   }
 
   void _setImageFromPath(dynamic path, Rx<File?> target) {
@@ -94,14 +126,6 @@ class ProfileController extends GetxController {
     if (file.existsSync()) {
       target.value = file;
     }
-  }
-
-  void togglePasswordVisibility() {
-    isPasswordVisible.value = !isPasswordVisible.value;
-  }
-
-  void toggleConfirmPasswordVisibility() {
-    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
   }
 
   Future<bool> changePassword({
@@ -159,9 +183,6 @@ class ProfileController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-      // Clear password fields
-      passwordController.clear();
-      confirmPasswordController.clear();
       return true;
     } on ApiException catch (e) {
       Get.snackbar(
@@ -225,52 +246,6 @@ class ProfileController extends GetxController {
     return null;
   }
 
-  String? validateEmail(String? value) {
-    if (value == null || value.trim().isEmpty) {
-      return 'Please enter your email';
-    }
-
-    final emailRegex = RegExp(r'^[\w-]+@([\w-]+\.)+[\w-]{2,4}$');
-    if (!emailRegex.hasMatch(value.trim())) {
-      return 'Please enter a valid email';
-    }
-
-    return null;
-  }
-
-  String? validatePassword(String? value) {
-    if ((value == null || value.isEmpty) &&
-        confirmPasswordController.text.isEmpty) {
-      return null;
-    }
-
-    if (value == null || value.isEmpty) {
-      return 'Please enter new password';
-    }
-
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters';
-    }
-
-    return null;
-  }
-
-  String? validateConfirmPassword(String? value) {
-    if (passwordController.text.isEmpty && (value == null || value.isEmpty)) {
-      return null;
-    }
-
-    if (value == null || value.isEmpty) {
-      return 'Please confirm your new password';
-    }
-
-    if (value != passwordController.text) {
-      return 'Passwords do not match';
-    }
-
-    return null;
-  }
-
   Future<void> updateProfile() async {
     final isValid = profileFormKey.currentState?.validate() ?? false;
     if (!isValid) {
@@ -301,7 +276,6 @@ class ProfileController extends GetxController {
         'shopName': shopNameController.text.trim(),
         'ownerName': ownerNameController.text.trim(),
         'phone': phoneController.text.trim(),
-        'email': emailController.text.trim(),
         'profileImage': uploadedProfileImage ?? existingUser['profileImage'],
         'nidImage': uploadedNid ?? existingUser['nidImage'],
         'shopImages': uploadedShopImages.isEmpty
@@ -519,9 +493,6 @@ class ProfileController extends GetxController {
     shopNameController.dispose();
     ownerNameController.dispose();
     phoneController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    confirmPasswordController.dispose();
     super.onClose();
   }
 }

@@ -24,21 +24,59 @@ class MoreController extends GetxController {
     _loadUserData();
   }
 
-  void _loadUserData() {
-    final user = _storage.getUser();
+  Future<void> _loadUserData() async {
+    final localUser = _storage.getUser();
 
+    try {
+      final remoteUser = await _authRepository.accessMe();
+      _applyUserData(remoteUser, fallback: localUser);
+      return;
+    } catch (_) {
+      // Use cached local user data when the API is unavailable.
+    }
+
+    _applyUserData(localUser);
+  }
+
+  void _applyUserData(
+    Map<String, dynamic>? user, {
+    Map<String, dynamic>? fallback,
+  }) {
     final resolvedName = _firstNonEmptyString(<dynamic>[
+      user?['name'],
       user?['fullName'],
       user?['ownerName'],
-      user?['name'],
-      user?['userName'],
+      user?['shopName'],
       user?['phone'],
       user?['email'],
+      fallback?['name'],
+      fallback?['fullName'],
+      fallback?['ownerName'],
+      fallback?['shopName'],
+      fallback?['phone'],
+      fallback?['email'],
+      _storage.getLastLoginIdentifier(),
     ]);
 
     userName.value = resolvedName ?? 'Guest User';
     userImage.value =
-        _firstNonEmptyString(<dynamic>[user?['profileImage'], user?['shopImage']]) ?? '';
+        _firstNonEmptyString(<dynamic>[
+              user?['profileImage'],
+              user?['profile_image'],
+              user?['shopImage'],
+              user?['shop_image'],
+              user?['avatar'],
+              user?['photo'],
+              user?['image'],
+              fallback?['profileImage'],
+              fallback?['profile_image'],
+              fallback?['shopImage'],
+              fallback?['shop_image'],
+              fallback?['avatar'],
+              fallback?['photo'],
+              fallback?['image'],
+            ]) ??
+        '';
   }
 
   String? _firstNonEmptyString(List<dynamic> values) {
