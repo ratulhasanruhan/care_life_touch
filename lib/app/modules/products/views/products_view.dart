@@ -364,7 +364,7 @@ class _BrandProductsBody extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.only(bottom: 20),
       children: [
-        SectionHeader(title: 'New Products', onViewAll: () {}),
+        SectionHeader(title: 'New Products'),
         const SizedBox(height: 12),
         _ProductsGrid(products: controller.brandNewProducts, nested: true),
         const SizedBox(height: 16),
@@ -402,4 +402,3 @@ class _BrandProductsBody extends StatelessWidget {
     );
   }
 }
-
