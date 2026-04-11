@@ -7,6 +7,7 @@ import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/primary_appbar.dart';
 import '../../../routes/app_pages.dart';
 import '../../cart/controllers/cart_controller.dart';
+import '../../home/models/product_model.dart';
 import '../../home/views/widgets/product_card.dart';
 import '../../products/models/products_query.dart';
 import '../../products/views/widgets/offer_product_tile.dart';
@@ -410,7 +411,10 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   .map(
                     (product) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: OfferProductTile(product: product),
+                      child: OfferProductTile(
+                        product: product,
+                        onTap: () => _openProductDetails(product),
+                      ),
                     ),
                   )
                   .toList(),
@@ -534,7 +538,10 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   .map(
                     (product) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: OfferProductTile(product: product),
+                      child: OfferProductTile(
+                        product: product,
+                        onTap: () => _openProductDetails(product),
+                      ),
                     ),
                   )
                   .toList(),
@@ -643,6 +650,18 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         color: Color(0xFFE8EAE8),
         size: 42,
       ),
+    );
+  }
+
+  void _openProductDetails(ProductModel product) {
+    if (Get.isRegistered<ProductDetailsController>()) {
+      Get.delete<ProductDetailsController>(force: true);
+    }
+
+    Get.toNamed(
+      Routes.PRODUCT_DETAILS,
+      arguments: product,
+      preventDuplicates: false,
     );
   }
 }

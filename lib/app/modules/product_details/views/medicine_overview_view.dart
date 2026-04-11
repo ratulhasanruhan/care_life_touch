@@ -1,19 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../global_widgets/primary_appbar.dart';
+import '../../home/models/product_model.dart';
+import '../controllers/product_details_controller.dart';
 
 class MedicineOverviewView extends StatelessWidget {
   const MedicineOverviewView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Product name can be retrieved from Get.arguments if needed for dynamic content
-    // final productName = Get.arguments as String? ?? 'Paracetamol';
+    final ProductModel product;
+    if (Get.arguments is ProductModel) {
+      product = Get.arguments as ProductModel;
+    } else if (Get.isRegistered<ProductDetailsController>()) {
+      product = Get.find<ProductDetailsController>().product;
+    } else {
+      return Scaffold(
+        backgroundColor: const Color(0xFFFFFCFC),
+        appBar: PrimaryAppBar(
+          title: 'Medicine Overview',
+          showBackButton: true,
+          backgroundColor: Colors.white,
+        ),
+        body: const Center(child: Text('Medicine details are unavailable.')),
+      );
+    }
+
+    final intro = _firstNonEmpty(<String?>[
+      product.description,
+      '${product.name} is a medicine product available in this catalog.',
+    ]);
+
+    final uses = <String>[
+      if (product.categoryName.trim().isNotEmpty) 'Category: ${product.categoryName}',
+      if (product.brand.trim().isNotEmpty && product.brand.toLowerCase() != 'unknown brand')
+        'Brand: ${product.brand}',
+      if (product.moq.trim().isNotEmpty) 'Pack/Unit: ${product.moq}',
+      'Price: ${product.priceDisplay}',
+    ];
+
+    final summary = <String>[
+      if (product.description != null && product.description!.trim().isNotEmpty)
+        product.description!.trim(),
+      if (product.offerLabel != null && product.offerLabel!.trim().isNotEmpty)
+        'Offer: ${product.offerLabel}',
+      'For proper use, follow your physician\'s guidance and product instructions.',
+    ];
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCFC),
       appBar: PrimaryAppBar(
-        title: 'Medicine Overview',
+        title: '${product.name} Overview',
         showBackButton: true,
         backgroundColor: Colors.white,
       ),
@@ -22,59 +59,33 @@ class MedicineOverviewView extends StatelessWidget {
         children: [
           _buildSection(
             'Introduction',
-            'Paracetamol is a widely used analgesic (pain reliever) and antipyretic (fever reducer). It is commonly used to relieve mild to moderate pain and reduce fever associated with various conditions.',
+            intro,
             showMore: true,
           ),
           const SizedBox(height: 16),
           _buildSection(
-            'Uses',
-            'Paracetamol is commonly used for:\n\n'
-            '• Headache\n'
-            '• Toothache\n'
-            '• Muscle and joint pain\n'
-            '• Back pain\n'
-            '• Menstrual pain\n'
-            '• Cold and flu symptoms\n'
-            '• Fever',
+            'Product Details',
+            uses.isEmpty ? 'Product details are currently limited.' : uses.map((item) => '• $item').join('\n'),
           ),
           const SizedBox(height: 16),
           _buildSection(
-            'How It Works',
-            'Paracetamol works by reducing the production of chemical substances in the brain that cause pain and increase body temperature.',
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            'Dosage (General Guidance)',
-            'Adults: As directed by a healthcare professional or according to the product label.\n\n'
-            'Children: Dosage depends on age and weight. Always follow pediatric guidance.\n\n'
-            '⚠️ Do not exceed the recommended daily dose.',
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            'Side Effects',
-            'Paracetamol is generally well tolerated when used as directed. Rare side effects may include:\n\n'
-            '• Nausea\n'
-            '• Allergic reactions (rash, itching)\n'
-            '• Liver problems (usually linked to overdose)\n\n'
-            'Seek medical attention if unusual symptoms occur.',
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            'Precautions',
-            '• Avoid exceeding the maximum daily dose.\n'
-            '• Consult a healthcare professional if you have liver disease.\n'
-            '• Avoid combining with other products containing Paracetamol.\n'
-            '• Seek medical advice during pregnancy or breastfeeding.',
-          ),
-          const SizedBox(height: 16),
-          _buildSection(
-            'Storage',
-            'Store in a cool, dry place away from direct sunlight and out of reach of children.',
+            'Overview',
+            summary.join('\n\n'),
           ),
           const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  String _firstNonEmpty(List<String?> values) {
+    for (final value in values) {
+      final text = (value ?? '').trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return 'Medicine information is not available for this product right now.';
   }
 
   Widget _buildSection(String title, String content, {bool showMore = false}) {
