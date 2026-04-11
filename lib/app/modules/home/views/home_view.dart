@@ -223,7 +223,7 @@ class HomeView extends GetView<HomeController> {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 169 / 225,
+          childAspectRatio: 165 / 225,
         ),
         itemCount: products.length,
         itemBuilder: (context, index) {
