@@ -106,25 +106,49 @@ class _ProductsViewState extends State<ProductsView> {
                 );
               }
 
-              return Column(
-                children: [
-                  Expanded(child: _ProductsGrid(products: items)),
+              return CustomScrollView(
+                slivers: [
+                  SliverPadding(
+                    padding: const EdgeInsets.only(top: 8),
+                    sliver: SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 169 / 225,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return ProductCard(product: items[index]);
+                          },
+                          childCount: items.length,
+                        ),
+                      ),
+                    ),
+                  ),
                   if (_controller.hasMorePages.value)
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                      child: SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: _controller.isMutating.value
-                              ? null
-                              : _controller.loadMoreProducts,
-                          child: _controller.isMutating.value
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Text('Load More'),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed: _controller.isMutating.value
+                                ? null
+                                : _controller.loadMoreProducts,
+                            child: _controller.isMutating.value
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('Load More'),
+                          ),
                         ),
                       ),
                     ),

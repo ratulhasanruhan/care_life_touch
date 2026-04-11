@@ -170,6 +170,27 @@ class LoginView extends GetView<AuthController> {
                   ),
                 ),
                 const SizedBox(height: 20),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.call_outlined,
+                    size: 18,
+                    color: Color(0xFF064E36),
+                  ),
+                  label: const Text(
+                    'Call Us',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Color(0xFF064E36),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: const Color(0xFF064E36),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ),
               ],
             ),
           ),
@@ -178,26 +199,4 @@ class LoginView extends GetView<AuthController> {
     );
   }
 
-  Widget _buildSocialButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onPressed,
-  }) {
-    return SizedBox(
-      width: double.infinity,
-      height: 56,
-      child: OutlinedButton.icon(
-        onPressed: onPressed,
-        icon: Icon(icon, size: 24),
-        label: Text(label),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: const Color(0xFF01060F),
-          side: const BorderSide(color: Color(0xFFE8EAEB)),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-        ),
-      ),
-    );
-  }
 }
