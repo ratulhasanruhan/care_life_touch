@@ -9,7 +9,7 @@ class AppConstants {
   // API Configuration
   static const String baseUrl = String.fromEnvironment(
     'BASE_URL',
-    defaultValue: 'https://carelifetouch.startupmindweb.com/api',
+    defaultValue: 'https://server.carelifetouch.com/api',
   );
   static const String uploadEndpoint = '/upload-image';
 
