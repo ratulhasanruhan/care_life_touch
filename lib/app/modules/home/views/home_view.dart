@@ -12,6 +12,35 @@ import 'all_brands_view.dart';
 import '../../products/models/products_query.dart';
 import '../../../routes/app_pages.dart';
 
+SliverGridDelegateWithFixedCrossAxisCount _responsiveGridDelegate(double maxWidth) {
+  const spacing = 12.0;
+
+  int crossAxisCount;
+  if (maxWidth >= 980) {
+    crossAxisCount = 4;
+  } else if (maxWidth >= 760) {
+    crossAxisCount = 3;
+  } else if (maxWidth >= 360) {
+    crossAxisCount = 2;
+  } else {
+    crossAxisCount = 1;
+  }
+
+  final cardWidth = (maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+  final cardHeight = cardWidth < 165
+      ? 238.0
+      : cardWidth < 210
+          ? 252.0
+          : 268.0;
+
+  return SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: crossAxisCount,
+    crossAxisSpacing: spacing,
+    mainAxisSpacing: spacing,
+    childAspectRatio: cardWidth / cardHeight,
+  );
+}
+
 /// Home View - Optimized main screen with separated widgets
 class HomeView extends GetView<HomeController> {
   const HomeView({super.key});
@@ -233,23 +262,20 @@ class HomeView extends GetView<HomeController> {
   Widget _buildProductGrid(RxList products) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.builder(
-        padding: EdgeInsets.zero,
-        primary: false,
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 165 / 225,
+      child: LayoutBuilder(
+        builder: (context, constraints) => GridView.builder(
+          padding: EdgeInsets.zero,
+          primary: false,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: _responsiveGridDelegate(constraints.maxWidth),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            return ProductCard(
+              product: products[index],
+            );
+          },
         ),
-        itemCount: products.length,
-        itemBuilder: (context, index) {
-          return ProductCard(
-            product: products[index],
-          );
-        },
       ),
     );
   }
@@ -424,18 +450,15 @@ class _HomeSkeleton extends StatelessWidget {
   Widget _buildGridSkeleton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: GridView.builder(
-        shrinkWrap: true,
-        primary: false,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: 4,
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 169 / 225,
+      child: LayoutBuilder(
+        builder: (context, constraints) => GridView.builder(
+          shrinkWrap: true,
+          primary: false,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 4,
+          gridDelegate: _responsiveGridDelegate(constraints.maxWidth),
+          itemBuilder: (_, __) => const _SkeletonBox(),
         ),
-        itemBuilder: (_, __) => const _SkeletonBox(),
       ),
     );
   }
