@@ -285,42 +285,21 @@ class _HomeHeaderState extends State<HomeHeader> {
                   // Notification Button
                   GestureDetector(
                     onTap: widget.onNotificationTap,
-                    child: Stack(
-                      clipBehavior: Clip.none,
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: widget.unreadNotificationCount > 0
-                              ? SvgPicture.asset('assets/svg/ic_notification.svg')
-                              : const Icon(
-                                  Icons.notifications_outlined,
-                                  color: Colors.white,
-                                  size: 22,
-                                ),
-                        ),
-                        if (widget.unreadNotificationCount > 0)
-                          Positioned(
-                            right: -1,
-                            top: -1,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFFFD400),
-                                border: Border.fromBorderSide(
-                                  BorderSide(color: Colors.white, width: 2),
-                                ),
-                                shape: BoxShape.circle,
-                              ),
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: widget.unreadNotificationCount > 0
+                          ? SvgPicture.asset('assets/svg/ic_notification.svg')
+                          : const Icon(
+                              Icons.notifications_outlined,
+                              color: Colors.white,
+                              size: 22,
                             ),
-                          ),
-                      ],
                     ),
                   ),
                 ],

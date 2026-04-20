@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/review_model.dart';
@@ -134,14 +135,16 @@ class ProductReviewsController extends GetxController {
       Get.snackbar(
         'Success',
         'Your review has been submitted',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
       );
     } catch (error, stackTrace) {
       AppLogger.error('Failed to submit review', error, stackTrace);
       Get.snackbar(
         'Error',
         'Failed to submit review. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red,
       );
     } finally {
       isSubmitting.value = false;
