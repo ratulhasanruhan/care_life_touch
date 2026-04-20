@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 import '../../../core/values/app_colors.dart';
 import '../controllers/splash_controller.dart';
 
@@ -19,11 +20,23 @@ class SplashView extends GetView<SplashController> {
                 child: Padding(
                   padding: const EdgeInsets.all(40),
                   child: Obx(() {
+                    if (controller.splashLogoLocalPath.value.isNotEmpty) {
+                      final file = File(controller.splashLogoLocalPath.value);
+                      if (file.existsSync()) {
+                        return Image.file(
+                          file,
+                          fit: BoxFit.contain,
+                          gaplessPlayback: true,
+                        );
+                      }
+                    }
+
                     // If logo URL is available, use it; otherwise use fallback
                     if (controller.splashLogo.value.isNotEmpty) {
                       return Image.network(
                         controller.splashLogo.value,
                         fit: BoxFit.contain,
+                        gaplessPlayback: true,
                         errorBuilder: (context, error, stackTrace) =>
                             _buildFallbackImage(),
                         loadingBuilder: (context, child, loadingProgress) {

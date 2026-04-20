@@ -9,6 +9,7 @@ class SplashController extends GetxController {
   final StorageService _storage = Get.find<StorageService>();
   late PageRepository _pageRepository;
   final splashLogo = ''.obs;
+  final splashLogoLocalPath = ''.obs;
   final splashText = 'Care You Trust. Medicines You Need.'.obs;
   final isLoadingLogo = true.obs;
 
@@ -55,9 +56,23 @@ class SplashController extends GetxController {
         splashLogo.value = logoUrl;
         AppLogger.success('Splash logo loaded: $logoUrl');
 
-        // Pre-cache the image for better performance
+        // Use previously cached file immediately if available.
         try {
-          await DefaultCacheManager().getSingleFile(logoUrl);
+          final cached = await DefaultCacheManager().getFileFromCache(logoUrl);
+          final file = cached?.file;
+          if (file != null && await file.exists()) {
+            splashLogoLocalPath.value = file.path;
+          }
+        } catch (e) {
+          AppLogger.warning('Failed to read splash logo cache', e);
+        }
+
+        // Refresh cache in background and update local path.
+        try {
+          final file = await DefaultCacheManager().getSingleFile(logoUrl);
+          if (await file.exists()) {
+            splashLogoLocalPath.value = file.path;
+          }
           AppLogger.success('Splash logo cached successfully');
         } catch (e) {
           AppLogger.warning('Failed to cache splash logo', e);
