@@ -3,7 +3,7 @@ import 'widgets/view_all_grid_screen.dart';
 
 class AllCategoriesView extends StatelessWidget {
   final List<Map<String, String>> categories;
-  final ValueChanged<String>? onCategoryTap;
+  final ValueChanged<Map<String, String>>? onCategoryTap;
 
   const AllCategoriesView({
     super.key,

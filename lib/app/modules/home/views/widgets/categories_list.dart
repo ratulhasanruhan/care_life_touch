@@ -83,7 +83,7 @@ class CategoryItem extends StatelessWidget {
 /// Categories List Widget
 class CategoriesList extends StatelessWidget {
   final List<Map<String, String>> categories;
-  final Function(String)? onCategoryTap;
+  final ValueChanged<Map<String, String>>? onCategoryTap;
 
   const CategoriesList({
     super.key,
@@ -108,8 +108,7 @@ class CategoriesList extends StatelessWidget {
             child: CategoryItem(
               name: category['name']!,
               imagePath: category['image']!,
-              onTap: () =>
-                  onCategoryTap?.call(category['query'] ?? category['name']!),
+              onTap: () => onCategoryTap?.call(category),
             ),
           );
         },

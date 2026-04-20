@@ -8,7 +8,7 @@ class ViewAllGridScreen extends StatelessWidget {
   final int labelMaxLines;
   final double labelFontSize;
   final double cardHeight;
-  final ValueChanged<String>? onItemTap;
+  final ValueChanged<Map<String, String>>? onItemTap;
 
   const ViewAllGridScreen({
     super.key,
@@ -50,7 +50,7 @@ class ViewAllGridScreen extends StatelessWidget {
           final imagePath = item['image'] ?? '';
 
           return GestureDetector(
-            onTap: () => onItemTap?.call(item['query'] ?? name),
+            onTap: () => onItemTap?.call(item),
             child: Column(
               children: [
                 Container(

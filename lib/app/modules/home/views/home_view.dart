@@ -59,12 +59,16 @@ class HomeView extends GetView<HomeController> {
                             () => AllCategoriesView(
                               categories: controller.categories,
                               onCategoryTap: (category) {
+                                final categoryTitle =
+                                    (category['name'] ?? 'Category').toString().trim();
+                                final categoryKeyword =
+                                    (category['query'] ?? categoryTitle).toString().trim();
                                 Get.toNamed(
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
                                     type: ProductListingType.category,
-                                    title: category,
-                                    keyword: category,
+                                    title: categoryTitle,
+                                    keyword: categoryKeyword,
                                   ),
                                 );
                               },
@@ -114,15 +118,27 @@ class HomeView extends GetView<HomeController> {
                                 for (final item in controller.brands) {
                                   final query = (item['query'] ?? '').trim();
                                   final name = (item['name'] ?? '').trim();
-                                  if (brandValue == query || brandValue == name) {
+                                  final selectedQuery =
+                                      (brandValue['query'] ?? '').toString().trim();
+                                  final selectedName =
+                                      (brandValue['name'] ?? '').toString().trim();
+                                  if (selectedQuery == query ||
+                                      selectedQuery == name ||
+                                      selectedName == query ||
+                                      selectedName == name) {
                                     matchedBrand = item;
                                     break;
                                   }
                                 }
 
-                                final brandTitle = (matchedBrand?['name'] ?? brandValue).trim();
+                                final brandTitle =
+                                    (matchedBrand?['name'] ?? brandValue['name'] ?? 'Brand')
+                                        .toString()
+                                        .trim();
                                 final brandKeyword =
-                                    (matchedBrand?['query'] ?? brandTitle).trim();
+                                    (matchedBrand?['query'] ?? brandValue['query'] ?? brandTitle)
+                                        .toString()
+                                        .trim();
 
                                 Get.toNamed(
                                   Routes.PRODUCTS,
@@ -193,12 +209,14 @@ class HomeView extends GetView<HomeController> {
     return CategoriesList(
       categories: controller.categories,
       onCategoryTap: (category) {
+        final categoryTitle = (category['name'] ?? 'Category').toString().trim();
+        final categoryKeyword = (category['query'] ?? categoryTitle).toString().trim();
         Get.toNamed(
           Routes.PRODUCTS,
           arguments: ProductsQuery(
             type: ProductListingType.category,
-            title: '$category Products',
-            keyword: category,
+            title: '$categoryTitle Products',
+            keyword: categoryKeyword,
           ),
         );
       },

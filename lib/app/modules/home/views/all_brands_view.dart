@@ -3,7 +3,7 @@ import 'widgets/view_all_grid_screen.dart';
 
 class AllBrandsView extends StatelessWidget {
   final List<Map<String, String>> brands;
-  final ValueChanged<String>? onBrandTap;
+  final ValueChanged<Map<String, String>>? onBrandTap;
 
   const AllBrandsView({super.key, required this.brands, this.onBrandTap});
 
