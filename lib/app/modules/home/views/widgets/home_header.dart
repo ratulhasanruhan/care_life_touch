@@ -174,19 +174,23 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   void _onSuggestionTap(String suggestion) {
-    _addToSearchHistory(suggestion);
-    _searchController.clear();
-    _searchFocusNode.unfocus();
-    _hideSuggestions();
-    widget.onSearch?.call(suggestion);
+    _searchController.text = suggestion;
+    _submitSearch(suggestion);
   }
 
   void _onSearchSubmitted(String value) {
-    _addToSearchHistory(value);
+    _submitSearch(value);
+  }
+
+  void _submitSearch(String value) {
+    final query = value.trim();
+    if (query.isEmpty) return;
+
+    _addToSearchHistory(query);
     _searchController.clear();
     _searchFocusNode.unfocus();
     _hideSuggestions();
-    widget.onSearch?.call(value);
+    widget.onSearch?.call(query);
   }
 
   @override
@@ -318,85 +322,87 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   Widget _buildSearchField() {
-    return Column(
-      children: [
-        TextField(
-          controller: _searchController,
-          focusNode: _searchFocusNode,
-          onTapOutside: (_) => _searchFocusNode.unfocus(),
-          onChanged: _filterSuggestions,
-          onSubmitted: _onSearchSubmitted,
-          textInputAction: TextInputAction.search,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-            color: Colors.white,
-          ),
-          decoration: InputDecoration(
-            isDense: true,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 10),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
-              borderSide: BorderSide.none,
-            ),
-            hintText: 'Search Your Needs...',
-            fillColor: Colors.white.withValues(alpha: 0.1),
-            hintStyle: const TextStyle(
+    return TextFieldTapRegion(
+      child: Column(
+        children: [
+          TextField(
+            controller: _searchController,
+            focusNode: _searchFocusNode,
+            onTapOutside: (_) => _searchFocusNode.unfocus(),
+            onChanged: _filterSuggestions,
+            onSubmitted: _onSearchSubmitted,
+            textInputAction: TextInputAction.search,
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: Color(0xFFA2A8AF),
-            ),
-            prefixIcon: const Icon(
-              Icons.search,
-              color: Color(0xFFA2A8AF),
-              size: 20,
-            ),
-          ),
-        ),
-        // Suggestions dropdown
-        if (_showSuggestions && _filteredSuggestions.isNotEmpty)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.1),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
             ),
-            constraints: const BoxConstraints(maxHeight: 200),
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: _filteredSuggestions.length,
-              itemBuilder: (context, index) {
-                final suggestion = _filteredSuggestions[index];
-                return _buildSuggestionTile(suggestion, index);
-              },
+            decoration: InputDecoration(
+              isDense: true,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              filled: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 10),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              errorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              focusedErrorBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide.none,
+              ),
+              hintText: 'Search Your Needs...',
+              fillColor: Colors.white.withValues(alpha: 0.1),
+              hintStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFFA2A8AF),
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: Color(0xFFA2A8AF),
+                size: 20,
+              ),
             ),
           ),
-      ],
+          // Suggestions dropdown
+          if (_showSuggestions && _filteredSuggestions.isNotEmpty)
+            Container(
+              margin: const EdgeInsets.only(top: 4),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              constraints: const BoxConstraints(maxHeight: 200),
+              child: ListView.builder(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                itemCount: _filteredSuggestions.length,
+                itemBuilder: (context, index) {
+                  final suggestion = _filteredSuggestions[index];
+                  return _buildSuggestionTile(suggestion, index);
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 
