@@ -56,18 +56,18 @@ class SplashController extends GetxController {
         splashLogo.value = logoUrl;
         AppLogger.success('Splash logo loaded: $logoUrl');
 
-        // Use previously cached file immediately if available.
+        // Try existing cache first so splash can show image without waiting for network.
         try {
           final cached = await DefaultCacheManager().getFileFromCache(logoUrl);
-          final file = cached?.file;
-          if (file != null && await file.exists()) {
-            splashLogoLocalPath.value = file.path;
+          final cachedFile = cached?.file;
+          if (cachedFile != null && await cachedFile.exists()) {
+            splashLogoLocalPath.value = cachedFile.path;
           }
         } catch (e) {
           AppLogger.warning('Failed to read splash logo cache', e);
         }
 
-        // Refresh cache in background and update local path.
+        // Refresh cache in background for latest logo.
         try {
           final file = await DefaultCacheManager().getSingleFile(logoUrl);
           if (await file.exists()) {
@@ -77,6 +77,9 @@ class SplashController extends GetxController {
         } catch (e) {
           AppLogger.warning('Failed to cache splash logo', e);
         }
+      } else {
+        splashLogo.value = '';
+        splashLogoLocalPath.value = '';
       }
     } catch (e) {
       AppLogger.warning('Failed to load splash logo', e);

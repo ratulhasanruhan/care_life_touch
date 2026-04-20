@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../legal/routes.dart';
 import '../../../core/values/app_colors.dart';
@@ -113,13 +114,17 @@ class OnboardingView extends GetView<OnboardingController> {
   Widget _buildOnboardingPage(dynamic page) {
     return Column(
       children: [
-        SizedBox(height: Get.height * 0.2),
+        SizedBox(height: Get.height * 0.1),
         // Image
         Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
-            child: _buildPageImage(page.image),
+            child: _buildImageCard(page.image),
           ),
+        ),
+
+        SizedBox(
+          height: Get.height * 0.09,
         ),
 
         // Title
@@ -163,6 +168,12 @@ class OnboardingView extends GetView<OnboardingController> {
       return Image.network(
         imagePath,
         fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return _buildSkeleton();
+        },
         errorBuilder: (context, error, stackTrace) =>
             _buildFallbackImage(imagePath),
       );
@@ -180,6 +191,24 @@ class OnboardingView extends GetView<OnboardingController> {
         height: 200,
         child: Icon(Icons.image_not_supported, size: 80),
       ),
+    );
+  }
+
+  Widget _buildImageCard(String imagePath) {
+    return AspectRatio(
+      aspectRatio: 1.05,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: _buildPageImage(imagePath),
+      ),
+    );
+  }
+
+  Widget _buildSkeleton() {
+    return Shimmer.fromColors(
+      baseColor: const Color(0xFFEDEDED),
+      highlightColor: const Color(0xFFF7F7F7),
+      child: Container(color: const Color(0xFFEFEFEF)),
     );
   }
 }
