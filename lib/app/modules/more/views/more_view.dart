@@ -19,15 +19,20 @@ class MoreView extends GetView<MoreController> {
         showBackButton: false,
         backgroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 16),
-            _buildProfileSection(),
-            const SizedBox(height: 20),
-            _buildMenuSection(),
-            const SizedBox(height: 20),
-          ],
+      body: RefreshIndicator(
+        onRefresh: controller.refreshPage,
+        color: const Color(0xFF064E36),
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              const SizedBox(height: 16),
+              _buildProfileSection(),
+              const SizedBox(height: 20),
+              _buildMenuSection(),
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );

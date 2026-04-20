@@ -38,6 +38,10 @@ class MoreController extends GetxController {
     _applyUserData(localUser);
   }
 
+  Future<void> refreshPage() async {
+    await _loadUserData();
+  }
+
   void _applyUserData(
     Map<String, dynamic>? user, {
     Map<String, dynamic>? fallback,

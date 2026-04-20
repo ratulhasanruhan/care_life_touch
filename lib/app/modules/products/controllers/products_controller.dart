@@ -57,6 +57,11 @@ class ProductsController extends GetxController {
     }
   }
 
+  Future<void> refreshPage() async {
+    await _loadInitialProducts();
+    await _loadFilterOptions();
+  }
+
   Future<void> _handleSearchChange() async {
     if (query.type == ProductListingType.offers) {
       // Offer listing is constrained from the offers API; apply local search only.

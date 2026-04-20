@@ -33,53 +33,79 @@ class CartView extends GetView<CartController> {
 
         if (controller.errorMessage.value.isNotEmpty &&
             controller.cartItems.isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 56,
-                    color: Color(0xFFEF4444),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    controller.errorMessage.value,
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF727379),
+          return RefreshIndicator(
+            onRefresh: () => controller.loadCart(showLoader: false),
+            color: const Color(0xFF064E36),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(
+                  height: Get.height * 0.62,
+                  child: Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.error_outline,
+                            size: 56,
+                            color: Color(0xFFEF4444),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            controller.errorMessage.value,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF727379),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          OutlinedButton(
+                            onPressed: controller.loadCart,
+                            child: const Text('Retry'),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  OutlinedButton(
-                    onPressed: controller.loadCart,
-                    child: const Text('Retry'),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         }
 
         if (controller.cartItems.isEmpty) {
-          return _buildEmptyCart();
+          return RefreshIndicator(
+            onRefresh: () => controller.loadCart(showLoader: false),
+            color: const Color(0xFF064E36),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(height: Get.height * 0.62, child: _buildEmptyCart()),
+              ],
+            ),
+          );
         }
 
         return Column(
           children: [
             // Cart Items List
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.all(20),
-                itemCount: controller.cartItems.length,
-                itemBuilder: (context, index) {
-                  final item = controller.cartItems[index];
-                  return _buildCartItem(item);
-                },
+              child: RefreshIndicator(
+                onRefresh: () => controller.loadCart(showLoader: false),
+                color: const Color(0xFF064E36),
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.all(20),
+                  itemCount: controller.cartItems.length,
+                  itemBuilder: (context, index) {
+                    final item = controller.cartItems[index];
+                    return _buildCartItem(item);
+                  },
+                ),
               ),
             ),
 

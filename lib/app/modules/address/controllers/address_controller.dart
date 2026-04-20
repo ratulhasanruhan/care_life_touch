@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/app_logger.dart';
@@ -276,7 +277,13 @@ class AddressController extends GetxController {
 
       clearForm();
       Get.back(result: saved);
-      Get.snackbar('Success', isEditing ? 'Address updated successfully' : 'Address saved successfully');
+      Get.snackbar(
+        'Success',
+        isEditing ? 'Address updated successfully' : 'Address saved successfully',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (_) {
       Get.snackbar('Error', isEditMode.value ? 'Failed to update address' : 'Failed to save address');
     } finally {
@@ -302,7 +309,13 @@ class AddressController extends GetxController {
       addresses.assignAll(updated);
       addresses.sort((a, b) => (b.isDefault ? 1 : 0).compareTo(a.isDefault ? 1 : 0));
 
-      Get.snackbar('Success', 'Default address updated');
+      Get.snackbar(
+        'Success',
+        'Default address updated',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
     } catch (_) {
       Get.snackbar('Error', 'Failed to set default address');
     } finally {

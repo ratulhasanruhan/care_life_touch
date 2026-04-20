@@ -84,80 +84,113 @@ class _ProductsViewState extends State<ProductsView> {
               }
 
               if (_controller.errorMessage.value.isNotEmpty) {
-                return _ProductsStatusView(
-                  icon: Icons.error_outline,
-                  title: 'Unable to load products',
-                  message: _controller.errorMessage.value,
-                  buttonText: 'Retry',
-                  onPressed: _controller.resetFilters,
+                return RefreshIndicator(
+                  onRefresh: _controller.refreshPage,
+                  color: const Color(0xFF064E36),
+                  child: _buildRefreshableStatus(
+                    _ProductsStatusView(
+                      icon: Icons.error_outline,
+                      title: 'Unable to load products',
+                      message: _controller.errorMessage.value,
+                      buttonText: 'Retry',
+                      onPressed: _controller.resetFilters,
+                    ),
+                  ),
                 );
               }
 
               if (_query.type == ProductListingType.brand) {
-                return _BrandProductsBody(controller: _controller);
+                return RefreshIndicator(
+                  onRefresh: _controller.refreshPage,
+                  color: const Color(0xFF064E36),
+                  child: _BrandProductsBody(controller: _controller),
+                );
               }
 
               final items = _controller.filteredProducts;
               if (items.isEmpty) {
-                return _ProductsStatusView(
-                  icon: Icons.inventory_2_outlined,
-                  title: 'No products found',
-                  message: 'Try changing your search or filter.',
+                return RefreshIndicator(
+                  onRefresh: _controller.refreshPage,
+                  color: const Color(0xFF064E36),
+                  child: _buildRefreshableStatus(
+                    const _ProductsStatusView(
+                      icon: Icons.inventory_2_outlined,
+                      title: 'No products found',
+                      message: 'Try changing your search or filter.',
+                    ),
+                  ),
                 );
               }
 
-              return CustomScrollView(
-                slivers: [
-                  SliverPadding(
-                    padding: const EdgeInsets.only(top: 8),
-                    sliver: SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      sliver: SliverGrid(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 12,
-                          mainAxisSpacing: 12,
-                          childAspectRatio: 169 / 225,
-                        ),
-                        delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            return ProductCard(product: items[index]);
-                          },
-                          childCount: items.length,
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (_controller.hasMorePages.value)
-                    SliverToBoxAdapter(
-                      child: Padding(
+              return RefreshIndicator(
+                onRefresh: _controller.refreshPage,
+                color: const Color(0xFF064E36),
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    SliverPadding(
+                      padding: const EdgeInsets.only(top: 8),
+                      sliver: SliverPadding(
                         padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _controller.isMutating.value
-                                ? null
-                                : _controller.loadMoreProducts,
-                            child: _controller.isMutating.value
-                                ? const SizedBox(
-                                    width: 18,
-                                    height: 18,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : const Text('Load More'),
+                        sliver: SliverGrid(
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 169 / 225,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            (context, index) {
+                              return ProductCard(product: items[index]);
+                            },
+                            childCount: items.length,
                           ),
                         ),
                       ),
                     ),
-                ],
+                    if (_controller.hasMorePages.value)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed: _controller.isMutating.value
+                                  ? null
+                                  : _controller.loadMoreProducts,
+                              child: _controller.isMutating.value
+                                  ? const SizedBox(
+                                      width: 18,
+                                      height: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Text('Load More'),
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
               );
             }),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildRefreshableStatus(Widget child) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      children: [
+        SizedBox(
+          height: Get.height * 0.62,
+          child: Center(child: child),
+        ),
+      ],
     );
   }
 }
@@ -362,6 +395,7 @@ class _BrandProductsBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 20),
       children: [
         SectionHeader(title: 'New Products'),

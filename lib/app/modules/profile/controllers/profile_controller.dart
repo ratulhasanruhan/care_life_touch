@@ -52,10 +52,10 @@ class ProfileController extends GetxController {
         ]) ??
         '';
     phoneController.text =
-        _firstNonEmptyString(<dynamic>[user['phone'], user['phoneNumber'], user['phone_number']]) ?? '';
+        _firstNonEmptyString(<dynamic>[user['phone'], user['phoneNumber'], user['phone_number'], user['mobile']]) ?? '';
 
     _setImagePath(
-      _firstNonEmptyString(<dynamic>[
+      _extractImagePathFromCandidates(<dynamic>[
         user['drugLicenseImage'],
         user['drugLicense'],
         user['drug_license'],
@@ -63,7 +63,7 @@ class ProfileController extends GetxController {
       drugLicenseImage,
     );
     _setImagePath(
-      _firstNonEmptyString(<dynamic>[
+      _extractImagePathFromCandidates(<dynamic>[
         user['tradeLicenseImage'],
         user['tradeLicense'],
         user['trade_license'],
@@ -71,27 +71,22 @@ class ProfileController extends GetxController {
       tradeLicenseImage,
     );
     _setImagePath(
-      _firstNonEmptyString(<dynamic>[user['nidImage'], user['nid_image'], user['nid']]),
+      _extractImagePathFromCandidates(<dynamic>[user['nidImage'], user['nid_image'], user['nid']]),
       nidImage,
     );
     _setImagePath(
-      _firstNonEmptyString(<dynamic>[user['profileImage'], user['profile_image'], user['avatar']]),
+      _extractImagePathFromCandidates(<dynamic>[user['profileImage'], user['profile_image'], user['avatar']]),
       profileImage,
     );
 
     shopImages.clear();
-    final dynamic rawShopImages = user['shopImages'];
-    if (rawShopImages is List) {
-      for (final item in rawShopImages) {
-        final path = (item ?? '').toString().trim();
-        if (path.isNotEmpty) {
-          shopImages.add(File(path));
-        }
-      }
+    final shopPaths = _extractImagePathsFromAny(user['shopImages']);
+    for (final path in shopPaths) {
+      shopImages.add(File(path));
     }
 
     if (shopImages.isEmpty) {
-      final legacyPath = _firstNonEmptyString(<dynamic>[user['shopImage'], user['shop_image']]) ?? '';
+      final legacyPath = _extractImagePathFromCandidates(<dynamic>[user['shopImage'], user['shop_image']]) ?? '';
       if (legacyPath.isNotEmpty) {
         shopImages.add(File(legacyPath));
       }
@@ -113,6 +108,72 @@ class ProfileController extends GetxController {
         return text;
       }
     }
+    return null;
+  }
+
+  String? _extractImagePathFromCandidates(List<dynamic> candidates) {
+    for (final candidate in candidates) {
+      final extracted = _extractImagePath(candidate);
+      if (extracted != null) {
+        return extracted;
+      }
+    }
+    return null;
+  }
+
+  List<String> _extractImagePathsFromAny(dynamic value) {
+    final paths = <String>[];
+
+    void collect(dynamic source) {
+      if (source == null) {
+        return;
+      }
+
+      if (source is List) {
+        for (final item in source) {
+          collect(item);
+        }
+        return;
+      }
+
+      final single = _extractImagePath(source);
+      if (single != null && !paths.contains(single)) {
+        paths.add(single);
+      }
+    }
+
+    collect(value);
+    return paths;
+  }
+
+  String? _extractImagePath(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is String) {
+      final text = value.trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+      return null;
+    }
+
+    if (value is Map<String, dynamic>) {
+      return _extractImagePathFromCandidates(<dynamic>[
+        value['url'],
+        value['image'],
+        value['path'],
+        value['imageUrl'],
+        value['secureUrl'],
+        value['location'],
+      ]);
+    }
+
+    if (value is Map) {
+      return _extractImagePath(value.map((key, item) => MapEntry(key.toString(), item)));
+    }
+
     return null;
   }
 
@@ -254,6 +315,8 @@ class ProfileController extends GetxController {
       final existingUser = _storage.getUser() ?? <String, dynamic>{};
 
       final uploadedProfileImage = await _resolveUpload(profileImage.value);
+      final uploadedDrugLicense = await _resolveUpload(drugLicenseImage.value);
+      final uploadedTradeLicense = await _resolveUpload(tradeLicenseImage.value);
       final uploadedNid = await _resolveUpload(nidImage.value);
       final uploadedShopImages = await _resolveUploads(shopImages);
 
@@ -261,6 +324,8 @@ class ProfileController extends GetxController {
         shopName: shopNameController.text.trim(),
         fullName: ownerNameController.text.trim(),
         profileImage: uploadedProfileImage,
+        drugLicense: uploadedDrugLicense,
+        tradeLicense: uploadedTradeLicense,
         nidImage: uploadedNid,
         shopImages: uploadedShopImages.isEmpty ? null : uploadedShopImages,
       );
@@ -273,6 +338,8 @@ class ProfileController extends GetxController {
         'ownerName': ownerNameController.text.trim(),
         'phone': phoneController.text.trim(),
         'profileImage': uploadedProfileImage ?? existingUser['profileImage'],
+        'drugLicense': uploadedDrugLicense ?? existingUser['drugLicense'],
+        'tradeLicense': uploadedTradeLicense ?? existingUser['tradeLicense'],
         'nidImage': uploadedNid ?? existingUser['nidImage'],
         'shopImages': uploadedShopImages.isEmpty
             ? (existingUser['shopImages'] ?? const <String>[])
