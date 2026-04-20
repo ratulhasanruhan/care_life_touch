@@ -394,45 +394,66 @@ class _BrandProductsBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(bottom: 20),
-      children: [
-        SectionHeader(title: 'New Products'),
-        const SizedBox(height: 12),
-        _ProductsGrid(products: controller.brandNewProducts, nested: true),
-        const SizedBox(height: 16),
-        SectionHeader(title: 'Offer Products'),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            children: controller.brandOfferProducts
-                .take(3)
-                .map(
-                  (product) => Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: OfferProductTile(product: product),
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-        const SizedBox(height: 4),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: Text(
-            'All Products',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF01060F),
+    return Obx(
+      () => ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 20),
+        children: [
+          SectionHeader(title: 'New Products'),
+          const SizedBox(height: 12),
+          _ProductsGrid(products: controller.brandNewProducts, nested: true),
+          const SizedBox(height: 16),
+          SectionHeader(title: 'Offer Products'),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              children: controller.brandOfferProducts
+                  .take(3)
+                  .map(
+                    (product) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: OfferProductTile(product: product),
+                    ),
+                  )
+                  .toList(),
             ),
           ),
-        ),
-        const SizedBox(height: 12),
-        _ProductsGrid(products: controller.brandAllProducts, nested: true),
-      ],
+          const SizedBox(height: 4),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'All Products',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF01060F),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          _ProductsGrid(products: controller.brandAllProducts, nested: true),
+          if (controller.hasMorePages.value)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: controller.isMutating.value
+                      ? null
+                      : controller.loadMoreProducts,
+                  child: controller.isMutating.value
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Load More'),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
