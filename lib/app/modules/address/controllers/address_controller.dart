@@ -56,7 +56,9 @@ class AddressController extends GetxController {
     addressRepository = Get.find<AddressRepository>();
     storageService = Get.find<StorageService>();
     _loadProfileIdentity();
-    loadAddresses();
+    if (storageService.isLoggedIn) {
+      loadAddresses();
+    }
   }
 
   void ensureLocationBootstrapped() {
@@ -67,6 +69,11 @@ class AddressController extends GetxController {
 
   /// Load saved addresses
   Future<void> loadAddresses() async {
+    if (!storageService.isLoggedIn) {
+      addresses.clear();
+      return;
+    }
+
     isLoading.value = true;
     try {
       final fetchedAddresses = await addressRepository.getMyAddresses();

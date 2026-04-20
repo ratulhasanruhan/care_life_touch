@@ -1,15 +1,18 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../routes/app_pages.dart';
-import '../../address/views/routes.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../../../global_widgets/otp_verification_dialog.dart';
+import '../../../services/map_service.dart';
 
 /// Auth Controller - Handles authentication logic
 class AuthController extends GetxController {
@@ -47,6 +50,7 @@ class AuthController extends GetxController {
   final otpSent = false.obs;
   final otpVerified = false.obs;
   final resendTimer = 60.obs;
+  final isResolvingRegistrationLocation = false.obs;
 
   final _storage = Get.find<StorageService>();
   final _authRepository = Get.find<AuthRepository>();
@@ -220,15 +224,13 @@ class AuthController extends GetxController {
 
       isLoading.value = false;
 
-      Get.toNamed(
-        AddressRoutes.addAddress,
-        arguments: {
-          'fromRegistration': true,
-          'accountId': _pendingAccountId,
-          'identifier': phoneController.text.isNotEmpty
-              ? phoneController.text.trim()
-              : emailController.text.trim(),
-        },
+      final identifier = phoneController.text.isNotEmpty
+          ? phoneController.text.trim()
+          : emailController.text.trim();
+
+      await _showRegistrationLocationModal(
+        accountId: _pendingAccountId!,
+        identifier: identifier,
       );
     } catch (e, stackTrace) {
       AppLogger.error('Registration failed', e, stackTrace);
@@ -330,6 +332,163 @@ class AuthController extends GetxController {
 
     await sendOTP(identifier: identifier);
     _showOtpDialog(identifier: identifier);
+  }
+
+  Future<void> _showRegistrationLocationModal({
+    required String accountId,
+    required String identifier,
+  }) async {
+    await Get.dialog<void>(
+      Obx(
+        () => Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          child: Container(
+            width: 358,
+            padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 110,
+                  height: 110,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Color(0xFFECFDF7),
+                  ),
+                  child: Center(
+                    child: Container(
+                      width: 76,
+                      height: 76,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xFF6EE7BF),
+                      ),
+                      child: const Center(
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Color(0xFF064E36),
+                          child: Icon(Icons.location_on, color: Colors.white, size: 28),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Use my location',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF01060F),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'We need your location to provide accurate healthcare information and deliveries.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    height: 1.4,
+                    color: Color(0x99191930),
+                  ),
+                ),
+                const SizedBox(height: 22),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isResolvingRegistrationLocation.value
+                        ? null
+                        : () async {
+                            await _resolveAndCacheRegistrationLocation();
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back();
+                            }
+                            await startRegistrationOtpAfterAddress(
+                              accountId: accountId,
+                              identifier: identifier,
+                            );
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF064E36),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                      elevation: 0,
+                    ),
+                    child: isResolvingRegistrationLocation.value
+                        ? const SizedBox(
+                            height: 18,
+                            width: 18,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          )
+                        : const Text(
+                            'Enable Location',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+  }
+
+  Future<void> _resolveAndCacheRegistrationLocation() async {
+    if (isResolvingRegistrationLocation.value) {
+      return;
+    }
+
+    isResolvingRegistrationLocation.value = true;
+    try {
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      if (permission == LocationPermission.denied ||
+          permission == LocationPermission.deniedForever) {
+        return;
+      }
+
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      );
+
+      String resolvedAddress = '';
+      final geocode = await MapService.reverseGeocode(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+      if (geocode != null) {
+        resolvedAddress = (geocode['display_name'] ?? '').toString().trim();
+      }
+
+      await _storage.write(
+        AppConstants.keyPendingRegistrationLocation,
+        jsonEncode({
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+          'address': resolvedAddress,
+          'timestamp': DateTime.now().millisecondsSinceEpoch,
+        }),
+      );
+    } catch (error) {
+      AppLogger.warning('Failed to resolve registration location', error);
+    } finally {
+      isResolvingRegistrationLocation.value = false;
+    }
   }
 
   /// Verify Registration OTP and show success modal
@@ -462,11 +621,45 @@ class AuthController extends GetxController {
   }
 
   void _tryResumePendingOtp() {
-    if (_storage.getPendingRegistration() != null) {
+    Map<String, dynamic>? pendingRegistration;
+    final args = Get.arguments;
+
+    if (args is Map && args['resumePendingRegistration'] == true) {
+      final fromArgs = args['pendingRegistration'];
+      if (fromArgs is Map) {
+        pendingRegistration = Map<String, dynamic>.from(fromArgs);
+      }
+    }
+
+    pendingRegistration ??= _storage.getPendingRegistration();
+
+    final pendingRegistrationAccountId =
+        (pendingRegistration?['accountId'] ?? '').toString().trim();
+    final pendingRegistrationIdentifier =
+        (pendingRegistration?['identifier'] ?? '').toString().trim();
+
+    if (pendingRegistrationAccountId.isNotEmpty &&
+        pendingRegistrationIdentifier.isNotEmpty) {
+      _pendingAccountId = pendingRegistrationAccountId;
+      if (pendingRegistrationIdentifier.contains('@')) {
+        emailController.text = pendingRegistrationIdentifier;
+      } else {
+        phoneController.text = pendingRegistrationIdentifier;
+      }
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (Get.isDialogOpen ?? false) {
+          return;
+        }
+
+        await _showRegistrationLocationModal(
+          accountId: pendingRegistrationAccountId,
+          identifier: pendingRegistrationIdentifier,
+        );
+      });
       return;
     }
 
-    final args = Get.arguments;
     Map<String, dynamic>? pending;
 
     if (args is Map &&

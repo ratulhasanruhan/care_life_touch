@@ -63,7 +63,7 @@ class SplashView extends GetView<SplashController> {
 
   Widget _buildFallbackImage() {
     return Image.asset(
-      'assets/images/splash_icon.png',
+      'assets/images/icon.png',
       fit: BoxFit.contain,
     );
   }

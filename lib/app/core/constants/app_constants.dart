@@ -34,6 +34,7 @@ class AppConstants {
   static const String keyUserRole = 'user_role';
   static const String keyPendingOtp = 'pending_otp';
   static const String keyPendingRegistration = 'pending_registration';
+  static const String keyPendingRegistrationLocation = 'pending_registration_location';
 
   // Validation
   static const int minPasswordLength = 6;
