@@ -108,8 +108,9 @@ class LoginView extends GetView<AuthController> {
                         ? null
                         : () {
                             if (!controller.loginFormKey.currentState!
-                                .validate())
+                                .validate()) {
                               return;
+                            }
                             controller.login();
                           },
                     isLoading: controller.isLoading.value,
@@ -170,25 +171,33 @@ class LoginView extends GetView<AuthController> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                TextButton.icon(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.call_outlined,
-                    size: 18,
-                    color: Color(0xFF064E36),
-                  ),
-                  label: const Text(
-                    'Call Us',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF064E36),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF064E36),
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    visualDensity: VisualDensity.compact,
+                Obx(
+                  () => Column(
+                    children: [
+                      TextButton.icon(
+                        onPressed: controller.onCallUsPressed,
+                        icon: const Icon(
+                          Icons.call_outlined,
+                          size: 18,
+                          color: Color(0xFF064E36),
+                        ),
+                        label: Text(
+                          controller.callUsLabel.value.isEmpty
+                              ? 'Call Us'
+                              : controller.callUsLabel.value,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Color(0xFF064E36),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: const Color(0xFF064E36),
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],

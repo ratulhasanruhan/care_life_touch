@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
+import '../../../data/repositories/page_repository.dart';
 import '../../../routes/app_pages.dart';
 import '../../../global_widgets/info_modal.dart';
 import '../../../global_widgets/otp_verification_dialog.dart';
@@ -51,15 +53,106 @@ class AuthController extends GetxController {
   final otpVerified = false.obs;
   final resendTimer = 60.obs;
   final isResolvingRegistrationLocation = false.obs;
+  final callUsLabel = 'Call Us'.obs;
+  final callUsPhone = ''.obs;
 
   final _storage = Get.find<StorageService>();
   final _authRepository = Get.find<AuthRepository>();
+  final _pageRepository = Get.find<PageRepository>();
   String? _pendingAccountId;
 
   @override
   void onInit() {
     super.onInit();
     _tryResumePendingOtp();
+    _loadCallUsSettings();
+  }
+
+  Future<void> _loadCallUsSettings() async {
+    try {
+      final response = await _pageRepository.getPageSettings('callUs');
+      final payload = _extractCallUsPayload(response);
+
+      final label = _firstNonEmptyString([
+        payload['label'],
+        payload['title'],
+        response['label'],
+      ]);
+      final phone = _firstNonEmptyString([
+        payload['phone1'],
+        payload['phone'],
+        payload['number'],
+        response['phone1'],
+      ]);
+
+      callUsLabel.value = label ?? 'Call Us';
+      callUsPhone.value = phone ?? '';
+    } catch (error) {
+      AppLogger.warning('Failed to load call us settings', error);
+      callUsLabel.value = 'Call Us';
+      callUsPhone.value = '';
+    }
+  }
+
+  Map<String, dynamic> _extractCallUsPayload(Map<String, dynamic> response) {
+    final direct = _toMap(response['data']);
+    if (direct != null) {
+      return direct;
+    }
+
+    final dataList = response['data'];
+    if (dataList is List && dataList.isNotEmpty) {
+      final first = _toMap(dataList.first);
+      if (first != null) {
+        return first;
+      }
+    }
+
+    final result = _toMap(response['result']);
+    if (result != null) {
+      return result;
+    }
+
+    return response;
+  }
+
+  String? _firstNonEmptyString(List<dynamic> values) {
+    for (final value in values) {
+      final text = (value ?? '').toString().trim();
+      if (text.isNotEmpty && text.toLowerCase() != 'null') {
+        return text;
+      }
+    }
+    return null;
+  }
+
+  Map<String, dynamic>? _toMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, item) => MapEntry(key.toString(), item));
+    }
+    return null;
+  }
+
+  String _normalizePhoneForDial(String value) {
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) {
+      return '';
+    }
+
+    final buffer = StringBuffer();
+    for (var i = 0; i < trimmed.length; i++) {
+      final char = trimmed[i];
+      final code = char.codeUnitAt(0);
+      final isDigit = code >= 48 && code <= 57;
+      final isLeadingPlus = i == 0 && char == '+';
+      if (isDigit || isLeadingPlus) {
+        buffer.write(char);
+      }
+    }
+    return buffer.toString();
   }
 
   @override
@@ -297,6 +390,27 @@ class AuthController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<void> onCallUsPressed() async {
+    final rawPhone = callUsPhone.value.trim();
+    if (rawPhone.isEmpty) {
+      _showError('Support phone number is not available now.');
+      return;
+    }
+
+    final dialPhone = _normalizePhoneForDial(rawPhone);
+    final uri = Uri(scheme: 'tel', path: dialPhone.isEmpty ? rawPhone : dialPhone);
+
+    try {
+      final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        _showError('Could not open dialer. Please call manually.');
+      }
+    } catch (error) {
+      AppLogger.warning('Failed to launch dialer', error);
+      _showError('Could not open dialer. Please call manually.');
     }
   }
 
