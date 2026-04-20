@@ -1,6 +1,7 @@
 class Review {
   final String id;
   final String userName;
+  final String? reviewerImage;
   final double rating;
   final String comment;
   final String date;
@@ -12,6 +13,7 @@ class Review {
   Review({
     required this.id,
     required this.userName,
+    this.reviewerImage,
     required this.rating,
     required this.comment,
     required this.date,
@@ -25,6 +27,7 @@ class Review {
     return Review(
       id: json['id'] ?? '',
       userName: json['userName'] ?? '',
+      reviewerImage: json['reviewerImage'] as String?,
       rating: (json['rating'] ?? 0).toDouble(),
       comment: json['comment'] ?? '',
       date: json['date'] ?? '',
@@ -39,6 +42,7 @@ class Review {
     return {
       'id': id,
       'userName': userName,
+      'reviewerImage': reviewerImage,
       'rating': rating,
       'comment': comment,
       'date': date,
@@ -49,4 +53,3 @@ class Review {
     };
   }
 }
-

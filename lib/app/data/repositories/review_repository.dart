@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../models/review_model.dart';
 import '../providers/api_provider.dart';
+import '../../core/utils/app_logger.dart';
 
 class ReviewRepository {
   ReviewRepository({ApiProvider? apiProvider})
@@ -93,16 +94,23 @@ class ReviewRepository {
 
   List<ReviewModel> _extractReviews(dynamic response) {
     final map = _toMap(response);
+    AppLogger.info('📥 Raw API Response: $response');
+    AppLogger.info('🔍 Parsed Map: $map');
+    
     if (map == null) return [];
 
     final reviewsRaw =
         map['data'] ?? map['reviews'] ?? map['items'] ?? map['result'] ?? [];
+    AppLogger.info('📋 Reviews Raw Data: $reviewsRaw');
+    
     if (reviewsRaw is List) {
-      return reviewsRaw
+      final parsed = reviewsRaw
           .map((r) => _toMap(r))
           .whereType<Map<String, dynamic>>()
           .map(ReviewModel.fromJson)
           .toList();
+      AppLogger.info('✅ Parsed ${parsed.length} reviews from API response');
+      return parsed;
     }
     return [];
   }

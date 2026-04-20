@@ -172,36 +172,29 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
   }
 
   Widget _buildReviewItem(Review review) {
+    final displayName = review.userName.trim().isEmpty ? 'Anonymous' : review.userName.trim();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Reviewer Info
         Row(
           children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: const Color(0xFFF6F6F6),
-              child: Text(
-                review.userName[0].toUpperCase(),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF064E36),
-                ),
-              ),
-            ),
+            _buildReviewerAvatar(displayName, review.reviewerImage),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    review.userName,
+                    displayName,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF01060F),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4),
                   Row(
@@ -271,9 +264,13 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
               itemCount: review.images.length,
               separatorBuilder: (context, index) => const SizedBox(width: 8),
               itemBuilder: (context, index) {
-                return ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
-                  child: _buildReviewImage(review.images[index]),
+                final imagePath = review.images[index];
+                return GestureDetector(
+                  onTap: () => _openImagePreviewDialog(context, imagePath),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: _buildReviewImage(imagePath),
+                  ),
                 );
               },
             ),
@@ -400,6 +397,76 @@ class ProductReviewsView extends GetView<ProductReviewsController> {
       height: 80,
       color: const Color(0xFFF6F6F6),
       child: const Icon(Icons.image, color: Color(0xFFA2A8AF)),
+    );
+  }
+
+  Widget _buildReviewerAvatar(String displayName, String? reviewerImage) {
+    final image = (reviewerImage ?? '').trim();
+    final hasRemoteImage = image.startsWith('http://') || image.startsWith('https://');
+    final initial = displayName.isNotEmpty ? displayName[0].toUpperCase() : 'A';
+
+    if (hasRemoteImage) {
+      return CircleAvatar(
+        radius: 20,
+        backgroundColor: const Color(0xFFF6F6F6),
+        backgroundImage: NetworkImage(image),
+        onBackgroundImageError: (_, __) {},
+        child: null,
+      );
+    }
+
+    return CircleAvatar(
+      radius: 20,
+      backgroundColor: const Color(0xFFF6F6F6),
+      child: Text(
+        initial,
+        style: const TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Color(0xFF064E36),
+        ),
+      ),
+    );
+  }
+
+  void _openImagePreviewDialog(BuildContext context, String path) {
+    final isRemote = path.startsWith('http://') || path.startsWith('https://');
+    showDialog<void>(
+      context: context,
+      builder: (_) => Dialog(
+        insetPadding: const EdgeInsets.all(16),
+        backgroundColor: Colors.black,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 1,
+              maxScale: 4,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: isRemote
+                    ? Image.network(
+                        path,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => _imageFallback(),
+                      )
+                    : Image.asset(
+                        path,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => _imageFallback(),
+                      ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close, color: Colors.white),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

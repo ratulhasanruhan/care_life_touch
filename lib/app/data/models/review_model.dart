@@ -24,6 +24,7 @@ class ReviewModel {
   });
 
   factory ReviewModel.fromJson(Map<String, dynamic> json) {
+    final buyer = _toMap(json['buyer']);
     final reviewer = _toMap(json['reviewer']) ?? _toMap(json['user']);
     return ReviewModel(
       id: (json['_id'] ?? json['id'] ?? '').toString(),
@@ -32,6 +33,7 @@ class ReviewModel {
         json['reviewerName'],
         json['userName'],
         json['name'],
+        buyer?['fullName'],
         reviewer?['name'],
         reviewer?['fullName'],
       ]) ??
@@ -40,6 +42,7 @@ class ReviewModel {
         json['reviewerImage'],
         json['userImage'],
         json['avatar'],
+        buyer?['profileImage'],
         reviewer?['profileImage'],
         reviewer?['avatar'],
       ]),

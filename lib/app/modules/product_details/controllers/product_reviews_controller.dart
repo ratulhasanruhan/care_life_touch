@@ -149,9 +149,11 @@ class ProductReviewsController extends GetxController {
   }
 
   Review _mapApiReview(ReviewModel model) {
+    final safeName = model.reviewerName.trim().isEmpty ? 'Anonymous' : model.reviewerName.trim();
     return Review(
       id: model.id,
-      userName: model.reviewerName,
+      userName: safeName,
+      reviewerImage: model.reviewerImage,
       rating: model.rating,
       comment: model.reviewText,
       date: model.createdAt == null ? '' : _formatDate(model.createdAt!),
