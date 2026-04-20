@@ -33,6 +33,7 @@ class HomeController extends GetxController {
   final brands = <Map<String, String>>[].obs;
   final banners = <String>[].obs;
   final unreadNotificationCount = 0.obs;
+  final _searchSuggestions = <String>[].obs;
 
   // Cart controller
   late CartController cartController;
@@ -59,6 +60,65 @@ class HomeController extends GetxController {
     'assets/demo/banner_1.png',
     'assets/demo/banner_2.png',
   ];
+
+   List<String> get searchSuggestions => _searchSuggestions;
+
+    void _updateSearchSuggestions() {
+      final products = <String>[];
+
+      String? addValue(String value) {
+        final text = value.trim();
+        if (text.isNotEmpty && !_isLikelyId(text)) {
+          return text;
+        }
+        return null;
+      }
+
+      // Collect only product names
+      for (final product in [...trendingProducts, ...newProducts, ...offerProducts]) {
+        final name = addValue(product.name);
+        if (name != null && name.isNotEmpty) {
+          products.add(name);
+        }
+      }
+
+      // Deduplicate while preserving order
+      final deduplicatedProducts = _deduplicateList(products);
+
+      // Take first 20 items
+      final final_suggestions = deduplicatedProducts.take(20).toList();
+      _searchSuggestions.assignAll(final_suggestions);
+    }
+
+    /// Deduplicates a list while preserving order
+    List<String> _deduplicateList(List<String> list) {
+      final seen = <String>{};
+      final result = <String>[];
+      for (final item in list) {
+        final key = item.toLowerCase();
+        if (seen.add(key)) {
+          result.add(item);
+        }
+      }
+      return result;
+    }
+
+   /// Check if a string looks like an ID (MongoDB ObjectId, UUID, or similar)
+   bool _isLikelyId(String value) {
+     // MongoDB ObjectId pattern (24 hex characters)
+     if (RegExp(r'^[a-f0-9]{24}$', caseSensitive: false).hasMatch(value)) {
+       return true;
+     }
+     // UUID pattern
+     if (RegExp(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', caseSensitive: false).hasMatch(value)) {
+       return true;
+     }
+     // Generic numeric ID pattern (all digits)
+     if (RegExp(r'^\d+$').hasMatch(value)) {
+       return true;
+     }
+     return false;
+   }
 
   @override
   void onInit() {
@@ -125,14 +185,17 @@ class HomeController extends GetxController {
         apiBanners = const [];
       }
 
-      trendingProducts.assignAll(trending.take(6));
-      newProducts.assignAll(newArrival.take(6));
-      offerProducts.assignAll(offers.take(6));
-      categories.assignAll(_normalizeCategories(apiCategories));
-      brands.assignAll(_normalizeBrands(apiBrands));
-      banners.assignAll(apiBanners.isEmpty ? _bannerFallbackImages : apiBanners);
+       trendingProducts.assignAll(trending.take(6));
+       newProducts.assignAll(newArrival.take(6));
+       offerProducts.assignAll(offers.take(6));
+       categories.assignAll(_normalizeCategories(apiCategories));
+       brands.assignAll(_normalizeBrands(apiBrands));
+       banners.assignAll(apiBanners.isEmpty ? _bannerFallbackImages : apiBanners);
 
-      AppLogger.success('Home data loaded successfully');
+       // Update search suggestions after loading all data
+       _updateSearchSuggestions();
+
+       AppLogger.success('Home data loaded successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to load home data', e, stackTrace);
     } finally {

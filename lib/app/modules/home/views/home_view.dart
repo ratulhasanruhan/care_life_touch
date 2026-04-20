@@ -32,6 +32,7 @@ class HomeView extends GetView<HomeController> {
               unreadNotificationCount: controller.unreadNotificationCount.value,
               onNotificationTap: controller.onNotificationTap,
               onSearch: controller.onSearch,
+              searchSuggestions: controller.searchSuggestions,
             ),
           ),
 
