@@ -81,7 +81,52 @@ class LegalController extends GetxController {
     return '';
   }
 
-  String _normalizeContent(String text) => text.trim();
+  String _normalizeContent(String text) {
+    var normalized = text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
+        .trim();
+
+    if (normalized.isEmpty) {
+      return '';
+    }
+
+    // Ensure markdown headers are on a new line if CMS content provides them inline.
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'([^\n])[ \t]+(#{1,6})(?=[ \t]*\S)'),
+      (match) => '${match.group(1)}\n${match.group(2)}',
+    );
+
+    // Allow compact headers like `##heading` by inserting a space after # markers.
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'(^|\n)([ \t]*)(#{1,6})([^\s#\n])', multiLine: true),
+      (match) => '${match.group(1)}${match.group(2)}${match.group(3)} ${match.group(4)}',
+    );
+
+    // Ensure inline bullet list markers start on a new line.
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'([^\n])[ \t]+([*+-])[ \t]+'),
+      (match) => '${match.group(1)}\n${match.group(2)} ',
+    );
+
+    // Ensure inline numbered list markers start on a new line.
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'([^\n])[ \t]+(\d+[.)])[ \t]+'),
+      (match) => '${match.group(1)}\n${match.group(2)} ',
+    );
+
+    // Also support compact list markers at line start like `-item` or `1.item`.
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'(^|\n)([ \t]*)([*+-])(\S)', multiLine: true),
+      (match) => '${match.group(1)}${match.group(2)}${match.group(3)} ${match.group(4)}',
+    );
+    normalized = normalized.replaceAllMapped(
+      RegExp(r'(^|\n)([ \t]*)(\d+[.)])(\S)', multiLine: true),
+      (match) => '${match.group(1)}${match.group(2)}${match.group(3)} ${match.group(4)}',
+    );
+
+    return normalized;
+  }
 
   @override
   void onClose() {
