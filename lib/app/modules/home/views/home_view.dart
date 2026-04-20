@@ -216,7 +216,7 @@ class HomeView extends GetView<HomeController> {
           Routes.PRODUCTS,
           arguments: ProductsQuery(
             type: ProductListingType.category,
-            title: '$categoryTitle Products',
+            title: categoryTitle,
             keyword: categoryKeyword,
           ),
         );
