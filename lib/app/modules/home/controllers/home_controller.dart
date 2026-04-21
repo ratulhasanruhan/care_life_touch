@@ -34,7 +34,7 @@ class HomeController extends GetxController {
   final brands = <Map<String, String>>[].obs;
   final banners = <String>[].obs;
   final unreadNotificationCount = 0.obs;
-  final _searchSuggestions = <String>[].obs;
+  final _searchSuggestions = <ProductModel>[].obs;
 
   // Cart controller
   late CartController cartController;
@@ -62,46 +62,33 @@ class HomeController extends GetxController {
     'assets/demo/banner_2.png',
   ];
 
-   List<String> get searchSuggestions => _searchSuggestions;
+    List<ProductModel> get searchSuggestions => _searchSuggestions;
 
     void _updateSearchSuggestions() {
-      final products = <String>[];
-
-      String? addValue(String value) {
-        final text = value.trim();
-        if (text.isNotEmpty && !_isLikelyId(text)) {
-          return text;
-        }
-        return null;
-      }
-
-      // Collect only product names
-      for (final product in [...trendingProducts, ...newProducts, ...offerProducts]) {
-        final name = addValue(product.name);
-        if (name != null && name.isNotEmpty) {
-          products.add(name);
-        }
-      }
-
-      // Deduplicate while preserving order
-      final deduplicatedProducts = _deduplicateList(products);
-
-      // Take first 20 items
-      final final_suggestions = deduplicatedProducts.take(20).toList();
-      _searchSuggestions.assignAll(final_suggestions);
-    }
-
-    /// Deduplicates a list while preserving order
-    List<String> _deduplicateList(List<String> list) {
+      final suggestions = <ProductModel>[];
       final seen = <String>{};
-      final result = <String>[];
-      for (final item in list) {
-        final key = item.toLowerCase();
-        if (seen.add(key)) {
-          result.add(item);
+
+      void addProduct(ProductModel product) {
+        final idKey = product.id.trim();
+        final nameKey = product.name.trim().toLowerCase();
+
+        if (product.name.trim().isEmpty || _isLikelyId(product.name.trim())) {
+          return;
         }
+
+        final dedupeKey = idKey.isNotEmpty ? idKey.toLowerCase() : nameKey;
+        if (dedupeKey.isEmpty || !seen.add(dedupeKey)) {
+          return;
+        }
+
+        suggestions.add(product);
       }
-      return result;
+
+      for (final product in [...trendingProducts, ...newProducts, ...offerProducts]) {
+        addProduct(product);
+      }
+
+      _searchSuggestions.assignAll(suggestions.take(20));
     }
 
    /// Check if a string looks like an ID (MongoDB ObjectId, UUID, or similar)

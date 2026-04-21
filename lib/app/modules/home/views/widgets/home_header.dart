@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get_storage/get_storage.dart';
 
+import '../../models/product_model.dart';
+
 /// Home Header Widget - Custom header with location and search
 class HomeHeader extends StatefulWidget {
   final VoidCallback? onLocationTap;
@@ -11,7 +13,7 @@ class HomeHeader extends StatefulWidget {
   final String locationText;
   final bool isLocationLoading;
   final bool hasLocationError;
-  final List<String> searchSuggestions;
+  final List<ProductModel> searchSuggestions;
 
   const HomeHeader({
     super.key,
@@ -32,12 +34,13 @@ class HomeHeader extends StatefulWidget {
 class _HomeHeaderState extends State<HomeHeader> {
   late TextEditingController _searchController;
   late FocusNode _searchFocusNode;
-  List<String> _filteredSuggestions = [];
+  List<_SearchSuggestionItem> _filteredSuggestions = [];
   List<String> _searchHistory = [];
   bool _showSuggestions = false;
   final _storage = GetStorage();
   static const _searchHistoryKey = 'search_history';
   static const int _maxHistoryItems = 10;
+  static const String _productPlaceholderImage = 'assets/demo/product_1.png';
 
   @override
   void initState() {
@@ -111,60 +114,36 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   void _filterSuggestions(String query) {
+    final historyItems = _searchHistory
+        .take(8)
+        .map(_SearchSuggestionItem.history)
+        .toList();
+
     if (query.trim().isEmpty) {
       setState(() {
-        // Show search history first, then suggestions
+        final productItems = _filterProductSuggestions('');
         _filteredSuggestions = [
-          ..._searchHistory.take(8),
-          ...widget.searchSuggestions
-              .where((s) => !_searchHistory.contains(s))
-              .take(8 - _searchHistory.take(8).length)
+          ...historyItems,
+          ...productItems.take(8 - historyItems.length),
         ];
         _showSuggestions = _searchFocusNode.hasFocus && _filteredSuggestions.isNotEmpty;
       });
     } else {
       final lowerQuery = query.toLowerCase().trim();
 
-      // Filter search history
       final historyMatches = _searchHistory
           .where((item) => item.toLowerCase().contains(lowerQuery))
+          .take(8)
           .toList();
 
-      // Filter suggestions with better ranking
-      List<String> suggestionMatches = widget.searchSuggestions.toList();
-
-      // Remove items already in history
-      suggestionMatches.removeWhere((s) =>
-          historyMatches.any((h) => h.toLowerCase() == s.toLowerCase())
-      );
-
-      // Filter only items that match the query
-      suggestionMatches = suggestionMatches
-          .where((suggestion) => suggestion.toLowerCase().contains(lowerQuery))
+      final suggestionMatches = _filterProductSuggestions(lowerQuery);
+      final historySuggestionItems = historyMatches
+          .map(_SearchSuggestionItem.history)
           .toList();
 
-      // Sort by relevance: prefix matches first, then contains matches
-      suggestionMatches.sort((a, b) {
-        final aLower = a.toLowerCase();
-        final bLower = b.toLowerCase();
-
-        final aStartsWith = aLower.startsWith(lowerQuery);
-        final bStartsWith = bLower.startsWith(lowerQuery);
-
-        // Prefix matches come first
-        if (aStartsWith && !bStartsWith) return -1;
-        if (!aStartsWith && bStartsWith) return 1;
-
-        // If both are prefix or both are contains, sort by length (shorter first)
-        if (aStartsWith && bStartsWith) return a.length.compareTo(b.length);
-
-        return 0;
-      });
-
-      // Combine: history matches first, then suggestions
       _filteredSuggestions = [
-        ...historyMatches.take(8),
-        ...suggestionMatches.take(8 - historyMatches.take(8).length)
+        ...historySuggestionItems,
+        ...suggestionMatches.take(8 - historySuggestionItems.length)
       ];
 
       setState(() {
@@ -174,7 +153,6 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   void _onSuggestionTap(String suggestion) {
-    _searchController.text = suggestion;
     _submitSearch(suggestion);
   }
 
@@ -191,6 +169,46 @@ class _HomeHeaderState extends State<HomeHeader> {
     _searchFocusNode.unfocus();
     _hideSuggestions();
     widget.onSearch?.call(query);
+  }
+
+  List<_SearchSuggestionItem> _filterProductSuggestions(String query) {
+    final lowerQuery = query.trim().toLowerCase();
+    final seen = <String>{};
+
+    final products = widget.searchSuggestions.where((product) {
+      final name = product.name.trim();
+      if (name.isEmpty) return false;
+      if (_searchHistory.any((history) => history.toLowerCase() == name.toLowerCase())) {
+        return false;
+      }
+      return lowerQuery.isEmpty || name.toLowerCase().contains(lowerQuery);
+    }).toList();
+
+    products.sort((a, b) {
+      if (lowerQuery.isEmpty) {
+        return a.name.length.compareTo(b.name.length);
+      }
+
+      final aLower = a.name.toLowerCase();
+      final bLower = b.name.toLowerCase();
+      final aStartsWith = aLower.startsWith(lowerQuery);
+      final bStartsWith = bLower.startsWith(lowerQuery);
+
+      if (aStartsWith && !bStartsWith) return -1;
+      if (!aStartsWith && bStartsWith) return 1;
+      if (aStartsWith && bStartsWith) return a.name.length.compareTo(b.name.length);
+      return a.name.length.compareTo(b.name.length);
+    });
+
+    final items = <_SearchSuggestionItem>[];
+    for (final product in products) {
+      final key = product.id.trim().isNotEmpty
+          ? product.id.trim().toLowerCase()
+          : product.name.trim().toLowerCase();
+      if (key.isEmpty || !seen.add(key)) continue;
+      items.add(_SearchSuggestionItem.product(product));
+    }
+    return items;
   }
 
   @override
@@ -406,9 +424,13 @@ class _HomeHeaderState extends State<HomeHeader> {
     );
   }
 
-  Widget _buildSuggestionTile(String suggestion, int index) {
-    final isFromHistory = _searchHistory.contains(suggestion);
+  Widget _buildSuggestionTile(_SearchSuggestionItem suggestion, int index) {
+    return suggestion.isHistory
+        ? _buildHistorySuggestionTile(suggestion.label, index)
+        : _buildProductSuggestionTile(suggestion.product!, index);
+  }
 
+  Widget _buildHistorySuggestionTile(String suggestion, int index) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -427,10 +449,10 @@ class _HomeHeaderState extends State<HomeHeader> {
           ),
           child: Row(
             children: [
-              Icon(
-                isFromHistory ? Icons.history : Icons.search,
+              const Icon(
+                Icons.history,
                 size: 18,
-                color: const Color(0xFFA2A8AF),
+                color: Color(0xFFA2A8AF),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -456,4 +478,191 @@ class _HomeHeaderState extends State<HomeHeader> {
       ),
     );
   }
+
+  Widget _buildProductSuggestionTile(ProductModel product, int index) {
+    final imageWidget = _buildSuggestionImage(product);
+    final price = product.price > 0 ? product.price : null;
+    final comparePrice = product.maxPrice != null && product.maxPrice! > 0 ? product.maxPrice : null;
+    final showComparePrice = price != null && comparePrice != null && comparePrice > price;
+    final discountLabel = _resolveDiscountLabel(product);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _onSuggestionTap(product.name),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            border: index < _filteredSuggestions.length - 1
+                ? const Border(
+                    bottom: BorderSide(
+                      color: Color(0xFFEEEEEE),
+                      width: 0.5,
+                    ),
+                  )
+                : null,
+          ),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  color: const Color(0xFFF4F5F4),
+                  child: imageWidget,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF01060F),
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Row(
+                      children: [
+                        Text(
+                          price != null ? '৳${_formatPrice(price)}' : 'Price unavailable',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF064E36),
+                          ),
+                        ),
+                        if (showComparePrice) ...[
+                          const SizedBox(width: 6),
+                          Text(
+                            '৳${_formatPrice(comparePrice!)}',
+                            style: const TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w400,
+                              color: Color(0xFF8C9196),
+                              decoration: TextDecoration.lineThrough,
+                            ),
+                          ),
+                        ],
+                        if (discountLabel != null) ...[
+                          const SizedBox(width: 6),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE53935),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              discountLabel,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              const Icon(
+                Icons.arrow_outward,
+                size: 16,
+                color: Color(0xFFA2A8AF),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _formatPrice(double value) {
+    return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+  }
+
+  Widget _buildSuggestionImage(ProductModel product) {
+    final imagePath = product.imagePath.trim().isEmpty ? _productPlaceholderImage : product.imagePath.trim();
+
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+      return Image.network(
+        imagePath,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => Image.asset(
+          _productPlaceholderImage,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => const Icon(
+            Icons.image_not_supported,
+            size: 20,
+            color: Color(0xFFC5C9CC),
+          ),
+        ),
+      );
+    }
+
+    return Image.asset(
+      imagePath,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => Image.asset(
+        _productPlaceholderImage,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, ___) => const Icon(
+          Icons.image_not_supported,
+          size: 20,
+          color: Color(0xFFC5C9CC),
+        ),
+      ),
+    );
+  }
+
+  String? _resolveDiscountLabel(ProductModel product) {
+    final offerLabel = product.offerLabel?.trim();
+    if (offerLabel != null && offerLabel.isNotEmpty) {
+      return offerLabel;
+    }
+
+    final comparePrice = product.maxPrice;
+    if (comparePrice != null && comparePrice > 0 && product.price > 0 && comparePrice > product.price) {
+      final percentage = (((comparePrice - product.price) / comparePrice) * 100).round();
+      if (percentage > 0) {
+        return '$percentage% OFF';
+      }
+    }
+
+    return null;
+  }
+}
+
+class _SearchSuggestionItem {
+  const _SearchSuggestionItem._({
+    required this.label,
+    required this.isHistory,
+    this.product,
+  });
+
+  factory _SearchSuggestionItem.history(String label) => _SearchSuggestionItem._(
+        label: label,
+        isHistory: true,
+      );
+
+  factory _SearchSuggestionItem.product(ProductModel product) => _SearchSuggestionItem._(
+        label: product.name,
+        isHistory: false,
+        product: product,
+      );
+
+  final String label;
+  final bool isHistory;
+  final ProductModel? product;
 }
