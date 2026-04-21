@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
@@ -70,26 +71,14 @@ class WriteReviewController extends GetxController {
 
       final remaining = 5 - selectedImages.length;
       if (remaining <= 0) {
-        Get.snackbar(
-          'Limit reached',
-          'You can upload up to 5 images.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        AppHelpers.showErrorSnackbar(message: 'You can upload up to 5 images.', title: 'Limit reached');
         return;
       }
 
       selectedImages.addAll(files.take(remaining).map((f) => File(f.path)));
     } catch (error, stackTrace) {
       AppLogger.error('Failed to pick review images', error, stackTrace);
-      Get.snackbar(
-        'Failed',
-        'Could not pick images. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Could not pick images. Please try again.', title: 'Failed');
     } finally {
       isPickingImages.value = false;
     }
@@ -106,54 +95,27 @@ class WriteReviewController extends GetxController {
 
   Future<void> submit() async {
     if (!canSubmitReview.value) {
-      Get.snackbar(
-        'Already reviewed',
-        'You can submit a review for this product only one time after order completion.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppHelpers.showErrorSnackbar(
+        message: 'You can submit a review for this product only one time after order completion.',
+        title: 'Already reviewed',
       );
       return;
     }
 
     if (productId.value.isEmpty || orderId.value.isEmpty || variantId.value.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Missing product or order details for review.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Missing product or order details for review.');
       return;
     }
     if (rating.value < 1 || rating.value > 5) {
-      Get.snackbar(
-        'Validation',
-        'Please select a rating.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please select a rating.', title: 'Validation');
       return;
     }
     if (titleController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Validation',
-        'Please write a review title.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please write a review title.', title: 'Validation');
       return;
     }
     if (commentController.text.trim().isEmpty) {
-      Get.snackbar(
-        'Validation',
-        'Please write your comment.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please write your comment.', title: 'Validation');
       return;
     }
 
@@ -180,33 +142,18 @@ class WriteReviewController extends GetxController {
 
       canSubmitReview.value = false;
       Get.back(result: true);
-      Get.snackbar(
-        'Success',
-        'Review submitted successfully.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'Review submitted successfully.');
     } catch (error, stackTrace) {
       AppLogger.error('Failed to submit review', error, stackTrace);
       if (_isDuplicateReviewError(error)) {
         canSubmitReview.value = false;
-        Get.snackbar(
-          'Already reviewed',
-          'You have already submitted a review for this product.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+        AppHelpers.showErrorSnackbar(
+          message: 'You have already submitted a review for this product.',
+          title: 'Already reviewed',
         );
         return;
       }
-      Get.snackbar(
-        'Failed',
-        'Could not submit your review. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Could not submit your review. Please try again.', title: 'Failed');
     } finally {
       isSubmitting.value = false;
     }

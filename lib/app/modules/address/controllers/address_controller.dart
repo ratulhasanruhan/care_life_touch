@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/address_repository.dart';
@@ -80,7 +80,7 @@ class AddressController extends GetxController {
       final fetchedAddresses = await addressRepository.getMyAddresses();
       addresses.assignAll(fetchedAddresses);
     } catch (e) {
-      Get.snackbar('Error', 'Failed to load addresses');
+      AppHelpers.showErrorSnackbar(message: 'Failed to load addresses');
     } finally {
       isLoading.value = false;
     }
@@ -100,7 +100,7 @@ class AddressController extends GetxController {
         if (result == LocationPermission.denied) {
           hasLocationError.value = true;
           locationStatus.value = 'Location permission denied';
-          Get.snackbar('Permission', 'Location permission denied');
+          AppHelpers.showInfoSnackbar(message: 'Location permission denied', title: 'Permission');
           return;
         }
       }
@@ -108,7 +108,7 @@ class AddressController extends GetxController {
       if (permission == LocationPermission.deniedForever) {
         hasLocationError.value = true;
         locationStatus.value = 'Location permission denied';
-        Get.snackbar('Error', 'Enable location permissions in app settings');
+        AppHelpers.showErrorSnackbar(message: 'Enable location permissions in app settings');
         return;
       }
 
@@ -137,7 +137,7 @@ class AddressController extends GetxController {
       hasLocationError.value = true;
       locationStatus.value = 'Failed to get location';
       AppLogger.error('Failed to get location', e);
-      Get.snackbar('Error', 'Failed to get location: $e');
+      AppHelpers.showErrorSnackbar(message: 'Failed to get location: $e');
     } finally {
       isGettingLocation.value = false;
     }
@@ -168,7 +168,7 @@ class AddressController extends GetxController {
       hasLocationError.value = true;
       locationStatus.value = 'Failed to get address';
       AppLogger.error('Failed to get address', e);
-      Get.snackbar('Error', 'Failed to resolve address: $e');
+      AppHelpers.showErrorSnackbar(message: 'Failed to resolve address: $e');
     } finally {
       isLoading.value = false;
     }
@@ -193,13 +193,13 @@ class AddressController extends GetxController {
       searchResults.assignAll(results);
 
       if (results.isEmpty) {
-        Get.snackbar('Info', 'No addresses found matching your query');
+        AppHelpers.showInfoSnackbar(message: 'No addresses found matching your query');
       }
 
       AppLogger.info('Search results: ${results.length} addresses found');
     } catch (e) {
       AppLogger.error('Failed to search address', e);
-      Get.snackbar('Error', 'Failed to search address: $e');
+      AppHelpers.showErrorSnackbar(message: 'Failed to search address: $e');
     } finally {
       isSearching.value = false;
       isLoading.value = false;
@@ -209,7 +209,7 @@ class AddressController extends GetxController {
   /// Save new address
   Future<void> saveAddress() async {
     if (addressText.value.trim().isEmpty) {
-      Get.snackbar('Error', 'Please fill all fields');
+      AppHelpers.showErrorSnackbar(message: 'Please fill all fields');
       return;
     }
 
@@ -268,7 +268,7 @@ class AddressController extends GetxController {
             );
           } catch (error, stackTrace) {
             AppLogger.error('Failed to start registration OTP flow', error, stackTrace);
-            Get.snackbar('Error', 'Address saved, but OTP could not be sent.');
+            AppHelpers.showErrorSnackbar(message: 'Address saved, but OTP could not be sent.');
           }
         });
 
@@ -277,15 +277,13 @@ class AddressController extends GetxController {
 
       clearForm();
       Get.back(result: saved);
-      Get.snackbar(
-        'Success',
-        isEditing ? 'Address updated successfully' : 'Address saved successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+      AppHelpers.showSuccessSnackbar(
+        message: isEditing ? 'Address updated successfully' : 'Address saved successfully',
       );
     } catch (_) {
-      Get.snackbar('Error', isEditMode.value ? 'Failed to update address' : 'Failed to save address');
+      AppHelpers.showErrorSnackbar(
+        message: isEditMode.value ? 'Failed to update address' : 'Failed to save address',
+      );
     } finally {
       isLoading.value = false;
     }
@@ -309,15 +307,9 @@ class AddressController extends GetxController {
       addresses.assignAll(updated);
       addresses.sort((a, b) => (b.isDefault ? 1 : 0).compareTo(a.isDefault ? 1 : 0));
 
-      Get.snackbar(
-        'Success',
-        'Default address updated',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'Default address updated');
     } catch (_) {
-      Get.snackbar('Error', 'Failed to set default address');
+      AppHelpers.showErrorSnackbar(message: 'Failed to set default address');
     } finally {
       isLoading.value = false;
     }
@@ -404,9 +396,9 @@ class AddressController extends GetxController {
       isLoading.value = true;
       // TODO: wire delete API when endpoint is available.
       addresses.removeWhere((addr) => addr.id == addressId);
-      Get.snackbar('Success', 'Address deleted');
+      AppHelpers.showSuccessSnackbar(message: 'Address deleted');
     } catch (_) {
-      Get.snackbar('Error', 'Failed to delete address');
+      AppHelpers.showErrorSnackbar(message: 'Failed to delete address');
     } finally {
       isLoading.value = false;
     }

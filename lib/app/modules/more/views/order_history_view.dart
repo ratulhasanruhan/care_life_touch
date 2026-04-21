@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../global_widgets/app_tag_chip.dart';
 import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/primary_appbar.dart';
@@ -137,9 +138,9 @@ class OrderHistoryView extends GetView<OrderController> {
                       );
                       if (ok) {
                         Get.back();
-                        Get.snackbar('Success', 'Order cancelled successfully.');
+                        AppHelpers.showSuccessSnackbar(message: 'Order cancelled successfully.');
                       } else {
-                        Get.snackbar('Failed', controller.errorMessage.value);
+                        AppHelpers.showErrorSnackbar(message: controller.errorMessage.value, title: 'Failed');
                       }
                     },
               child: controller.isMutating.value
@@ -191,9 +192,9 @@ class OrderHistoryView extends GetView<OrderController> {
                       );
                       if (ok) {
                         Get.back();
-                        Get.snackbar('Success', 'Return request submitted.');
+                        AppHelpers.showSuccessSnackbar(message: 'Return request submitted.');
                       } else {
-                        Get.snackbar('Failed', controller.errorMessage.value);
+                        AppHelpers.showErrorSnackbar(message: controller.errorMessage.value, title: 'Failed');
                       }
                     },
               child: controller.isMutating.value
@@ -238,7 +239,7 @@ class OrderHistoryView extends GetView<OrderController> {
   }
 
   void _showComingSoon(String message) {
-    Get.snackbar('Info', message, snackPosition: SnackPosition.BOTTOM);
+    AppHelpers.showInfoSnackbar(message: message);
   }
 
   String _emptyTitle(OrderTab tab) {

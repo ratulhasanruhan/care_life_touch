@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/validators.dart';
 import '../../../data/models/api_exception.dart';
@@ -79,25 +80,15 @@ class ChangePasswordController extends GetxController {
 
       AppLogger.success('Password changed successfully');
 
-      Get.snackbar(
-        'Success',
-        'Password changed successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'Password changed successfully');
 
       Get.back(result: true);
     } catch (e, stackTrace) {
       AppLogger.error('Failed to change password', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        e is ApiException && e.message.trim().isNotEmpty
+      AppHelpers.showErrorSnackbar(
+        message: e is ApiException && e.message.trim().isNotEmpty
             ? e.message
             : 'Failed to change password. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
     } finally {
       isLoading.value = false;

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/models/api_exception.dart';
@@ -106,24 +106,15 @@ class CheckoutController extends GetxController {
 
     final address = selectedAddress;
     if (address == null || address.id.isEmpty) {
-      Get.snackbar(
-        'Address Required',
-        'Please select a shipping address first.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please select a shipping address first.', title: 'Address Required');
       return;
     }
 
     final orderItems = cartController.toOrderItems();
     if (orderItems.isEmpty) {
-      Get.snackbar(
-        'Unable to Continue',
-        'Some cart items are missing variant information. Please refresh your cart and try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppHelpers.showErrorSnackbar(
+        message: 'Some cart items are missing variant information. Please refresh your cart and try again.',
+        title: 'Unable to Continue',
       );
       return;
     }

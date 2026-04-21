@@ -1,6 +1,7 @@
 import 'package:care_life_touch/app/modules/notification/views/widgets/notification_item.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../core/values/app_colors.dart';
 import '../../../global_widgets/primary_appbar.dart';
 import '../controllers/notification_controller.dart';
@@ -133,13 +134,7 @@ class NotificationView extends GetView<NotificationController> {
                 },
                 onDelete: () {
                   controller.deleteNotification(notification.id);
-                  Get.snackbar(
-                    'Deleted',
-                    'Notification removed',
-                    snackPosition: SnackPosition.BOTTOM,
-                    duration: const Duration(seconds: 2),
-                    margin: const EdgeInsets.all(16),
-                  );
+                  AppHelpers.showInfoSnackbar(message: 'Notification removed', title: 'Deleted');
                 },
               ),
             )),

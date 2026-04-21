@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/review_model.dart';
 import '../../../data/repositories/review_repository.dart';
@@ -110,15 +111,15 @@ class ProductReviewsController extends GetxController {
     required String comment,
   }) async {
     if (productId.value.isEmpty) {
-      Get.snackbar('Error', 'Missing product information.');
+      AppHelpers.showErrorSnackbar(message: 'Missing product information.');
       return;
     }
     if (comment.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter your review comment.');
+      AppHelpers.showErrorSnackbar(message: 'Please enter your review comment.');
       return;
     }
     if (rating < 1 || rating > 5) {
-      Get.snackbar('Error', 'Please select a rating between 1 and 5.');
+      AppHelpers.showErrorSnackbar(message: 'Please select a rating between 1 and 5.');
       return;
     }
 
@@ -132,20 +133,10 @@ class ProductReviewsController extends GetxController {
 
       await loadReviews();
 
-      Get.snackbar(
-        'Success',
-        'Your review has been submitted',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'Your review has been submitted');
     } catch (error, stackTrace) {
       AppLogger.error('Failed to submit review', error, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Failed to submit review. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Failed to submit review. Please try again.');
     } finally {
       isSubmitting.value = false;
     }

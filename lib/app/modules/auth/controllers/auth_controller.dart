@@ -6,6 +6,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
@@ -200,68 +201,32 @@ class AuthController extends GetxController {
   Future<void> register() async {
     // Basic validation for required fields
     if (shopNameController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter shop name',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter shop name');
       return;
     }
 
     if (ownerNameController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter owner name',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter owner name');
       return;
     }
 
     if (phoneController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter phone number',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter phone number');
       return;
     }
 
     if (passwordController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter password',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter password');
       return;
     }
 
     if (confirmPasswordController.text.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please confirm your password',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please confirm your password');
       return;
     }
 
     if (passwordController.text != confirmPasswordController.text) {
-      Get.snackbar(
-        'Error',
-        'Passwords do not match',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Passwords do not match');
       return;
     }
 
@@ -608,13 +573,7 @@ class AuthController extends GetxController {
   /// Verify Registration OTP and show success modal
   Future<void> verifyRegistrationOTP() async {
     if (otpController.text.isEmpty || otpController.text.length < 6) {
-      Get.snackbar(
-        'Error',
-        'Please enter valid 6-digit OTP',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter valid 6-digit OTP');
       return;
     }
 
@@ -667,13 +626,7 @@ class AuthController extends GetxController {
   /// Verify OTP
   Future<void> verifyOTP() async {
     if (otpController.text.isEmpty || otpController.text.length < 6) {
-      Get.snackbar(
-        'Error',
-        'Please enter valid 6-digit OTP',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter valid 6-digit OTP');
       return;
     }
 
@@ -702,13 +655,7 @@ class AuthController extends GetxController {
       otpController.clear();
       await sendOTP();
 
-      Get.snackbar(
-        'Success',
-        'OTP resent successfully',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'OTP resent successfully');
     } catch (e) {
       _showError(_resolveErrorMessage(e, fallback: 'Failed to resend OTP'));
     }
@@ -842,13 +789,7 @@ class AuthController extends GetxController {
   }
 
   void _showError(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
+    AppHelpers.showErrorSnackbar(message: message);
   }
 
   /// Start resend timer
@@ -945,13 +886,7 @@ class AuthController extends GetxController {
       }
     } catch (e, stackTrace) {
       AppLogger.error('Failed to pick image', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Failed to pick image. Please try again.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Failed to pick image. Please try again.');
     }
   }
 

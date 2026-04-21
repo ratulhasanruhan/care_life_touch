@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/repositories/order_repository.dart';
@@ -77,24 +78,18 @@ class PaymentController extends GetxController {
     if (isProcessing.value) return;
 
     if (addressId.isEmpty) {
-      Get.snackbar(
-        'Address Missing',
-        'Please go back and select a shipping address.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppHelpers.showErrorSnackbar(
+        message: 'Please go back and select a shipping address.',
+        title: 'Address Missing',
       );
       return;
     }
 
     final orderItems = cartController.toOrderItems();
     if (orderItems.isEmpty) {
-      Get.snackbar(
-        'Cart Empty',
-        'Your cart items are missing required information.',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppHelpers.showErrorSnackbar(
+        message: 'Your cart items are missing required information.',
+        title: 'Cart Empty',
       );
       return;
     }
@@ -113,12 +108,9 @@ class PaymentController extends GetxController {
       _showPaymentSuccessSheet();
     } catch (error, stackTrace) {
       AppLogger.error('Payment failed', error, stackTrace);
-      Get.snackbar(
-        'Payment Failed',
-        _resolveMessage(error, 'Unable to process payment right now. Please try again.'),
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+      AppHelpers.showErrorSnackbar(
+        title: 'Payment Failed',
+        message: _resolveMessage(error, 'Unable to process payment right now. Please try again.'),
       );
     } finally {
       isProcessing.value = false;

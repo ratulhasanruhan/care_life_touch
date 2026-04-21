@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/repositories/auth_repository.dart';
@@ -182,13 +183,7 @@ class ForgotPasswordController extends GetxController {
 
       AppLogger.success('OTP resent successfully');
 
-      Get.snackbar(
-        'Success',
-        'OTP resent to ${resetEmail.value}',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'OTP resent to ${resetEmail.value}');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to resend OTP', e, stackTrace);
       _showError(_resolveErrorMessage(e, fallback: 'Failed to resend OTP. Please try again.'));
@@ -253,12 +248,6 @@ class ForgotPasswordController extends GetxController {
   }
 
   void _showError(String message) {
-    Get.snackbar(
-      'Error',
-      message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
-    );
+    AppHelpers.showErrorSnackbar(message: message);
   }
 }

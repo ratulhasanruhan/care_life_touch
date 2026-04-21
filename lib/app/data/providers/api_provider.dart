@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 
 import '../../core/constants/app_constants.dart';
 import '../../core/utils/app_logger.dart';
+import '../../core/utils/helpers.dart';
 import '../models/api_exception.dart';
 import 'storage_provider.dart';
 import '../../routes/app_pages.dart';
@@ -343,10 +344,9 @@ class ApiProvider extends GetConnect {
 
         if (!isAuthRoute) {
           await Get.offAllNamed<void>(Routes.LOGIN);
-          Get.snackbar(
-            'Session expired',
-            'Please sign in again to continue.',
-            snackPosition: SnackPosition.BOTTOM,
+          AppHelpers.showInfoSnackbar(
+            message: 'Please sign in again to continue.',
+            title: 'Session expired',
           );
         }
       } finally {

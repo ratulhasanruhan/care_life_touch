@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/auth_repository.dart';
@@ -41,8 +43,23 @@ class ProfileController extends GetxController {
       return;
     }
 
+    _logJson('👤 Cached Profile JSON', user);
+
+    final buyer = _asMap(user['buyer']);
+    final profile = _asMap(user['profile']);
+    final documents =
+        _asMap(user['documents']) ?? _asMap(user['document']) ?? _asMap(user['kyc']);
+
     shopNameController.text =
-        _firstNonEmptyString(<dynamic>[user['shopName'], user['shop_name']]) ?? '';
+        _firstNonEmptyString(<dynamic>[
+          user['shopName'],
+          user['shop_name'],
+          user['storeName'],
+          buyer?['shopName'],
+          buyer?['storeName'],
+          profile?['shopName'],
+        ]) ??
+        '';
     ownerNameController.text = _firstNonEmptyString(<dynamic>[
           user['ownerName'],
           user['owner_name'],
@@ -71,7 +88,22 @@ class ProfileController extends GetxController {
       tradeLicenseImage,
     );
     _setImagePath(
-      _extractImagePathFromCandidates(<dynamic>[user['nidImage'], user['nid_image'], user['nid']]),
+      _extractImagePathFromCandidates(<dynamic>[
+        user['nidImage'],
+        user['nid_image'],
+        user['nid'],
+        user['nationalIdImage'],
+        user['nidFront'],
+        user['nidBack'],
+        buyer?['nidImage'],
+        buyer?['nid'],
+        profile?['nidImage'],
+        documents?['nidImage'],
+        documents?['nid'],
+        documents?['nationalIdImage'],
+        documents?['nidFront'],
+        documents?['nidBack'],
+      ]),
       nidImage,
     );
     _setImagePath(
@@ -80,7 +112,40 @@ class ProfileController extends GetxController {
     );
 
     shopImages.clear();
-    final shopPaths = _extractImagePathsFromAny(user['shopImages']);
+
+    final shopPaths = <String>[];
+    void collectShop(dynamic source) {
+      for (final path in _extractImagePathsFromAny(source)) {
+        if (!shopPaths.contains(path)) {
+          shopPaths.add(path);
+        }
+      }
+    }
+
+    collectShop(user['shopImages']);
+    collectShop(user['shop_images']);
+    collectShop(user['shopImage']);
+    collectShop(user['shop_image']);
+    collectShop(user['storeImage']);
+    collectShop(user['storeImages']);
+    collectShop(user['shopPhotos']);
+    collectShop(user['gallery']);
+    collectShop(buyer?['shopImages']);
+    collectShop(buyer?['shopImage']);
+    collectShop(buyer?['shopPhotos']);
+    collectShop(buyer?['gallery']);
+    collectShop(profile?['shopImages']);
+    collectShop(profile?['shopImage']);
+    collectShop(profile?['shopPhotos']);
+    collectShop(profile?['gallery']);
+    collectShop(documents?['shopImages']);
+    collectShop(documents?['shopImage']);
+    collectShop(documents?['shopPhotos']);
+    collectShop(documents?['gallery']);
+
+    AppLogger.info('🪪 NID resolved path: ${nidImage.value?.path ?? ''}');
+    AppLogger.info('🏪 Shop image count resolved: ${shopPaths.length}');
+
     for (final path in shopPaths) {
       shopImages.add(File(path));
     }
@@ -91,6 +156,16 @@ class ProfileController extends GetxController {
         shopImages.add(File(legacyPath));
       }
     }
+  }
+
+  Map<String, dynamic>? _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) {
+      return value;
+    }
+    if (value is Map) {
+      return value.map((key, item) => MapEntry(key.toString(), item));
+    }
+    return null;
   }
 
   void _setImagePath(dynamic path, Rx<File?> target) {
@@ -151,6 +226,16 @@ class ProfileController extends GetxController {
       return null;
     }
 
+    if (value is List) {
+      for (final item in value) {
+        final path = _extractImagePath(item);
+        if (path != null) {
+          return path;
+        }
+      }
+      return null;
+    }
+
     if (value is String) {
       final text = value.trim();
       if (text.isNotEmpty && text.toLowerCase() != 'null') {
@@ -177,6 +262,15 @@ class ProfileController extends GetxController {
     return null;
   }
 
+  void _logJson(String title, Map<String, dynamic> data) {
+    try {
+      final pretty = const JsonEncoder.withIndent('  ').convert(data);
+      AppLogger.info(title, pretty);
+    } catch (_) {
+      AppLogger.info(title, data.toString());
+    }
+  }
+
   Future<bool> changePassword({
     required String oldPassword,
     required String newPassword,
@@ -184,43 +278,19 @@ class ProfileController extends GetxController {
   }) async {
     // Validate inputs
     if (oldPassword.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter your current password',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter your current password');
       return false;
     }
     if (newPassword.isEmpty) {
-      Get.snackbar(
-        'Error',
-        'Please enter your new password',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Please enter your new password');
       return false;
     }
     if (newPassword != confirmPassword) {
-      Get.snackbar(
-        'Error',
-        'Passwords do not match',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Passwords do not match');
       return false;
     }
     if (newPassword.length < 6) {
-      Get.snackbar(
-        'Error',
-        'Password must be at least 6 characters',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Password must be at least 6 characters');
       return false;
     }
 
@@ -230,31 +300,13 @@ class ProfileController extends GetxController {
         oldPassword: oldPassword,
         newPassword: newPassword,
       );
-      Get.snackbar(
-        'Success',
-        'Password changed successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
+      AppHelpers.showSuccessSnackbar(message: 'Password changed successfully');
       return true;
     } on ApiException catch (e) {
-      Get.snackbar(
-        'Error',
-        e.message,
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: e.message);
       return false;
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Failed to change password. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Failed to change password. Please try again.');
       return false;
     } finally {
       isLoading.value = false;
@@ -271,13 +323,7 @@ class ProfileController extends GetxController {
       Get.offAllNamed('/login');
     } catch (e) {
       AppLogger.error('Logout failed', e);
-      Get.snackbar(
-        'Error',
-        'Failed to logout. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Failed to logout. Please try again.');
     } finally {
       isLoading.value = false;
     }
@@ -351,26 +397,16 @@ class ProfileController extends GetxController {
       });
 
       AppLogger.success('Profile updated successfully');
-
-      Get.snackbar(
-        'Success',
-        'Profile updated successfully',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-      );
-
       Get.back(result: true);
+      Future.microtask(() {
+        AppHelpers.showSuccessSnackbar(message: 'Profile updated successfully');
+      });
     } catch (e, stackTrace) {
       AppLogger.error('Profile update failed', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        e is ApiException && e.message.trim().isNotEmpty
+      AppHelpers.showErrorSnackbar(
+        message: e is ApiException && e.message.trim().isNotEmpty
             ? e.message
             : 'Failed to update profile. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
       );
     } finally {
       isLoading.value = false;
@@ -384,6 +420,7 @@ class ProfileController extends GetxController {
 
     try {
       final profile = await _authRepository.accessMe();
+      _logJson('👤 access-me Profile JSON', profile);
       final existing = _storage.getUser() ?? <String, dynamic>{};
       await _storage.saveUser({...existing, ...profile});
       _loadProfile();
@@ -458,13 +495,7 @@ class ProfileController extends GetxController {
       AppLogger.success('Profile image picked: $imageType');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to pick profile image', e, stackTrace);
-      Get.snackbar(
-        'Error',
-        'Failed to pick image. Please try again.',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      AppHelpers.showErrorSnackbar(message: 'Failed to pick image. Please try again.');
     }
   }
 

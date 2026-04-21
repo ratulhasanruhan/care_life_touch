@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../../core/utils/app_logger.dart';
+import '../../../core/utils/helpers.dart';
 import '../../../data/models/address_model.dart';
 import '../../../data/repositories/address_repository.dart';
 import '../../../data/repositories/notification_repository.dart';
@@ -299,7 +300,7 @@ class HomeController extends GetxController {
   void onCategoryTap(String category) {
     AppLogger.debug('Category tapped: $category');
     // TODO: Navigate to category page
-    Get.snackbar('Category', 'Navigating to $category');
+    AppHelpers.showInfoSnackbar(message: 'Navigating to $category', title: 'Category');
   }
 
   List<Map<String, String>> _normalizeCategories(List<Map<String, dynamic>> source) {
@@ -376,7 +377,7 @@ class HomeController extends GetxController {
   void onBrandTap(String brand) {
     AppLogger.debug('Brand tapped: $brand');
     // TODO: Navigate to brand page
-    Get.snackbar('Brand', 'Navigating to $brand');
+    AppHelpers.showInfoSnackbar(message: 'Navigating to $brand', title: 'Brand');
   }
 
   void onNotificationTap() {
@@ -386,7 +387,7 @@ class HomeController extends GetxController {
   /// Handle search
   void onSearch(String query) {
     if (query.trim().isEmpty) {
-      Get.snackbar('Search', 'Please enter a search query');
+      AppHelpers.showInfoSnackbar(message: 'Please enter a search query', title: 'Search');
       return;
     }
 

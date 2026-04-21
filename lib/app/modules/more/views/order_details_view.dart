@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../global_widgets/app_tag_chip.dart';
 import '../../../global_widgets/custom_button.dart';
 import '../../../global_widgets/primary_appbar.dart';
@@ -148,7 +149,7 @@ class OrderDetailsView extends GetView<OrderController> {
   ) async {
     final orderId = controller.orderIdOf(order);
     if (orderId.isEmpty) {
-      Get.snackbar('Failed', 'Order id missing.');
+      AppHelpers.showErrorSnackbar(message: 'Order id missing.', title: 'Failed');
       return;
     }
 
@@ -177,9 +178,9 @@ class OrderDetailsView extends GetView<OrderController> {
                       );
                       if (ok) {
                         Get.back();
-                        Get.snackbar('Success', 'Order cancelled successfully.');
+                        AppHelpers.showSuccessSnackbar(message: 'Order cancelled successfully.');
                       } else {
-                        Get.snackbar('Failed', controller.errorMessage.value);
+                        AppHelpers.showErrorSnackbar(message: controller.errorMessage.value, title: 'Failed');
                       }
                     },
               child: const Text('Confirm'),
@@ -318,11 +319,7 @@ class _TrackingDetailsCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(14),
                     onTap: () async {
                       await Clipboard.setData(ClipboardData(text: value));
-                      Get.snackbar(
-                        'Copied',
-                        '$label copied',
-                        snackPosition: SnackPosition.BOTTOM,
-                      );
+                      AppHelpers.showInfoSnackbar(message: '$label copied', title: 'Copied');
                     },
                     child: const Padding(
                       padding: EdgeInsets.all(2),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../values/app_colors.dart';
+
 /// Helper class for showing snackbars and dialogs
 class AppHelpers {
   AppHelpers._();
@@ -14,9 +16,9 @@ class AppHelpers {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF388E3C),
-      colorText: const Color(0xFFFFFFFF),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.success,
+      colorText: AppColors.white,
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 8,
@@ -32,9 +34,9 @@ class AppHelpers {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFD32F2F),
-      colorText: const Color(0xFFFFFFFF),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.error,
+      colorText: AppColors.white,
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 8,
@@ -50,9 +52,9 @@ class AppHelpers {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFF0288D1),
-      colorText: const Color(0xFFFFFFFF),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.info,
+      colorText: AppColors.white,
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 8,
@@ -68,9 +70,9 @@ class AppHelpers {
     Get.snackbar(
       title,
       message,
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: const Color(0xFFF57C00),
-      colorText: const Color(0xFFFFFFFF),
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: AppColors.warning,
+      colorText: AppColors.white,
       duration: duration,
       margin: const EdgeInsets.all(16),
       borderRadius: 8,

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../../core/utils/helpers.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/models/cart_api_model.dart';
@@ -160,11 +161,7 @@ class CartController extends GetxController {
         ),
       );
       if (notify) {
-        Get.snackbar(
-          'Success',
-          'Cart cleared successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppHelpers.showSuccessSnackbar(message: 'Cart cleared successfully');
       }
     } catch (error, stackTrace) {
       AppLogger.error('Failed to clear cart', error, stackTrace);
@@ -210,11 +207,7 @@ class CartController extends GetxController {
       final snapshot = await action();
       _applySnapshot(snapshot);
       if (successMessage != null && successMessage.isNotEmpty) {
-        Get.snackbar(
-          'Success',
-          successMessage,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        AppHelpers.showSuccessSnackbar(message: successMessage);
       }
     } catch (error, stackTrace) {
       AppLogger.error('Cart mutation failed', error, stackTrace);
@@ -313,7 +306,7 @@ class CartController extends GetxController {
   }
 
   void _showError(String message) {
-    Get.snackbar('Error', message, snackPosition: SnackPosition.BOTTOM);
+    AppHelpers.showErrorSnackbar(message: message);
   }
 
   bool _isMeaningfulBrand(String value) {
