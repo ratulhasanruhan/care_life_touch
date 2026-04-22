@@ -14,24 +14,13 @@ import '../../../routes/app_pages.dart';
 
 SliverGridDelegateWithFixedCrossAxisCount _responsiveGridDelegate(double maxWidth) {
   const spacing = 12.0;
-
-  int crossAxisCount;
-  if (maxWidth >= 980) {
-    crossAxisCount = 4;
-  } else if (maxWidth >= 760) {
-    crossAxisCount = 3;
-  } else if (maxWidth >= 360) {
-    crossAxisCount = 2;
-  } else {
-    crossAxisCount = 1;
-  }
-
+  const crossAxisCount = 2;
   final cardWidth = (maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
-  final cardHeight = cardWidth < 165
-      ? 238.0
-      : cardWidth < 210
-          ? 252.0
-          : 268.0;
+  final cardHeight = cardWidth < 150
+      ? 232.0
+      : cardWidth < 190
+          ? 246.0
+          : 262.0;
 
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: crossAxisCount,

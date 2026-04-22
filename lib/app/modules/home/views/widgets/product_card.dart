@@ -22,13 +22,9 @@ class ProductCard extends StatelessWidget {
           },
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final isCompact = constraints.maxWidth < 165;
-          final isRoomy = constraints.maxWidth > 210;
-          final imageHeight = isCompact
-              ? 116.0
-              : isRoomy
-                  ? 148.0
-                  : 136.0;
+          final isUltraCompact = constraints.maxWidth < 150;
+          final isCompact = constraints.maxWidth < 170;
+          final imageHeight = (constraints.maxWidth * 0.74).clamp(108.0, 148.0);
           final contentPadding = isCompact ? 6.0 : 8.0;
           final titleFontSize = isCompact ? 11.0 : 12.0;
 
@@ -72,7 +68,13 @@ class ProductCard extends StatelessWidget {
                         const Spacer(),
 
                         // Price and Add to Bag Button
-                        Obx(() => _buildPriceAndButton(cartController, isCompact: isCompact)),
+                        Obx(
+                          () => _buildPriceAndButton(
+                            cartController,
+                            isCompact: isCompact,
+                            isUltraCompact: isUltraCompact,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -193,9 +195,54 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Build price and add to cart button
-  Widget _buildPriceAndButton(CartController cartController, {required bool isCompact}) {
+  Widget _buildPriceAndButton(
+    CartController cartController, {
+    required bool isCompact,
+    required bool isUltraCompact,
+  }) {
     final quantity = cartController.getQuantity(product.id);
     final isInCart = quantity > 0;
+    final action = isInCart
+        ? _buildQuantityControls(
+            cartController,
+            quantity,
+            isCompact: isCompact,
+            isUltraCompact: isUltraCompact,
+          )
+        : _buildAddToCartButton(
+            cartController,
+            isCompact: isCompact,
+            isUltraCompact: isUltraCompact,
+          );
+
+    if (isUltraCompact) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildPriceText(isCompact: isCompact),
+          Text(
+            product.moqDisplay,
+            style: TextStyle(
+              fontSize: 7,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xB301060F),
+            ),
+            maxLines: 2,
+            softWrap: true,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Align(
+            alignment: Alignment.centerRight,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              alignment: Alignment.centerRight,
+              child: action,
+            ),
+          ),
+        ],
+      );
+    }
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -231,9 +278,7 @@ class ProductCard extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerRight,
-              child: isInCart
-                  ? _buildQuantityControls(cartController, quantity, isCompact: isCompact)
-                  : _buildAddToCartButton(cartController, isCompact: isCompact),
+                child: action,
             ),
           ),
         ),
@@ -242,15 +287,19 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Build add to cart button
-  Widget _buildAddToCartButton(CartController cartController, {required bool isCompact}) {
+  Widget _buildAddToCartButton(
+    CartController cartController, {
+    required bool isCompact,
+    required bool isUltraCompact,
+  }) {
     return GestureDetector(
       onTap: () async {
         // Add to cart without showing snackbar - just update state
         await cartController.addToCart(product, quantity: 1);
       },
       child: Container(
-        height: isCompact ? 20 : 22,
-        padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 6),
+        height: isUltraCompact ? 19 : (isCompact ? 20 : 22),
+        padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
         decoration: BoxDecoration(
           color: const Color(0xFF064E36),
           borderRadius: BorderRadius.circular(4),
@@ -261,13 +310,17 @@ class ProductCard extends StatelessWidget {
             Text(
               'Add to Bag',
               style: TextStyle(
-                fontSize: isCompact ? 7 : 8,
+                fontSize: isUltraCompact ? 6.5 : (isCompact ? 7 : 8),
                 fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),
-            SizedBox(width: isCompact ? 2 : 4),
-            Icon(Icons.shopping_bag_outlined, color: Colors.white, size: isCompact ? 9 : 10),
+            SizedBox(width: isUltraCompact ? 1.5 : (isCompact ? 2 : 4)),
+            Icon(
+              Icons.shopping_bag_outlined,
+              color: Colors.white,
+              size: isUltraCompact ? 8 : (isCompact ? 9 : 10),
+            ),
           ],
         ),
       ),
@@ -275,9 +328,14 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Build quantity controls
-  Widget _buildQuantityControls(CartController cartController, int quantity, {required bool isCompact}) {
+  Widget _buildQuantityControls(
+    CartController cartController,
+    int quantity, {
+    required bool isCompact,
+    required bool isUltraCompact,
+  }) {
     return Container(
-      height: isCompact ? 20 : 22,
+      height: isUltraCompact ? 19 : (isCompact ? 20 : 22),
       decoration: BoxDecoration(
         color: const Color(0xFF064E36),
         borderRadius: BorderRadius.circular(4),
@@ -288,16 +346,20 @@ class ProductCard extends StatelessWidget {
           GestureDetector(
             onTap: () => cartController.decreaseQuantity(product.id),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 6),
-              child: Icon(Icons.remove, color: Colors.white, size: isCompact ? 10 : 12),
+              padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+              child: Icon(
+                Icons.remove,
+                color: Colors.white,
+                size: isUltraCompact ? 9 : (isCompact ? 10 : 12),
+              ),
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 6),
+            padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
             child: Text(
               quantity.toString(),
               style: TextStyle(
-                fontSize: isCompact ? 9 : 10,
+                fontSize: isUltraCompact ? 8 : (isCompact ? 9 : 10),
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
@@ -306,8 +368,12 @@ class ProductCard extends StatelessWidget {
           GestureDetector(
             onTap: () => cartController.increaseQuantity(product.id),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: isCompact ? 4 : 6),
-              child: Icon(Icons.add, color: Colors.white, size: isCompact ? 10 : 12),
+              padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+              child: Icon(
+                Icons.add,
+                color: Colors.white,
+                size: isUltraCompact ? 9 : (isCompact ? 10 : 12),
+              ),
             ),
           ),
         ],
