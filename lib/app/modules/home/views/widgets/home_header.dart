@@ -9,22 +9,26 @@ class HomeHeader extends StatefulWidget {
   final VoidCallback? onLocationTap;
   final VoidCallback? onNotificationTap;
   final Function(String)? onSearch;
+  final ValueChanged<String>? onSearchChanged;
   final int unreadNotificationCount;
   final String locationText;
   final bool isLocationLoading;
   final bool hasLocationError;
   final List<ProductModel> searchSuggestions;
+  final bool isSearchingSuggestions;
 
   const HomeHeader({
     super.key,
     this.onLocationTap,
     this.onNotificationTap,
     this.onSearch,
+    this.onSearchChanged,
     this.unreadNotificationCount = 0,
     required this.locationText,
     required this.isLocationLoading,
     required this.hasLocationError,
     this.searchSuggestions = const [],
+    this.isSearchingSuggestions = false,
   });
 
   @override
@@ -102,7 +106,9 @@ class _HomeHeaderState extends State<HomeHeader> {
     if (trimmedQuery.isEmpty) return;
 
     try {
-      _searchHistory.removeWhere((item) => item.toLowerCase() == trimmedQuery.toLowerCase());
+      _searchHistory.removeWhere(
+        (item) => item.toLowerCase() == trimmedQuery.toLowerCase(),
+      );
       _searchHistory.insert(0, trimmedQuery);
       if (_searchHistory.length > _maxHistoryItems) {
         _searchHistory = _searchHistory.sublist(0, _maxHistoryItems);
@@ -126,7 +132,8 @@ class _HomeHeaderState extends State<HomeHeader> {
           ...historyItems,
           ...productItems.take(8 - historyItems.length),
         ];
-        _showSuggestions = _searchFocusNode.hasFocus && _filteredSuggestions.isNotEmpty;
+        _showSuggestions =
+            _searchFocusNode.hasFocus && _filteredSuggestions.isNotEmpty;
       });
     } else {
       final lowerQuery = query.toLowerCase().trim();
@@ -143,11 +150,12 @@ class _HomeHeaderState extends State<HomeHeader> {
 
       _filteredSuggestions = [
         ...historySuggestionItems,
-        ...suggestionMatches.take(8 - historySuggestionItems.length)
+        ...suggestionMatches.take(8 - historySuggestionItems.length),
       ];
 
       setState(() {
-        _showSuggestions = _searchFocusNode.hasFocus && _filteredSuggestions.isNotEmpty;
+        _showSuggestions =
+            _searchFocusNode.hasFocus && _filteredSuggestions.isNotEmpty;
       });
     }
   }
@@ -168,6 +176,7 @@ class _HomeHeaderState extends State<HomeHeader> {
     _searchController.clear();
     _searchFocusNode.unfocus();
     _hideSuggestions();
+    widget.onSearchChanged?.call('');
     widget.onSearch?.call(query);
   }
 
@@ -178,7 +187,9 @@ class _HomeHeaderState extends State<HomeHeader> {
     final products = widget.searchSuggestions.where((product) {
       final name = product.name.trim();
       if (name.isEmpty) return false;
-      if (_searchHistory.any((history) => history.toLowerCase() == name.toLowerCase())) {
+      if (_searchHistory.any(
+        (history) => history.toLowerCase() == name.toLowerCase(),
+      )) {
         return false;
       }
       return lowerQuery.isEmpty || name.toLowerCase().contains(lowerQuery);
@@ -196,7 +207,8 @@ class _HomeHeaderState extends State<HomeHeader> {
 
       if (aStartsWith && !bStartsWith) return -1;
       if (!aStartsWith && bStartsWith) return 1;
-      if (aStartsWith && bStartsWith) return a.name.length.compareTo(b.name.length);
+      if (aStartsWith && bStartsWith)
+        return a.name.length.compareTo(b.name.length);
       return a.name.length.compareTo(b.name.length);
     });
 
@@ -216,8 +228,8 @@ class _HomeHeaderState extends State<HomeHeader> {
     final subtitleText = widget.isLocationLoading
         ? 'Getting location...'
         : widget.hasLocationError
-            ? 'Location unavailable. Tap to choose'
-            : widget.locationText;
+        ? 'Location unavailable. Tap to choose'
+        : widget.locationText;
 
     return Container(
       decoration: const BoxDecoration(
@@ -347,7 +359,10 @@ class _HomeHeaderState extends State<HomeHeader> {
             controller: _searchController,
             focusNode: _searchFocusNode,
             onTapOutside: (_) => _searchFocusNode.unfocus(),
-            onChanged: _filterSuggestions,
+            onChanged: (value) {
+              _filterSuggestions(value);
+              widget.onSearchChanged?.call(value);
+            },
             onSubmitted: _onSearchSubmitted,
             textInputAction: TextInputAction.search,
             style: const TextStyle(
@@ -391,6 +406,16 @@ class _HomeHeaderState extends State<HomeHeader> {
                 color: Color(0xFFA2A8AF),
                 size: 20,
               ),
+              suffixIcon: widget.isSearchingSuggestions
+                  ? const Padding(
+                      padding: EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                    )
+                  : null,
             ),
           ),
           // Suggestions dropdown
@@ -440,20 +465,13 @@ class _HomeHeaderState extends State<HomeHeader> {
           decoration: BoxDecoration(
             border: index < _filteredSuggestions.length - 1
                 ? const Border(
-                    bottom: BorderSide(
-                      color: Color(0xFFEEEEEE),
-                      width: 0.5,
-                    ),
+                    bottom: BorderSide(color: Color(0xFFEEEEEE), width: 0.5),
                   )
                 : null,
           ),
           child: Row(
             children: [
-              const Icon(
-                Icons.history,
-                size: 18,
-                color: Color(0xFFA2A8AF),
-              ),
+              const Icon(Icons.history, size: 18, color: Color(0xFFA2A8AF)),
               const SizedBox(width: 10),
               Expanded(
                 child: Text(
@@ -482,8 +500,11 @@ class _HomeHeaderState extends State<HomeHeader> {
   Widget _buildProductSuggestionTile(ProductModel product, int index) {
     final imageWidget = _buildSuggestionImage(product);
     final price = product.price > 0 ? product.price : null;
-    final comparePrice = product.maxPrice != null && product.maxPrice! > 0 ? product.maxPrice : null;
-    final showComparePrice = price != null && comparePrice != null && comparePrice > price;
+    final comparePrice = product.maxPrice != null && product.maxPrice! > 0
+        ? product.maxPrice
+        : null;
+    final showComparePrice =
+        price != null && comparePrice != null && comparePrice > price;
     final discountLabel = _resolveDiscountLabel(product);
 
     return Material(
@@ -495,10 +516,7 @@ class _HomeHeaderState extends State<HomeHeader> {
           decoration: BoxDecoration(
             border: index < _filteredSuggestions.length - 1
                 ? const Border(
-                    bottom: BorderSide(
-                      color: Color(0xFFEEEEEE),
-                      width: 0.5,
-                    ),
+                    bottom: BorderSide(color: Color(0xFFEEEEEE), width: 0.5),
                   )
                 : null,
           ),
@@ -533,7 +551,9 @@ class _HomeHeaderState extends State<HomeHeader> {
                     Row(
                       children: [
                         Text(
-                          price != null ? '৳${_formatPrice(price)}' : 'Price unavailable',
+                          price != null
+                              ? '৳${_formatPrice(price)}'
+                              : 'Price unavailable',
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
@@ -543,7 +563,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                         if (showComparePrice) ...[
                           const SizedBox(width: 6),
                           Text(
-                            '৳${_formatPrice(comparePrice!)}',
+                            '৳${_formatPrice(comparePrice)}',
                             style: const TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w400,
@@ -555,7 +575,10 @@ class _HomeHeaderState extends State<HomeHeader> {
                         if (discountLabel != null) ...[
                           const SizedBox(width: 6),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE53935),
                               borderRadius: BorderRadius.circular(20),
@@ -593,7 +616,9 @@ class _HomeHeaderState extends State<HomeHeader> {
   }
 
   Widget _buildSuggestionImage(ProductModel product) {
-    final imagePath = product.imagePath.trim().isEmpty ? _productPlaceholderImage : product.imagePath.trim();
+    final imagePath = product.imagePath.trim().isEmpty
+        ? _productPlaceholderImage
+        : product.imagePath.trim();
 
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
       return Image.network(
@@ -633,8 +658,12 @@ class _HomeHeaderState extends State<HomeHeader> {
     }
 
     final comparePrice = product.maxPrice;
-    if (comparePrice != null && comparePrice > 0 && product.price > 0 && comparePrice > product.price) {
-      final percentage = (((comparePrice - product.price) / comparePrice) * 100).round();
+    if (comparePrice != null &&
+        comparePrice > 0 &&
+        product.price > 0 &&
+        comparePrice > product.price) {
+      final percentage = (((comparePrice - product.price) / comparePrice) * 100)
+          .round();
       if (percentage > 0) {
         return '$percentage% OFF';
       }
@@ -651,12 +680,11 @@ class _SearchSuggestionItem {
     this.product,
   });
 
-  factory _SearchSuggestionItem.history(String label) => _SearchSuggestionItem._(
-        label: label,
-        isHistory: true,
-      );
+  factory _SearchSuggestionItem.history(String label) =>
+      _SearchSuggestionItem._(label: label, isHistory: true);
 
-  factory _SearchSuggestionItem.product(ProductModel product) => _SearchSuggestionItem._(
+  factory _SearchSuggestionItem.product(ProductModel product) =>
+      _SearchSuggestionItem._(
         label: product.name,
         isHistory: false,
         product: product,

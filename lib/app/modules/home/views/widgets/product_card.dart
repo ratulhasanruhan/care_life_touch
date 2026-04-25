@@ -39,7 +39,10 @@ class ProductCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Product Image with Badge
-                _buildProductImage(imageHeight: imageHeight, isCompact: isCompact),
+                _buildProductImage(
+                  imageHeight: imageHeight,
+                  isCompact: isCompact,
+                ),
 
                 // Product Details
                 Expanded(
@@ -88,7 +91,12 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Build product image section with offer badge
-  Widget _buildProductImage({required double imageHeight, required bool isCompact}) {
+  Widget _buildProductImage({
+    required double imageHeight,
+    required bool isCompact,
+  }) {
+    final discountLabel = _resolveDiscountLabel();
+
     return SizedBox(
       height: imageHeight,
       child: DecoratedBox(
@@ -131,7 +139,7 @@ class ProductCard extends StatelessWidget {
                       ),
               ),
             ),
-            if (product.hasOffer)
+            if (discountLabel != null)
               Positioned(
                 top: 8,
                 right: 8,
@@ -145,7 +153,7 @@ class ProductCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    product.offerLabel ?? 'SALE',
+                    discountLabel,
                     style: TextStyle(
                       fontSize: isCompact ? 9 : 10,
                       fontWeight: FontWeight.w500,
@@ -178,7 +186,11 @@ class ProductCard extends StatelessWidget {
         ),
         Row(
           children: [
-            Icon(Icons.star, color: const Color(0xFFF1B71B), size: isCompact ? 10 : 12),
+            Icon(
+              Icons.star,
+              color: const Color(0xFFF1B71B),
+              size: isCompact ? 10 : 12,
+            ),
             SizedBox(width: isCompact ? 1 : 2),
             Text(
               product.rating.toString(),
@@ -278,7 +290,7 @@ class ProductCard extends StatelessWidget {
             child: FittedBox(
               fit: BoxFit.scaleDown,
               alignment: Alignment.centerRight,
-                child: action,
+              child: action,
             ),
           ),
         ),
@@ -299,7 +311,9 @@ class ProductCard extends StatelessWidget {
       },
       child: Container(
         height: isUltraCompact ? 19 : (isCompact ? 20 : 22),
-        padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+        padding: EdgeInsets.symmetric(
+          horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF064E36),
           borderRadius: BorderRadius.circular(4),
@@ -346,7 +360,9 @@ class ProductCard extends StatelessWidget {
           GestureDetector(
             onTap: () => cartController.decreaseQuantity(product.id),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+              padding: EdgeInsets.symmetric(
+                horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+              ),
               child: Icon(
                 Icons.remove,
                 color: Colors.white,
@@ -355,7 +371,9 @@ class ProductCard extends StatelessWidget {
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+            padding: EdgeInsets.symmetric(
+              horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+            ),
             child: Text(
               quantity.toString(),
               style: TextStyle(
@@ -368,7 +386,9 @@ class ProductCard extends StatelessWidget {
           GestureDetector(
             onTap: () => cartController.increaseQuantity(product.id),
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6)),
+              padding: EdgeInsets.symmetric(
+                horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+              ),
               child: Icon(
                 Icons.add,
                 color: Colors.white,
@@ -417,5 +437,25 @@ class ProductCard extends StatelessWidget {
 
   String _money(double value) {
     return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+  }
+
+  String? _resolveDiscountLabel() {
+    final label = product.offerLabel?.trim();
+    if (label != null && label.isNotEmpty) {
+      return label;
+    }
+
+    final comparePrice = product.maxPrice;
+    if (comparePrice != null &&
+        comparePrice > 0 &&
+        comparePrice > product.price) {
+      final discountPercent =
+          (((comparePrice - product.price) / comparePrice) * 100).round();
+      if (discountPercent > 0) {
+        return '$discountPercent% OFF';
+      }
+    }
+
+    return null;
   }
 }

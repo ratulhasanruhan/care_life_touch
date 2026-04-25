@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+import '../../core/utils/app_logger.dart';
 import '../models/api_exception.dart';
 import '../providers/api_provider.dart';
 import '../../modules/home/models/product_model.dart';
@@ -23,21 +24,27 @@ class ProductRepository {
     int? page,
     int? limit,
   }) async {
+    final normalizedQuery = query.trim();
     final params = <String, dynamic>{
-      'q': query.trim(),
+      'q': normalizedQuery,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
     };
     try {
+      AppLogger.info('Search API request', params);
       final response = await _api.getData('/search', query: params);
+      AppLogger.debug('Search API raw response', response);
       return _extractProducts(response);
     } on ApiException catch (error) {
       // Some environments accept only `q` for /search.
       if (error.statusCode == 400) {
-        final fallback = await _api.getData(
-          '/search',
-          query: {'q': query.trim()},
+        final fallbackParams = {'q': normalizedQuery};
+        AppLogger.warning(
+          'Search API retry with minimal query',
+          fallbackParams,
         );
+        final fallback = await _api.getData('/search', query: fallbackParams);
+        AppLogger.debug('Search API raw fallback response', fallback);
         return _extractProducts(fallback);
       }
       rethrow;
@@ -212,34 +219,59 @@ class ProductRepository {
   }
 
   List<ProductModel> _extractProducts(dynamic response) {
-    if (response is Map) {
-      final map = response.map((key, value) => MapEntry(key.toString(), value));
-      final products =
-          map['products'] ?? map['data'] ?? map['items'] ?? map['result'];
-      if (products is List) {
-        return products
-            .whereType<Map>()
-            .map(
-              (item) => ProductModel.fromJson(
-                item.map((key, value) => MapEntry(key.toString(), value)),
-              ),
-            )
-            .toList();
+    final list = _findProductList(response);
+    if (list == null) {
+      throw ApiException('Invalid products response.', details: response);
+    }
+
+    return list
+        .whereType<Map>()
+        .map(
+          (item) => ProductModel.fromJson(
+            item.map((key, value) => MapEntry(key.toString(), value)),
+          ),
+        )
+        .toList();
+  }
+
+  List<dynamic>? _findProductList(dynamic value) {
+    if (value is List) {
+      return value;
+    }
+
+    final map = _toMap(value);
+    if (map == null) {
+      return null;
+    }
+
+    for (final key in const [
+      'products',
+      'items',
+      'result',
+      'results',
+      'docs',
+    ]) {
+      final candidate = map[key];
+      if (candidate is List) {
+        return candidate;
       }
     }
 
-    if (response is List) {
-      return response
-          .whereType<Map>()
-          .map(
-            (item) => ProductModel.fromJson(
-              item.map((key, value) => MapEntry(key.toString(), value)),
-            ),
-          )
-          .toList();
+    for (final key in const ['data', 'payload', 'meta']) {
+      final candidate = _findProductList(map[key]);
+      if (candidate != null) {
+        return candidate;
+      }
     }
 
-    throw ApiException('Invalid products response.', details: response);
+    for (final candidate in map.values) {
+      final nested = _findProductList(candidate);
+      if (nested != null) {
+        return nested;
+      }
+    }
+
+    return null;
   }
 
   List<Map<String, dynamic>> _extractMapItems(

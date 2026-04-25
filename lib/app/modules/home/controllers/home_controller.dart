@@ -35,13 +35,20 @@ class HomeController extends GetxController {
   final banners = <String>[].obs;
   final unreadNotificationCount = 0.obs;
   final _searchSuggestions = <ProductModel>[].obs;
+  final isSearchSuggestionsLoading = false.obs;
+  final _searchSuggestionQuery = ''.obs;
 
   // Cart controller
   late CartController cartController;
   final ProductRepository _productRepository = Get.find<ProductRepository>();
-  final NotificationRepository _notificationRepository = Get.find<NotificationRepository>();
+  final NotificationRepository _notificationRepository =
+      Get.find<NotificationRepository>();
   final PageRepository _pageRepository = Get.find<PageRepository>();
   final AddressRepository _addressRepository = Get.find<AddressRepository>();
+
+  Worker? _searchSuggestionWorker;
+  int _searchSuggestionRequestId = 0;
+  List<ProductModel> _fallbackSuggestions = const [];
 
   static const _categoryFallbackImages = <String>[
     'assets/demo/cat_1.png',
@@ -62,56 +69,72 @@ class HomeController extends GetxController {
     'assets/demo/banner_2.png',
   ];
 
-    List<ProductModel> get searchSuggestions => _searchSuggestions;
+  List<ProductModel> get searchSuggestions => _searchSuggestions;
 
-    void _updateSearchSuggestions() {
-      final suggestions = <ProductModel>[];
-      final seen = <String>{};
+  void _updateSearchSuggestions() {
+    final suggestions = <ProductModel>[];
+    final seen = <String>{};
 
-      void addProduct(ProductModel product) {
-        final idKey = product.id.trim();
-        final nameKey = product.name.trim().toLowerCase();
+    void addProduct(ProductModel product) {
+      final idKey = product.id.trim();
+      final nameKey = product.name.trim().toLowerCase();
 
-        if (product.name.trim().isEmpty || _isLikelyId(product.name.trim())) {
-          return;
-        }
-
-        final dedupeKey = idKey.isNotEmpty ? idKey.toLowerCase() : nameKey;
-        if (dedupeKey.isEmpty || !seen.add(dedupeKey)) {
-          return;
-        }
-
-        suggestions.add(product);
+      if (product.name.trim().isEmpty || _isLikelyId(product.name.trim())) {
+        return;
       }
 
-      for (final product in [...trendingProducts, ...newProducts, ...offerProducts]) {
-        addProduct(product);
+      final dedupeKey = idKey.isNotEmpty ? idKey.toLowerCase() : nameKey;
+      if (dedupeKey.isEmpty || !seen.add(dedupeKey)) {
+        return;
       }
 
-      _searchSuggestions.assignAll(suggestions.take(20));
+      suggestions.add(product);
     }
 
-   /// Check if a string looks like an ID (MongoDB ObjectId, UUID, or similar)
-   bool _isLikelyId(String value) {
-     // MongoDB ObjectId pattern (24 hex characters)
-     if (RegExp(r'^[a-f0-9]{24}$', caseSensitive: false).hasMatch(value)) {
-       return true;
-     }
-     // UUID pattern
-     if (RegExp(r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$', caseSensitive: false).hasMatch(value)) {
-       return true;
-     }
-     // Generic numeric ID pattern (all digits)
-     if (RegExp(r'^\d+$').hasMatch(value)) {
-       return true;
-     }
-     return false;
-   }
+    for (final product in [
+      ...trendingProducts,
+      ...newProducts,
+      ...offerProducts,
+    ]) {
+      addProduct(product);
+    }
+
+    _fallbackSuggestions = suggestions.take(20).toList(growable: false);
+
+    if (_searchSuggestionQuery.value.trim().isEmpty) {
+      _searchSuggestions.assignAll(_fallbackSuggestions);
+    }
+  }
+
+  /// Check if a string looks like an ID (MongoDB ObjectId, UUID, or similar)
+  bool _isLikelyId(String value) {
+    // MongoDB ObjectId pattern (24 hex characters)
+    if (RegExp(r'^[a-f0-9]{24}$', caseSensitive: false).hasMatch(value)) {
+      return true;
+    }
+    // UUID pattern
+    if (RegExp(
+      r'^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$',
+      caseSensitive: false,
+    ).hasMatch(value)) {
+      return true;
+    }
+    // Generic numeric ID pattern (all digits)
+    if (RegExp(r'^\d+$').hasMatch(value)) {
+      return true;
+    }
+    return false;
+  }
 
   @override
   void onInit() {
     super.onInit();
     cartController = Get.find<CartController>();
+    _searchSuggestionWorker = debounce<String>(
+      _searchSuggestionQuery,
+      _fetchSearchSuggestions,
+      time: const Duration(milliseconds: 350),
+    );
     loadData();
     _loadUnreadNotifications();
     _requestLocationPermission();
@@ -146,7 +169,10 @@ class HomeController extends GetxController {
       }
 
       try {
-        offers = await _productRepository.getOfferProducts(limit: 10, minDiscount: 1);
+        offers = await _productRepository.getOfferProducts(
+          limit: 10,
+          minDiscount: 1,
+        );
       } catch (e) {
         AppLogger.warning('Failed to load offer products', e);
         offers = const [];
@@ -173,17 +199,19 @@ class HomeController extends GetxController {
         apiBanners = const [];
       }
 
-       trendingProducts.assignAll(trending.take(6));
-       newProducts.assignAll(newArrival.take(6));
-       offerProducts.assignAll(offers.take(6));
-       categories.assignAll(_normalizeCategories(apiCategories));
-       brands.assignAll(_normalizeBrands(apiBrands));
-       banners.assignAll(apiBanners.isEmpty ? _bannerFallbackImages : apiBanners);
+      trendingProducts.assignAll(trending.take(6));
+      newProducts.assignAll(newArrival.take(6));
+      offerProducts.assignAll(offers.take(6));
+      categories.assignAll(_normalizeCategories(apiCategories));
+      brands.assignAll(_normalizeBrands(apiBrands));
+      banners.assignAll(
+        apiBanners.isEmpty ? _bannerFallbackImages : apiBanners,
+      );
 
-       // Update search suggestions after loading all data
-       _updateSearchSuggestions();
+      // Update local fallback suggestions after loading all data.
+      _updateSearchSuggestions();
 
-       AppLogger.success('Home data loaded successfully');
+      AppLogger.success('Home data loaded successfully');
     } catch (e, stackTrace) {
       AppLogger.error('Failed to load home data', e, stackTrace);
     } finally {
@@ -191,9 +219,61 @@ class HomeController extends GetxController {
     }
   }
 
+  void onSearchTextChanged(String query) {
+    final normalizedQuery = query.trim();
+    _searchSuggestionQuery.value = normalizedQuery;
+
+    if (normalizedQuery.isEmpty) {
+      _searchSuggestionRequestId++;
+      isSearchSuggestionsLoading.value = false;
+      _searchSuggestions.assignAll(_fallbackSuggestions);
+    }
+  }
+
+  Future<void> _fetchSearchSuggestions(String query) async {
+    final normalizedQuery = query.trim();
+    if (normalizedQuery.isEmpty) {
+      return;
+    }
+
+    final requestId = ++_searchSuggestionRequestId;
+    isSearchSuggestionsLoading.value = true;
+    AppLogger.info('Search suggestions request', {'q': normalizedQuery});
+
+    try {
+      final products = await _productRepository.searchProducts(
+        normalizedQuery,
+        limit: 8,
+      );
+
+      if (requestId != _searchSuggestionRequestId) {
+        AppLogger.debug('Search suggestions stale response ignored', {
+          'q': normalizedQuery,
+        });
+        return;
+      }
+
+      _searchSuggestions.assignAll(products.take(8));
+      AppLogger.info('Search suggestions updated', {
+        'q': normalizedQuery,
+        'count': _searchSuggestions.length,
+      });
+    } catch (e, stackTrace) {
+      if (requestId == _searchSuggestionRequestId) {
+        _searchSuggestions.clear();
+      }
+      AppLogger.error('Search suggestions failed', e, stackTrace);
+    } finally {
+      if (requestId == _searchSuggestionRequestId) {
+        isSearchSuggestionsLoading.value = false;
+      }
+    }
+  }
+
   Future<void> _loadUnreadNotifications() async {
     try {
-      unreadNotificationCount.value = await _notificationRepository.getUnreadCount();
+      unreadNotificationCount.value = await _notificationRepository
+          .getUnreadCount();
     } catch (e) {
       unreadNotificationCount.value = 0;
       AppLogger.warning('Failed to load unread notification count', e);
@@ -255,7 +335,9 @@ class HomeController extends GetxController {
       }
 
       selectedHomeAddress.value = preferred;
-      locationText.value = preferred.details.isEmpty ? 'Choose delivery location' : preferred.details;
+      locationText.value = preferred.details.isEmpty
+          ? 'Choose delivery location'
+          : preferred.details;
     } catch (e, stackTrace) {
       hasLocationError.value = true;
       locationText.value = 'Location unavailable. Tap to choose';
@@ -267,11 +349,16 @@ class HomeController extends GetxController {
 
   /// Handle location tap to open address picker
   Future<void> onLocationTap() async {
-    final result = await Get.toNamed(AddressRoutes.addresses, arguments: {'pickerMode': true});
+    final result = await Get.toNamed(
+      AddressRoutes.addresses,
+      arguments: {'pickerMode': true},
+    );
 
     if (result is AddressModel) {
       selectedHomeAddress.value = result;
-      locationText.value = result.details.isEmpty ? 'Choose delivery location' : result.details;
+      locationText.value = result.details.isEmpty
+          ? 'Choose delivery location'
+          : result.details;
       hasLocationError.value = false;
     } else {
       await resolveHomeLocation();
@@ -280,27 +367,39 @@ class HomeController extends GetxController {
 
   /// Refresh data
   Future<void> onRefresh() async {
-    await Future.wait([loadData(), resolveHomeLocation(), _loadUnreadNotifications()]);
+    await Future.wait([
+      loadData(),
+      resolveHomeLocation(),
+      _loadUnreadNotifications(),
+    ]);
   }
 
   /// Navigate to category
   void onCategoryTap(String category) {
     AppLogger.debug('Category tapped: $category');
     // TODO: Navigate to category page
-    AppHelpers.showInfoSnackbar(message: 'Navigating to $category', title: 'Category');
+    AppHelpers.showInfoSnackbar(
+      message: 'Navigating to $category',
+      title: 'Category',
+    );
   }
 
-  List<Map<String, String>> _normalizeCategories(List<Map<String, dynamic>> source) {
+  List<Map<String, String>> _normalizeCategories(
+    List<Map<String, dynamic>> source,
+  ) {
     if (source.isEmpty) {
-      return List<Map<String, String>>.generate(_categoryFallbackImages.length, (index) {
-        final fallbackName = ['Pharma', 'Unani', 'Tablet', 'Capsule'][index];
-        return {
-          'id': fallbackName,
-          'name': fallbackName,
-          'query': fallbackName,
-          'image': _categoryFallbackImages[index],
-        };
-      });
+      return List<Map<String, String>>.generate(
+        _categoryFallbackImages.length,
+        (index) {
+          final fallbackName = ['Pharma', 'Unani', 'Tablet', 'Capsule'][index];
+          return {
+            'id': fallbackName,
+            'name': fallbackName,
+            'query': fallbackName,
+            'image': _categoryFallbackImages[index],
+          };
+        },
+      );
     }
 
     return source.asMap().entries.map((entry) {
@@ -308,7 +407,9 @@ class HomeController extends GetxController {
       final item = entry.value;
       final id = (item['_id'] ?? item['id'] ?? '').toString();
       final name = (item['name'] ?? 'Category').toString();
-      final image = _pickImage(item) ?? _categoryFallbackImages[index % _categoryFallbackImages.length];
+      final image =
+          _pickImage(item) ??
+          _categoryFallbackImages[index % _categoryFallbackImages.length];
       return {
         'id': id,
         'name': name,
@@ -318,13 +419,35 @@ class HomeController extends GetxController {
     }).toList();
   }
 
-  List<Map<String, String>> _normalizeBrands(List<Map<String, dynamic>> source) {
+  List<Map<String, String>> _normalizeBrands(
+    List<Map<String, dynamic>> source,
+  ) {
     if (source.isEmpty) {
       return const [
-        {'id': 'Incepta', 'name': 'Incepta Pharmaceu...', 'query': 'Incepta', 'image': 'assets/demo/company_1.png'},
-        {'id': 'ACME', 'name': 'ACME Pharmaceu...', 'query': 'ACME', 'image': 'assets/demo/company_2.png'},
-        {'id': 'Opsonin', 'name': 'Opsonin Pharmaceu...', 'query': 'Opsonin', 'image': 'assets/demo/company_3.png'},
-        {'id': 'Aristopharma', 'name': 'Aristopharma Pharmaceu...', 'query': 'Aristopharma', 'image': 'assets/demo/company_4.png'},
+        {
+          'id': 'Incepta',
+          'name': 'Incepta Pharmaceu...',
+          'query': 'Incepta',
+          'image': 'assets/demo/company_1.png',
+        },
+        {
+          'id': 'ACME',
+          'name': 'ACME Pharmaceu...',
+          'query': 'ACME',
+          'image': 'assets/demo/company_2.png',
+        },
+        {
+          'id': 'Opsonin',
+          'name': 'Opsonin Pharmaceu...',
+          'query': 'Opsonin',
+          'image': 'assets/demo/company_3.png',
+        },
+        {
+          'id': 'Aristopharma',
+          'name': 'Aristopharma Pharmaceu...',
+          'query': 'Aristopharma',
+          'image': 'assets/demo/company_4.png',
+        },
       ];
     }
 
@@ -333,7 +456,9 @@ class HomeController extends GetxController {
       final item = entry.value;
       final id = (item['_id'] ?? item['id'] ?? '').toString();
       final name = (item['name'] ?? 'Brand').toString();
-      final image = _pickImage(item) ?? _brandFallbackImages[index % _brandFallbackImages.length];
+      final image =
+          _pickImage(item) ??
+          _brandFallbackImages[index % _brandFallbackImages.length];
       return {
         'id': id,
         'name': name,
@@ -364,7 +489,10 @@ class HomeController extends GetxController {
   void onBrandTap(String brand) {
     AppLogger.debug('Brand tapped: $brand');
     // TODO: Navigate to brand page
-    AppHelpers.showInfoSnackbar(message: 'Navigating to $brand', title: 'Brand');
+    AppHelpers.showInfoSnackbar(
+      message: 'Navigating to $brand',
+      title: 'Brand',
+    );
   }
 
   void onNotificationTap() {
@@ -374,10 +502,14 @@ class HomeController extends GetxController {
   /// Handle search
   void onSearch(String query) {
     if (query.trim().isEmpty) {
-      AppHelpers.showInfoSnackbar(message: 'Please enter a search query', title: 'Search');
+      AppHelpers.showInfoSnackbar(
+        message: 'Please enter a search query',
+        title: 'Search',
+      );
       return;
     }
 
+    onSearchTextChanged('');
     AppLogger.debug('Search query: $query');
     Get.toNamed(
       Routes.PRODUCTS,
@@ -391,7 +523,7 @@ class HomeController extends GetxController {
 
   @override
   void onClose() {
-    // Clean up resources
+    _searchSuggestionWorker?.dispose();
     super.onClose();
   }
 }
