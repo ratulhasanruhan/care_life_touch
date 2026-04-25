@@ -310,14 +310,14 @@ class _SearchAndFilterBarState extends State<_SearchAndFilterBar> {
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(4),
                     borderSide: const BorderSide(
-                      color: Color(0xFFE8EAE8),
+                      color: Color(0xFF064E36),
                       width: 1,
                     ),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(4),
                     borderSide: const BorderSide(
-                      color: Color(0xFFE8EAE8),
+                      color: Color(0xFF064E36),
                       width: 1,
                     ),
                   ),

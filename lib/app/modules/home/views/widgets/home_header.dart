@@ -368,7 +368,7 @@ class _HomeHeaderState extends State<HomeHeader> {
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
-              color: Colors.white,
+              color: Color(0xFF01060F),
             ),
             decoration: InputDecoration(
               isDense: true,
@@ -395,7 +395,7 @@ class _HomeHeaderState extends State<HomeHeader> {
                 borderSide: BorderSide.none,
               ),
               hintText: 'Search Your Needs...',
-              fillColor: Colors.white.withValues(alpha: 0.1),
+              fillColor: Colors.white.withValues(alpha: 0.92),
               hintStyle: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -403,7 +403,7 @@ class _HomeHeaderState extends State<HomeHeader> {
               ),
               prefixIcon: const Icon(
                 Icons.search,
-                color: Color(0xFFA2A8AF),
+                color: Color(0xFF6E767E),
                 size: 20,
               ),
               suffixIcon: widget.isSearchingSuggestions
