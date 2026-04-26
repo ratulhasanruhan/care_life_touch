@@ -41,18 +41,20 @@ class HomeView extends GetView<HomeController> {
       body: Column(
         children: [
           // Custom Header
-          Obx(
-            () => HomeHeader(
-              locationText: controller.locationText.value,
-              isLocationLoading: controller.isResolvingLocation.value,
-              hasLocationError: controller.hasLocationError.value,
-              onLocationTap: controller.onLocationTap,
-              unreadNotificationCount: controller.unreadNotificationCount.value,
-              onNotificationTap: controller.onNotificationTap,
-              onSearch: controller.onSearch,
-              searchSuggestions: controller.searchSuggestions,
-            ),
-          ),
+           Obx(
+             () => HomeHeader(
+               locationText: controller.locationText.value,
+               isLocationLoading: controller.isResolvingLocation.value,
+               hasLocationError: controller.hasLocationError.value,
+               onLocationTap: controller.onLocationTap,
+               unreadNotificationCount: controller.unreadNotificationCount.value,
+               onNotificationTap: controller.onNotificationTap,
+               onSearch: controller.onSearch,
+               onSearchChanged: controller.onSearchTextChanged,
+               searchSuggestions: controller.searchSuggestions,
+               isSearchingSuggestions: controller.isSearchSuggestionsLoading.value,
+             ),
+           ),
 
           // Scrollable Content
           Expanded(
