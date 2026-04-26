@@ -227,72 +227,39 @@ class ProductCard extends StatelessWidget {
             isUltraCompact: isUltraCompact,
           );
 
-    if (isUltraCompact) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildPriceText(isCompact: isCompact),
-           Text(
-             product.moqDisplay,
-             style: TextStyle(
-               fontSize: 8,
-               fontWeight: FontWeight.w400,
-               color: const Color(0xB301060F),
-             ),
-             maxLines: 2,
-             softWrap: true,
-             overflow: TextOverflow.ellipsis,
-           ),
-          const SizedBox(height: 4),
-          Align(
-            alignment: Alignment.centerRight,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: action,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.end,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Price and MOQ
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildPriceText(isCompact: isCompact),
-               Text(
-                 product.moqDisplay,
-                 style: TextStyle(
-                   fontSize: isCompact ? 8 : 9,
-                   fontWeight: FontWeight.w400,
-                   color: const Color(0xB301060F),
-                 ),
-                 maxLines: 2,
-                 softWrap: true,
-                 overflow: TextOverflow.ellipsis,
-               ),
-            ],
-          ),
-        ),
-
-        const SizedBox(width: 4),
-
-        // Add to Bag / Quantity Button
-        Flexible(
-          child: Align(
-            alignment: Alignment.bottomRight,
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: action,
+        _buildPriceText(isCompact: isCompact),
+        const SizedBox(height: 4),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Text(
+                product.moqDisplay,
+                style: TextStyle(
+                  fontSize: isUltraCompact ? 9 : (isCompact ? 10 : 11),
+                  fontWeight: FontWeight.w400,
+                  color: const Color(0xB301060F),
+                ),
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
-          ),
+            const SizedBox(width: 6),
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: isUltraCompact ? 96 : (isCompact ? 112 : 128),
+              ),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerRight,
+                child: action,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -310,9 +277,9 @@ class ProductCard extends StatelessWidget {
         await cartController.addToCart(product, quantity: 1);
       },
       child: Container(
-        height: isUltraCompact ? 19 : (isCompact ? 20 : 22),
         padding: EdgeInsets.symmetric(
           horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+          vertical: isUltraCompact ? 2 : (isCompact ? 3 : 4),
         ),
         decoration: BoxDecoration(
           color: const Color(0xFF064E36),
@@ -324,7 +291,7 @@ class ProductCard extends StatelessWidget {
              Text(
                'Add to Bag',
                style: TextStyle(
-                 fontSize: isUltraCompact ? 8 : (isCompact ? 9 : 10),
+                 fontSize: isUltraCompact ? 10 : (isCompact ? 11 : 12),
                  fontWeight: FontWeight.w500,
                  color: Colors.white,
                ),
@@ -333,7 +300,7 @@ class ProductCard extends StatelessWidget {
             Icon(
               Icons.shopping_bag_outlined,
               color: Colors.white,
-              size: isUltraCompact ? 8 : (isCompact ? 9 : 10),
+              size: isUltraCompact ? 10 : (isCompact ? 11 : 12),
             ),
           ],
         ),
@@ -349,7 +316,9 @@ class ProductCard extends StatelessWidget {
     required bool isUltraCompact,
   }) {
     return Container(
-      height: isUltraCompact ? 19 : (isCompact ? 20 : 22),
+      padding: EdgeInsets.symmetric(
+        vertical: isUltraCompact ? 2 : (isCompact ? 3 : 4),
+      ),
       decoration: BoxDecoration(
         color: const Color(0xFF064E36),
         borderRadius: BorderRadius.circular(4),
@@ -366,7 +335,7 @@ class ProductCard extends StatelessWidget {
               child: Icon(
                 Icons.remove,
                 color: Colors.white,
-                size: isUltraCompact ? 9 : (isCompact ? 10 : 12),
+                size: isUltraCompact ? 10 : (isCompact ? 11 : 12),
               ),
             ),
           ),
@@ -377,7 +346,7 @@ class ProductCard extends StatelessWidget {
             child: Text(
               quantity.toString(),
               style: TextStyle(
-                fontSize: isUltraCompact ? 8 : (isCompact ? 9 : 10),
+                fontSize: isUltraCompact ? 10 : (isCompact ? 11 : 12),
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
               ),
@@ -392,7 +361,7 @@ class ProductCard extends StatelessWidget {
               child: Icon(
                 Icons.add,
                 color: Colors.white,
-                size: isUltraCompact ? 9 : (isCompact ? 10 : 12),
+                size: isUltraCompact ? 10 : (isCompact ? 11 : 12),
               ),
             ),
           ),
@@ -410,7 +379,7 @@ class ProductCard extends StatelessWidget {
         Text(
           '৳${_money(product.price)}',
           style: TextStyle(
-            fontSize: isCompact ? 11 : 12,
+            fontSize: isCompact ? 15 : 16,
             fontWeight: FontWeight.w700,
             color: const Color(0xFF064E36),
           ),
@@ -423,7 +392,7 @@ class ProductCard extends StatelessWidget {
                maxLines: 1,
                overflow: TextOverflow.ellipsis,
                style: TextStyle(
-                 fontSize: isCompact ? 10 : 11,
+                 fontSize: isCompact ? 14 : 15,
                  fontWeight: FontWeight.w400,
                  color: const Color(0xFF8D949D),
                  decoration: TextDecoration.lineThrough,

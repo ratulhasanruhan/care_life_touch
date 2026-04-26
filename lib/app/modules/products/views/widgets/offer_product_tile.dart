@@ -137,7 +137,7 @@ class OfferProductTile extends StatelessWidget {
       },
       child: Container(
         width: 68,
-        height: 22,
+        height: 26,
         decoration: BoxDecoration(
           color: const Color(0xFF064E36),
           borderRadius: BorderRadius.circular(4),
@@ -146,7 +146,7 @@ class OfferProductTile extends StatelessWidget {
           child: Text(
             'Add to Bag',
             style: TextStyle(
-              fontSize: 8,
+              fontSize: 10,
               fontWeight: FontWeight.w500,
               color: Colors.white,
             ),
