@@ -97,7 +97,7 @@ class _FakeProductRepository extends ProductRepository {
       moq: '1 Box',
       imagePath: 'assets/demo/product_1.png',
       hasOffer: true,
-      offerLabel: '20 OFF',
+      offerLabel: '20% OFF',
     ),
     ProductModel(
       id: 'p2',

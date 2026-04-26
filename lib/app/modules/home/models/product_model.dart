@@ -234,7 +234,7 @@ class ProductModel {
           (discountValue is num ? discountValue > 0 : false) ||
           (comparePrice != null && comparePrice > finalPrice + 0.0001),
       offerLabel: (discountValue is num && discountValue > 0)
-          ? '${discountValue.toInt()} OFF'
+          ? '${discountValue.toInt()}% OFF'
           : json['offerLabel'],
     );
   }

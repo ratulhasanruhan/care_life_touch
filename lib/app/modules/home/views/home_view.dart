@@ -12,18 +12,15 @@ import 'all_brands_view.dart';
 import '../../products/models/products_query.dart';
 import '../../../routes/app_pages.dart';
 
-SliverGridDelegateWithFixedCrossAxisCount _responsiveGridDelegate(
-  double maxWidth,
-) {
+SliverGridDelegateWithFixedCrossAxisCount _responsiveGridDelegate(double maxWidth) {
   const spacing = 12.0;
   const crossAxisCount = 2;
-  final cardWidth =
-      (maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
+  final cardWidth = (maxWidth - (crossAxisCount - 1) * spacing) / crossAxisCount;
   final cardHeight = cardWidth < 150
       ? 232.0
       : cardWidth < 190
-      ? 246.0
-      : 262.0;
+          ? 246.0
+          : 262.0;
 
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: crossAxisCount,
@@ -53,9 +50,6 @@ class HomeView extends GetView<HomeController> {
               unreadNotificationCount: controller.unreadNotificationCount.value,
               onNotificationTap: controller.onNotificationTap,
               onSearch: controller.onSearch,
-              onSearchChanged: controller.onSearchTextChanged,
-              isSearchingSuggestions:
-                  controller.isSearchSuggestionsLoading.value,
               searchSuggestions: controller.searchSuggestions,
             ),
           ),
@@ -85,13 +79,9 @@ class HomeView extends GetView<HomeController> {
                               categories: controller.categories,
                               onCategoryTap: (category) {
                                 final categoryTitle =
-                                    (category['name'] ?? 'Category')
-                                        .toString()
-                                        .trim();
+                                    (category['name'] ?? 'Category').toString().trim();
                                 final categoryKeyword =
-                                    (category['query'] ?? categoryTitle)
-                                        .toString()
-                                        .trim();
+                                    (category['query'] ?? categoryTitle).toString().trim();
                                 Get.toNamed(
                                   Routes.PRODUCTS,
                                   arguments: ProductsQuery(
@@ -148,13 +138,9 @@ class HomeView extends GetView<HomeController> {
                                   final query = (item['query'] ?? '').trim();
                                   final name = (item['name'] ?? '').trim();
                                   final selectedQuery =
-                                      (brandValue['query'] ?? '')
-                                          .toString()
-                                          .trim();
+                                      (brandValue['query'] ?? '').toString().trim();
                                   final selectedName =
-                                      (brandValue['name'] ?? '')
-                                          .toString()
-                                          .trim();
+                                      (brandValue['name'] ?? '').toString().trim();
                                   if (selectedQuery == query ||
                                       selectedQuery == name ||
                                       selectedName == query ||
@@ -165,15 +151,11 @@ class HomeView extends GetView<HomeController> {
                                 }
 
                                 final brandTitle =
-                                    (matchedBrand?['name'] ??
-                                            brandValue['name'] ??
-                                            'Brand')
+                                    (matchedBrand?['name'] ?? brandValue['name'] ?? 'Brand')
                                         .toString()
                                         .trim();
                                 final brandKeyword =
-                                    (matchedBrand?['query'] ??
-                                            brandValue['query'] ??
-                                            brandTitle)
+                                    (matchedBrand?['query'] ?? brandValue['query'] ?? brandTitle)
                                         .toString()
                                         .trim();
 
@@ -246,12 +228,8 @@ class HomeView extends GetView<HomeController> {
     return CategoriesList(
       categories: controller.categories,
       onCategoryTap: (category) {
-        final categoryTitle = (category['name'] ?? 'Category')
-            .toString()
-            .trim();
-        final categoryKeyword = (category['query'] ?? categoryTitle)
-            .toString()
-            .trim();
+        final categoryTitle = (category['name'] ?? 'Category').toString().trim();
+        final categoryKeyword = (category['query'] ?? categoryTitle).toString().trim();
         Get.toNamed(
           Routes.PRODUCTS,
           arguments: ProductsQuery(
@@ -282,7 +260,9 @@ class HomeView extends GetView<HomeController> {
           gridDelegate: _responsiveGridDelegate(constraints.maxWidth),
           itemCount: products.length,
           itemBuilder: (context, index) {
-            return ProductCard(product: products[index]);
+            return ProductCard(
+              product: products[index],
+            );
           },
         ),
       ),
@@ -361,16 +341,20 @@ class HomeView extends GetView<HomeController> {
       return Image.network(
         imagePath,
         fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) =>
-            const Icon(Icons.image_not_supported, color: Color(0xFFE8EAE8)),
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          Icons.image_not_supported,
+          color: Color(0xFFE8EAE8),
+        ),
       );
     }
 
     return Image.asset(
       imagePath,
       fit: BoxFit.contain,
-      errorBuilder: (context, error, stackTrace) =>
-          const Icon(Icons.image_not_supported, color: Color(0xFFE8EAE8)),
+      errorBuilder: (context, error, stackTrace) => const Icon(
+        Icons.image_not_supported,
+        color: Color(0xFFE8EAE8),
+      ),
     );
   }
 }
@@ -502,3 +486,4 @@ class _SkeletonBox extends StatelessWidget {
     );
   }
 }
+

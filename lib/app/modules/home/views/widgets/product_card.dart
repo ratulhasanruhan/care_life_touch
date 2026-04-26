@@ -232,17 +232,17 @@ class ProductCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _buildPriceText(isCompact: isCompact),
-          Text(
-            product.moqDisplay,
-            style: TextStyle(
-              fontSize: 7,
-              fontWeight: FontWeight.w400,
-              color: const Color(0xB301060F),
-            ),
-            maxLines: 2,
-            softWrap: true,
-            overflow: TextOverflow.ellipsis,
-          ),
+           Text(
+             product.moqDisplay,
+             style: TextStyle(
+               fontSize: 8,
+               fontWeight: FontWeight.w400,
+               color: const Color(0xB301060F),
+             ),
+             maxLines: 2,
+             softWrap: true,
+             overflow: TextOverflow.ellipsis,
+           ),
           const SizedBox(height: 4),
           Align(
             alignment: Alignment.centerRight,
@@ -266,17 +266,17 @@ class ProductCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildPriceText(isCompact: isCompact),
-              Text(
-                product.moqDisplay,
-                style: TextStyle(
-                  fontSize: isCompact ? 7 : 8,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xB301060F),
-                ),
-                maxLines: 2,
-                softWrap: true,
-                overflow: TextOverflow.ellipsis,
-              ),
+               Text(
+                 product.moqDisplay,
+                 style: TextStyle(
+                   fontSize: isCompact ? 8 : 9,
+                   fontWeight: FontWeight.w400,
+                   color: const Color(0xB301060F),
+                 ),
+                 maxLines: 2,
+                 softWrap: true,
+                 overflow: TextOverflow.ellipsis,
+               ),
             ],
           ),
         ),
@@ -321,14 +321,14 @@ class ProductCard extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Add to Bag',
-              style: TextStyle(
-                fontSize: isUltraCompact ? 6.5 : (isCompact ? 7 : 8),
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
+             Text(
+               'Add to Bag',
+               style: TextStyle(
+                 fontSize: isUltraCompact ? 8 : (isCompact ? 9 : 10),
+                 fontWeight: FontWeight.w500,
+                 color: Colors.white,
+               ),
+             ),
             SizedBox(width: isUltraCompact ? 1.5 : (isCompact ? 2 : 4)),
             Icon(
               Icons.shopping_bag_outlined,
@@ -417,19 +417,19 @@ class ProductCard extends StatelessWidget {
         ),
         if (hasCompare) ...[
           SizedBox(width: isCompact ? 2 : 4),
-          Flexible(
-            child: Text(
-              '৳${_money(product.maxPrice!)}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: isCompact ? 9 : 10,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF8D949D),
-                decoration: TextDecoration.lineThrough,
-              ),
-            ),
-          ),
+           Flexible(
+             child: Text(
+               '৳${_money(product.maxPrice!)}',
+               maxLines: 1,
+               overflow: TextOverflow.ellipsis,
+               style: TextStyle(
+                 fontSize: isCompact ? 10 : 11,
+                 fontWeight: FontWeight.w400,
+                 color: const Color(0xFF8D949D),
+                 decoration: TextDecoration.lineThrough,
+               ),
+             ),
+           ),
         ],
       ],
     );
