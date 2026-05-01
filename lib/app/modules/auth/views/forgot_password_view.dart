@@ -77,7 +77,7 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                             }
 
                             OTPVerificationDialog.show(
-                              email: controller.emailController.text,
+                              identifier: controller.emailController.text,
                               onVerify: (pin) {
                                 controller.verifyPasswordResetOTP(pin);
                               },
@@ -91,6 +91,11 @@ class ForgotPasswordView extends GetView<ForgotPasswordController> {
                               resendTimer: controller.resendTimer,
                               isLoading: controller.isLoading,
                               otpLength: 6,
+                              title: 'Enter verification code',
+                              subtitle:
+                                  'Enter the 6-digit code sent we sent to',
+                              showIdentifier: true,
+                              showResendButton: true,
                             );
                           },
                     isLoading: controller.isLoading.value,

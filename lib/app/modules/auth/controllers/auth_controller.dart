@@ -234,6 +234,13 @@ class AuthController extends GetxController {
       isLoading.value = true;
       AppLogger.info('Registering user: ${emailController.text}');
 
+      final address = await _ensureRegistrationAddress();
+      if (address == null || address.trim().isEmpty) {
+        throw const ApiException(
+          'Location is required for registration. Please try again.',
+        );
+      }
+
       final uploadedDrugLicense = drugLicenseImage.value == null
           ? null
           : await _authRepository.uploadImage(drugLicenseImage.value!);
@@ -261,7 +268,10 @@ class AuthController extends GetxController {
         tradeLicense: uploadedTradeLicense,
         nidImage: uploadedNid,
         shopImages: uploadedShopImages.isEmpty ? null : uploadedShopImages,
+        address: address,
       );
+
+      AppLogger.info('Register API response: $response');
 
       _pendingAccountId = _extractAccountId(response);
       if (_pendingAccountId == null || _pendingAccountId!.isEmpty) {
@@ -286,7 +296,7 @@ class AuthController extends GetxController {
           ? phoneController.text.trim()
           : emailController.text.trim();
 
-      await _showRegistrationLocationModal(
+      await startRegistrationOtpAfterAddress(
         accountId: _pendingAccountId!,
         identifier: identifier,
       );
@@ -413,11 +423,8 @@ class AuthController extends GetxController {
     _showOtpDialog(identifier: identifier);
   }
 
-  Future<void> _showRegistrationLocationModal({
-    required String accountId,
-    required String identifier,
-  }) async {
-    await Get.dialog<void>(
+  Future<String?> _showRegistrationLocationModal() async {
+    return await Get.dialog<String?>(
       Obx(
         () => Dialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -482,14 +489,16 @@ class AuthController extends GetxController {
                     onPressed: isResolvingRegistrationLocation.value
                         ? null
                         : () async {
-                            await _resolveAndCacheRegistrationLocation();
-                            if (Get.isDialogOpen ?? false) {
-                              Get.back();
+                            final address = await _resolveAndCacheRegistrationLocation();
+                            if (address == null || address.trim().isEmpty) {
+                              _showError(
+                                'Unable to detect your location. Please try again.',
+                              );
+                              return;
                             }
-                            await startRegistrationOtpAfterAddress(
-                              accountId: accountId,
-                              identifier: identifier,
-                            );
+                            if (Get.isDialogOpen ?? false) {
+                              Get.back(result: address);
+                            }
                           },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF064E36),
@@ -524,9 +533,50 @@ class AuthController extends GetxController {
     );
   }
 
-  Future<void> _resolveAndCacheRegistrationLocation() async {
+  String? _readCachedRegistrationAddress() {
+    final cachedLocationJson = _storage.read<String>(
+      AppConstants.keyPendingRegistrationLocation,
+    );
+
+    if (cachedLocationJson == null || cachedLocationJson.trim().isEmpty) {
+      return null;
+    }
+
+    try {
+      final decoded = jsonDecode(cachedLocationJson);
+      if (decoded is Map) {
+        final address = decoded['address']?.toString().trim();
+        if (address != null && address.isNotEmpty && address.toLowerCase() != 'null') {
+          return address;
+        }
+
+        final latitude = decoded['latitude']?.toString().trim();
+        final longitude = decoded['longitude']?.toString().trim();
+        if ((latitude ?? '').isNotEmpty && (longitude ?? '').isNotEmpty) {
+          return '$latitude, $longitude';
+        }
+      } else if (decoded is String && decoded.trim().isNotEmpty) {
+        return decoded.trim();
+      }
+    } catch (_) {
+      // Fall back to the raw cached value when decoding fails.
+    }
+
+    return cachedLocationJson.trim();
+  }
+
+  Future<String?> _ensureRegistrationAddress() async {
+    final cachedAddress = _readCachedRegistrationAddress();
+    if (cachedAddress != null && cachedAddress.isNotEmpty) {
+      return cachedAddress;
+    }
+
+    return await _showRegistrationLocationModal();
+  }
+
+  Future<String?> _resolveAndCacheRegistrationLocation() async {
     if (isResolvingRegistrationLocation.value) {
-      return;
+      return _readCachedRegistrationAddress();
     }
 
     isResolvingRegistrationLocation.value = true;
@@ -538,20 +588,23 @@ class AuthController extends GetxController {
 
       if (permission == LocationPermission.denied ||
           permission == LocationPermission.deniedForever) {
-        return;
+        return null;
       }
 
       final position = await Geolocator.getCurrentPosition(
         locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
       );
 
-      String resolvedAddress = '';
+      String resolvedAddress = '${position.latitude}, ${position.longitude}';
       final geocode = await MapService.reverseGeocode(
         latitude: position.latitude,
         longitude: position.longitude,
       );
       if (geocode != null) {
-        resolvedAddress = (geocode['display_name'] ?? '').toString().trim();
+        final displayName = (geocode['display_name'] ?? '').toString().trim();
+        if (displayName.isNotEmpty) {
+          resolvedAddress = displayName;
+        }
       }
 
       await _storage.write(
@@ -563,8 +616,11 @@ class AuthController extends GetxController {
           'timestamp': DateTime.now().millisecondsSinceEpoch,
         }),
       );
+
+      return resolvedAddress;
     } catch (error) {
       AppLogger.warning('Failed to resolve registration location', error);
+      return null;
     } finally {
       isResolvingRegistrationLocation.value = false;
     }
@@ -664,18 +720,18 @@ class AuthController extends GetxController {
   void _showOtpDialog({required String identifier}) {
     Get.dialog(
       OTPVerificationDialog(
-        email: identifier,
+        identifier: identifier,
         onVerify: (pin) async {
           otpController.text = pin;
           await verifyRegistrationOTP();
         },
-        onResend: () async {
-          otpController.clear();
-          await resendOTP();
-        },
         resendTimer: resendTimer,
         isLoading: isLoading,
         otpLength: 6,
+        title: 'Enter OTP',
+        subtitle: 'Enter the OTP provided by admin to complete registration.',
+        showResendButton: false,
+        showIdentifier: false,
       ),
       barrierDismissible: false,
     );
@@ -713,7 +769,7 @@ class AuthController extends GetxController {
           return;
         }
 
-        await _showRegistrationLocationModal(
+        await startRegistrationOtpAfterAddress(
           accountId: pendingRegistrationAccountId,
           identifier: pendingRegistrationIdentifier,
         );

@@ -20,49 +20,60 @@ import '../core/values/app_colors.dart';
 /// ```dart
 /// // In Registration Flow
 /// OTPVerificationDialog.show(
-///   email: emailController.text,
+///   identifier: emailController.text,
 ///   onVerify: (pin) async {
 ///     await authController.verifyRegistrationOTP(pin);
 ///   },
-///   onResend: () => authController.resendOTP(),
-///   onEdit: () {
-///     Get.back();
-///     // Navigate back to email input
-///   },
 ///   resendTimer: authController.resendTimer,
 ///   isLoading: authController.isLoading,
+///   title: 'Enter OTP',
+///   subtitle: 'Enter the OTP provided by admin to complete registration.',
+///   showResendButton: false,
 ///   otpLength: 6,
 /// );
 ///
 /// // In Forgot Password Flow
 /// OTPVerificationDialog.show(
-///   email: forgotPasswordEmail,
+///   identifier: forgotPasswordEmail,
 ///   onVerify: (pin) async {
 ///     await passwordController.verifyResetOTP(pin);
 ///   },
 ///   onResend: () => passwordController.resendResetOTP(),
+///   onEdit: () {
+///     Get.back();
+///     // Navigate back to phone/email input
+///   },
 ///   resendTimer: passwordController.otpTimer,
 ///   isLoading: passwordController.isLoading,
+///   showIdentifier: true,
 /// );
 /// ```
 class OTPVerificationDialog extends StatelessWidget {
-  final String email;
+  final String identifier;
   final Function(String) onVerify;
-  final VoidCallback onResend;
+  final VoidCallback? onResend;
   final VoidCallback? onEdit;
   final RxInt resendTimer;
   final RxBool isLoading;
   final int otpLength;
+  final String title;
+  final String subtitle;
+  final bool showResendButton;
+  final bool showIdentifier;
 
   const OTPVerificationDialog({
     super.key,
-    required this.email,
+    required this.identifier,
     required this.onVerify,
-    required this.onResend,
+    this.onResend,
     this.onEdit,
     required this.resendTimer,
     required this.isLoading,
     this.otpLength = 6,
+    this.title = 'Enter verification code',
+    this.subtitle = 'Care Life Touch will contact you for your OTP.',
+    this.showResendButton = true,
+    this.showIdentifier = false,
   });
 
   @override
@@ -104,9 +115,9 @@ class OTPVerificationDialog extends StatelessWidget {
             const SizedBox(height: 16),
 
             // Title
-            const Text(
-              'Enter verification code',
-              style: TextStyle(
+            Text(
+              title,
+              style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -116,9 +127,9 @@ class OTPVerificationDialog extends StatelessWidget {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            const Text(
-              'Care Life Touch will contact you for your OTP.',
-              style: TextStyle(
+            Text(
+              subtitle,
+              style: const TextStyle(
                 fontFamily: 'DM Sans',
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
@@ -127,6 +138,39 @@ class OTPVerificationDialog extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
+            if (showIdentifier && identifier.trim().isNotEmpty) ...[
+              const SizedBox(height: 8),
+              Text(
+                identifier.trim(),
+                style: const TextStyle(
+                  fontFamily: 'DM Sans',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF01060F),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+            if (onEdit != null && showIdentifier) ...[
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: onEdit,
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(0, 0),
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                child: const Text(
+                  'Edit',
+                  style: TextStyle(
+                    fontFamily: 'DM Sans',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
             const SizedBox(height: 32),
 
             // OTP Input using Pinput
@@ -197,37 +241,38 @@ class OTPVerificationDialog extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
-            // Resend Code Button (No Timer)
-            Obx(
-              () => resendTimer.value == 0
-                  ? TextButton(
-                      onPressed: onResend,
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: const Text(
-                        'Tap to resend OTP',
-                        style: TextStyle(
-                          fontFamily: 'DM Sans',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    )
-                  : const Text(
-                      'Resend OTP',
+            if (showResendButton) ...[
+              // Resend Code Button with countdown
+              Obx(
+                () {
+                  final canResend = resendTimer.value == 0 && onResend != null;
+                  final isBusy = isLoading.value;
+                  final label = resendTimer.value == 0
+                      ? 'Tap to resend OTP'
+                      : 'Resend Code in ${resendTimer.value}s';
+
+                  return TextButton(
+                    onPressed: canResend && !isBusy ? onResend : null,
+                    style: TextButton.styleFrom(
+                      padding: EdgeInsets.zero,
+                      minimumSize: const Size(0, 0),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    ),
+                    child: Text(
+                      label,
                       style: TextStyle(
                         fontFamily: 'DM Sans',
                         fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        height: 1.43,
-                        color: Color.fromRGBO(1, 6, 15, 0.7),
+                        fontWeight:
+                            canResend && !isBusy ? FontWeight.w500 : FontWeight.w400,
+                        color:
+                            canResend && !isBusy ? AppColors.primary : const Color.fromRGBO(1, 6, 15, 0.7),
                       ),
                     ),
-            ),
+                  );
+                },
+              ),
+            ],
           ],
         ),
       ),
@@ -236,23 +281,31 @@ class OTPVerificationDialog extends StatelessWidget {
 
   /// Static method to show the dialog
   static Future<void> show({
-    required String email,
+    required String identifier,
     required Function(String) onVerify,
-    required VoidCallback onResend,
+    VoidCallback? onResend,
     VoidCallback? onEdit,
     required RxInt resendTimer,
     required RxBool isLoading,
     int otpLength = 6,
+    String title = 'Enter verification code',
+    String subtitle = 'Care Life Touch will contact you for your OTP.',
+    bool showResendButton = true,
+    bool showIdentifier = false,
   }) {
     return Get.dialog(
       OTPVerificationDialog(
-        email: email,
+        identifier: identifier,
         onVerify: onVerify,
         onResend: onResend,
         onEdit: onEdit,
         resendTimer: resendTimer,
         isLoading: isLoading,
         otpLength: otpLength,
+        title: title,
+        subtitle: subtitle,
+        showResendButton: showResendButton,
+        showIdentifier: showIdentifier,
       ),
       barrierDismissible: false,
     );

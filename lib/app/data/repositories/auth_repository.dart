@@ -50,6 +50,7 @@ class AuthRepository {
     String? tradeLicense,
     String? nidImage,
     List<String>? shopImages,
+    String? address,
   }) async {
     final response = await _api.postData(
       '/register-buyer',
@@ -68,6 +69,7 @@ class AuthRepository {
         if (nidImage != null && nidImage.isNotEmpty) 'nidImage': nidImage,
         if (shopImages != null && shopImages.isNotEmpty)
           'shopImages': shopImages,
+        if (address != null && address.trim().isNotEmpty) 'address': address.trim(),
       },
     );
 
