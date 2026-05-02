@@ -150,12 +150,28 @@ class _AddToCartModalState extends State<AddToCartModal> {
                       const SizedBox(height: 4),
 
                       // Price
-                      Text(
-                        _buildPriceDisplay(selectedPrice, selectedComparePrice),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF064E36),
+                      Text.rich(
+                        TextSpan(
+                          text: '৳${_formatMoney(selectedPrice)}',
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF064E36),
+                          ),
+                          children: [
+                            if (selectedComparePrice != null &&
+                                selectedComparePrice > selectedPrice + 0.0001)
+                              TextSpan(
+                                text: '  ৳${_formatMoney(selectedComparePrice)}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w400,
+                                  color: Color(0xFF9AA3A8),
+                                  decoration: TextDecoration.lineThrough,
+                                  decorationColor: Color(0xFF9AA3A8),
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ],
@@ -476,13 +492,6 @@ class _AddToCartModalState extends State<AddToCartModal> {
     return widget.product.variants.first;
   }
 
-  String _buildPriceDisplay(double price, double? comparePrice) {
-    final base = '৳${_formatMoney(price)}';
-    if (comparePrice != null && comparePrice > price + 0.0001) {
-      return '$base-৳${_formatMoney(comparePrice)}';
-    }
-    return base;
-  }
 
   String _formatMoney(double value) {
     return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
