@@ -10,6 +10,7 @@ import '../../../core/utils/helpers.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../data/models/api_exception.dart';
 import '../../../data/providers/storage_provider.dart';
+import '../../../data/repositories/address_repository.dart';
 import '../../../data/repositories/auth_repository.dart';
 import '../../../data/repositories/page_repository.dart';
 import '../../../routes/app_pages.dart';
@@ -356,6 +357,9 @@ class AuthController extends GetxController {
       }
 
       await _storage.saveLastLoginIdentifier(identifier);
+
+      await Get.find<AddressRepository>()
+          .ensureBootstrapAddressFromRegistrationCache(_storage);
 
       Get.offAllNamed(Routes.HOME);
     } catch (e, stackTrace) {

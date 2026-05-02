@@ -184,6 +184,8 @@ class StorageService extends GetxService {
     await remove(AppConstants.keyUserRole);
     await removePendingOTP();
     await removePendingRegistration();
+    await remove(AppConstants.keyPendingRegistrationLocation);
+    await remove(AppConstants.keyRegistrationAddressBootstrapCompleted);
   }
 
   /// Save pending OTP state (accountId waiting for OTP verification)

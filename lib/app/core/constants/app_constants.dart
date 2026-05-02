@@ -35,6 +35,9 @@ class AppConstants {
   static const String keyPendingOtp = 'pending_otp';
   static const String keyPendingRegistration = 'pending_registration';
   static const String keyPendingRegistrationLocation = 'pending_registration_location';
+  /// One-shot: registration-location → default address bootstrap has finished (success or nothing to do).
+  static const String keyRegistrationAddressBootstrapCompleted =
+      'registration_address_bootstrap_completed';
 
   // Validation
   static const int minPasswordLength = 6;
