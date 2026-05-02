@@ -26,51 +26,76 @@ class ProductCard extends StatelessWidget {
           final isCompact = constraints.maxWidth < 170;
           final imageHeight = (constraints.maxWidth * 0.74).clamp(108.0, 148.0);
           final contentPadding = isCompact ? 6.0 : 8.0;
-          final titleFontSize = isCompact ? 11.0 : 12.0;
+          // Match primary price text size (see _buildPriceText).
+          final headlineFontSize = isCompact ? 15.0 : 16.0;
+          final genericFontSize = isCompact ? 11.0 : 12.0;
 
-          return Container(
-            clipBehavior: Clip.antiAlias,
+          return DecoratedBox(
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(color: const Color(0xFFE8EAE8)),
               borderRadius: BorderRadius.circular(4),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Product Image with Badge
-                _buildProductImage(
-                  imageHeight: imageHeight,
-                  isCompact: isCompact,
-                ),
-
-                // Product Details
-                Expanded(
-                  child: Padding(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildProductImage(
+                    imageHeight: imageHeight,
+                    isCompact: isCompact,
+                  ),
+                  Padding(
                     padding: EdgeInsets.all(contentPadding),
                     child: Column(
+                      mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Brand and Rating
-                        _buildBrandAndRating(isCompact: isCompact),
-
+                        _buildBrandAndRating(
+                          isCompact: isCompact,
+                          headlineFontSize: headlineFontSize,
+                        ),
                         SizedBox(height: isCompact ? 1 : 2),
-
-                        // Product Name
                         Text(
                           product.name,
                           style: TextStyle(
-                            fontSize: titleFontSize,
+                            fontSize: headlineFontSize,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF191930),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-
-                        const Spacer(),
-
-                        // Price and Add to Bag Button
+                        if (product.genericStrengthSubtitle != null) ...[
+                          SizedBox(height: isCompact ? 2 : 3),
+                          Text(
+                            product.genericStrengthSubtitle!,
+                            style: TextStyle(
+                              fontSize: genericFontSize,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xB301060F),
+                              height: 1.25,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        if (product.cardShortDescription != null) ...[
+                          SizedBox(height: isCompact ? 2 : 3),
+                          Text(
+                            product.cardShortDescription!,
+                            style: TextStyle(
+                              fontSize: genericFontSize,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0x8C01060F),
+                              height: 1.35,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                        SizedBox(height: isCompact ? 6 : 8),
                         Obx(
                           () => _buildPriceAndButton(
                             cartController,
@@ -81,8 +106,8 @@ class ProductCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -169,38 +194,50 @@ class ProductCard extends StatelessWidget {
   }
 
   /// Build brand name and rating row
-  Widget _buildBrandAndRating({required bool isCompact}) {
+  Widget _buildBrandAndRating({
+    required bool isCompact,
+    required double headlineFontSize,
+  }) {
+    // Rating visually prominent — larger than generic/subtitle text.
+    final ratingStarSize = isCompact ? 18.0 : 20.0;
+    final ratingTextSize = isCompact ? 15.0 : 16.0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Expanded(
           child: Text(
             product.brand,
             style: TextStyle(
-              fontSize: isCompact ? 9 : 10,
+              fontSize: headlineFontSize,
               fontWeight: FontWeight.w400,
               color: const Color(0xB301060F),
             ),
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        Row(
-          children: [
-            Icon(
-              Icons.star,
-              color: const Color(0xFFF1B71B),
-              size: isCompact ? 10 : 12,
-            ),
-            SizedBox(width: isCompact ? 1 : 2),
-            Text(
-              product.rating.toString(),
-              style: TextStyle(
-                fontSize: isCompact ? 9 : 10,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF01060F),
+        Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.star_rounded,
+                color: const Color(0xFFF1B71B),
+                size: ratingStarSize,
               ),
-            ),
-          ],
+              SizedBox(width: isCompact ? 2 : 3),
+              Text(
+                product.rating.toString(),
+                style: TextStyle(
+                  fontSize: ratingTextSize,
+                  fontWeight: FontWeight.w600,
+                  color: const Color(0xFF01060F),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -265,44 +302,45 @@ class ProductCard extends StatelessWidget {
     );
   }
 
-  /// Build add to cart button
+  /// Add to cart — original compact size; [InkWell] for splash / reliable tap handling.
   Widget _buildAddToCartButton(
     CartController cartController, {
     required bool isCompact,
     required bool isUltraCompact,
   }) {
-    return GestureDetector(
-      onTap: () async {
-        // Add to cart without showing snackbar - just update state
-        await cartController.addToCart(product, quantity: 1);
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(
-          horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
-          vertical: isUltraCompact ? 2 : (isCompact ? 3 : 4),
-        ),
-        decoration: BoxDecoration(
-          color: const Color(0xFF064E36),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-             Text(
-               'Add to Bag',
-               style: TextStyle(
-                 fontSize: isUltraCompact ? 10 : (isCompact ? 11 : 12),
-                 fontWeight: FontWeight.w500,
-                 color: Colors.white,
-               ),
-             ),
-            SizedBox(width: isUltraCompact ? 1.5 : (isCompact ? 2 : 4)),
-            Icon(
-              Icons.shopping_bag_outlined,
-              color: Colors.white,
-              size: isUltraCompact ? 10 : (isCompact ? 11 : 12),
-            ),
-          ],
+    return Material(
+      color: const Color(0xFF064E36),
+      borderRadius: BorderRadius.circular(4),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () async {
+          await cartController.addToCart(product, quantity: 1);
+        },
+        borderRadius: BorderRadius.circular(4),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: isUltraCompact ? 3 : (isCompact ? 4 : 6),
+            vertical: isUltraCompact ? 2 : (isCompact ? 3 : 4),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Add to Bag',
+                style: TextStyle(
+                  fontSize: isUltraCompact ? 10 : (isCompact ? 11 : 12),
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(width: isUltraCompact ? 1.5 : (isCompact ? 2 : 4)),
+              Icon(
+                Icons.shopping_bag_outlined,
+                color: Colors.white,
+                size: isUltraCompact ? 10 : (isCompact ? 11 : 12),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -426,5 +464,61 @@ class ProductCard extends StatelessWidget {
     }
 
     return null;
+  }
+}
+
+/// Two-column layout for [ProductCard]s — same card widget; row height follows the taller item.
+class ProductCardsTwoColumn extends StatelessWidget {
+  const ProductCardsTwoColumn({
+    super.key,
+    required this.products,
+    this.spacing = 12,
+    this.padding = EdgeInsets.zero,
+  });
+
+  final List<ProductModel> products;
+  final double spacing;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+
+    final rows = (products.length + 1) ~/ 2;
+    final halfGap = spacing / 2;
+
+    return Padding(
+      padding: padding,
+      child: Table(
+        defaultVerticalAlignment: TableCellVerticalAlignment.top,
+        columnWidths: const {
+          0: FlexColumnWidth(1),
+          1: FlexColumnWidth(1),
+        },
+        children: [
+          for (var row = 0; row < rows; row++)
+            TableRow(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(
+                    right: halfGap,
+                    bottom: row < rows - 1 ? spacing : 0,
+                  ),
+                  child: ProductCard(product: products[row * 2]),
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: halfGap,
+                    bottom: row < rows - 1 ? spacing : 0,
+                  ),
+                  child: row * 2 + 1 < products.length
+                      ? ProductCard(product: products[row * 2 + 1])
+                      : const SizedBox.shrink(),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
   }
 }

@@ -128,25 +128,10 @@ class _ProductsViewState extends State<ProductsView> {
                 child: CustomScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   slivers: [
-                    SliverPadding(
-                      padding: const EdgeInsets.only(top: 8),
-                      sliver: SliverPadding(
-                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                        sliver: SliverGrid(
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 12,
-                            mainAxisSpacing: 12,
-                            childAspectRatio: 169 / 225,
-                          ),
-                          delegate: SliverChildBuilderDelegate(
-                            (context, index) {
-                              return ProductCard(product: items[index]);
-                            },
-                            childCount: items.length,
-                          ),
-                        ),
+                    SliverToBoxAdapter(
+                      child: ProductCardsTwoColumn(
+                        padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                        products: items,
                       ),
                     ),
                     if (_controller.hasMorePages.value)
@@ -367,22 +352,9 @@ class _ProductsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.builder(
-      shrinkWrap: nested,
-      physics: nested
-          ? const NeverScrollableScrollPhysics()
-          : const AlwaysScrollableScrollPhysics(),
+    return ProductCardsTwoColumn(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      itemCount: products.length,
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 169 / 225,
-      ),
-      itemBuilder: (context, index) {
-        return ProductCard(product: products[index]);
-      },
+      products: products,
     );
   }
 }

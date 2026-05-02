@@ -31,6 +31,12 @@ class ProductModel {
   final List<ProductVariant> variants;
   final bool hasOffer;
   final String? offerLabel;
+  /// Active ingredient / generic name from API (e.g. Paracetamol).
+  final String? genericName;
+  /// Strength label from API (e.g. 500 mg).
+  final String? strength;
+  /// Short marketing/summary line for listings (separate from full [description] when API sends both).
+  final String? shortDescription;
 
   ProductModel({
     required this.id,
@@ -50,7 +56,30 @@ class ProductModel {
     this.variants = const [],
     this.hasOffer = false,
     this.offerLabel,
+    this.genericName,
+    this.strength,
+    this.shortDescription,
   });
+
+  /// Line shown under product name, e.g. "Paracetamol - 500 mg".
+  String? get genericStrengthSubtitle {
+    final g = genericName?.trim();
+    final s = strength?.trim();
+    if ((g == null || g.isEmpty) && (s == null || s.isEmpty)) return null;
+    if (g != null && g.isNotEmpty && s != null && s.isNotEmpty) {
+      return '$g - $s';
+    }
+    return g ?? s;
+  }
+
+  /// Text for product card under generic/strength (skips if empty or same as generic line).
+  String? get cardShortDescription {
+    final s = shortDescription?.trim();
+    if (s == null || s.isEmpty) return null;
+    final g = genericStrengthSubtitle?.trim().toLowerCase();
+    if (g != null && g.isNotEmpty && s.toLowerCase() == g) return null;
+    return s;
+  }
 
   bool get hasRemoteImage =>
       imagePath.startsWith('http://') || imagePath.startsWith('https://');
@@ -256,6 +285,25 @@ class ProductModel {
             .toString()
             .trim();
 
+    final genericName = _optionalTrimmed(
+      json['genericName'] ??
+          json['generic_name'] ??
+          json['generic'] ??
+          json['composition'],
+    );
+    final strength = _optionalTrimmed(
+      json['strength'] ??
+          json['dosageStrength'] ??
+          json['dosage_strength'] ??
+          json['potency'],
+    );
+    final shortDescription = _optionalTrimmed(
+      json['shortDescription'] ??
+          json['short_description'] ??
+          json['summary'] ??
+          json['tagline'],
+    );
+
     return ProductModel(
       id: id,
       slug: slugText.isEmpty ? null : slugText,
@@ -286,7 +334,16 @@ class ProductModel {
       offerLabel: (discountValue is num && discountValue > 0)
           ? '${discountValue.toInt()}% OFF'
           : json['offerLabel'],
+      genericName: genericName,
+      strength: strength,
+      shortDescription: shortDescription,
     );
+  }
+
+  static String? _optionalTrimmed(dynamic value) {
+    final text = value?.toString().trim() ?? '';
+    if (text.isEmpty || text.toLowerCase() == 'null') return null;
+    return text;
   }
 
   static double? _toDouble(dynamic value) {
@@ -374,6 +431,9 @@ class ProductModel {
           .toList(),
       'hasOffer': hasOffer,
       'offerLabel': offerLabel,
+      'genericName': genericName,
+      'strength': strength,
+      'shortDescription': shortDescription,
     };
   }
 }

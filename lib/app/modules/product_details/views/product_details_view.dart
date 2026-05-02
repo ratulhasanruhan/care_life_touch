@@ -466,19 +466,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
           ),
           const SizedBox(height: 16),
           Obx(
-            () => GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 169 / 225,
-              ),
-              itemCount: controller.brandProducts.length,
-              itemBuilder: (context, index) {
-                return ProductCard(product: controller.brandProducts[index]);
-              },
+            () => ProductCardsTwoColumn(
+              products: List<ProductModel>.from(controller.brandProducts),
             ),
           ),
         ],

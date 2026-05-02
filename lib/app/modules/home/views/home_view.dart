@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 import '../controllers/home_controller.dart';
+import '../models/product_model.dart';
 import 'widgets/home_header.dart';
 import 'widgets/section_header.dart';
 import 'widgets/categories_list.dart';
@@ -249,25 +250,11 @@ class HomeView extends GetView<HomeController> {
     return OfferBannersCarousel(banners: controller.banners);
   }
 
-  /// Product grid widget
-  Widget _buildProductGrid(RxList products) {
-    return Padding(
+  /// Product grid widget — row height follows content (no fixed aspect ratio).
+  Widget _buildProductGrid(RxList<ProductModel> products) {
+    return ProductCardsTwoColumn(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: LayoutBuilder(
-        builder: (context, constraints) => GridView.builder(
-          padding: EdgeInsets.zero,
-          primary: false,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: _responsiveGridDelegate(constraints.maxWidth),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            return ProductCard(
-              product: products[index],
-            );
-          },
-        ),
-      ),
+      products: List<ProductModel>.from(products),
     );
   }
 

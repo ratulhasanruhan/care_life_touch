@@ -151,7 +151,10 @@ class CartView extends GetView<CartController> {
     );
   }
 
-  /// Build cart item widget
+  static const _brandGreen = Color(0xFF064E36);
+  static const _titleInk = Color(0xFF191930);
+
+  /// Cart line — matches My Bag tile spec (no checkbox): photo 80², brand/name/price + qty row.
   Widget _buildCartItem(CartItem item) {
     final resolvedProductId = item.product.id.isNotEmpty
         ? item.product.id
@@ -165,157 +168,203 @@ class CartView extends GetView<CartController> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border.all(color: const Color(0xFFE8EAE8)),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(4),
       ),
-      child: Row(
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
         children: [
-          // Product Image
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF4F4F4),
-              borderRadius: BorderRadius.circular(4),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: item.product.hasRemoteImage
-                  ? Image.network(
-                      item.product.imagePath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.image_not_supported,
-                          size: 32,
-                          color: Color(0xFFE8EAE8),
-                        );
-                      },
-                    )
-                  : hasImage
-                  ? Image.asset(
-                      item.product.imagePath,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.image_not_supported,
-                          size: 32,
-                          color: Color(0xFFE8EAE8),
-                        );
-                      },
-                    )
-                  : const Icon(
-                      Icons.image_not_supported,
-                      size: 32,
-                      color: Color(0xFFE8EAE8),
-                    ),
-            ),
-          ),
-
-          const SizedBox(width: 12),
-
-          // Product Details
-          Expanded(
-            child: Column(
+          Padding(
+            // Match close button inset (Positioned right: 6) so ± aligns with × horizontally.
+            padding: const EdgeInsets.fromLTRB(16, 12, 6, 12),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  productName,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF01060F),
-                  ),
-                ),
-                if (brandName.isNotEmpty) ...[
-                  const SizedBox(height: 4),
-                  Text(
-                    brandName,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xFF727379),
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 8),
-                Text(
-                  priceText,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF064E36),
+                _cartItemImage(item, hasImage),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(right: 36),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (brandName.isNotEmpty) ...[
+                              Text(
+                                brandName,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  height: 18 / 12,
+                                  fontWeight: FontWeight.w400,
+                                  color: const Color(0xFF01060F).withValues(
+                                    alpha: 0.7,
+                                  ),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                            ],
+                            Text(
+                              productName,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                height: 24 / 16,
+                                fontWeight: FontWeight.w500,
+                                color: _titleInk,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _cartItemPriceRow(item, priceText),
+                            ),
+                            Obx(
+                              () => _CartQtyStepper(
+                                quantity: item.quantity,
+                                enabled: !controller.isMutating.value,
+                                onDecrease: () => controller
+                                    .decreaseQuantity(resolvedProductId),
+                                onIncrease: () => controller
+                                    .increaseQuantity(resolvedProductId),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
             ),
           ),
 
-          // Quantity Controls
-          Column(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF4F4F4),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: controller.isMutating.value
-                          ? null
-                          : () =>
-                                controller.decreaseQuantity(resolvedProductId),
-                      icon: const Icon(Icons.remove, size: 16),
-                      padding: const EdgeInsets.all(4),
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
+          // Remove — top right (red ×)
+          Positioned(
+            top: 6,
+            right: 6,
+            child: Obx(
+              () => Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: controller.isMutating.value
+                      ? null
+                      : () => controller.removeFromCart(resolvedProductId),
+                  borderRadius: BorderRadius.circular(20),
+                  child: const Padding(
+                    padding: EdgeInsets.all(8),
+                    child: Icon(
+                      Icons.close,
+                      size: 18,
+                      color: Color(0xFFEF4444),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Text(
-                        item.quantity.toString(),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF01060F),
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: controller.isMutating.value
-                          ? null
-                          : () =>
-                                controller.increaseQuantity(resolvedProductId),
-                      icon: const Icon(Icons.add, size: 16),
-                      padding: const EdgeInsets.all(4),
-                      constraints: const BoxConstraints(
-                        minWidth: 32,
-                        minHeight: 32,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              const SizedBox(height: 8),
-              GestureDetector(
-                onTap: controller.isMutating.value
-                    ? null
-                    : () => controller.removeFromCart(resolvedProductId),
-                child: const Icon(
-                  Icons.delete_outline,
-                  size: 20,
-                  color: Color(0xFFEF4444),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Sale price + optional compare (MRP) with strikethrough, same idea as product cards.
+  Widget _cartItemPriceRow(CartItem item, String priceText) {
+    final compare = item.product.maxPrice;
+    final unit = item.unitPrice;
+    final showCompare =
+        compare != null && compare > unit + 0.0001;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          priceText,
+          style: const TextStyle(
+            fontSize: 16,
+            height: 21 / 16,
+            fontWeight: FontWeight.w700,
+            color: _brandGreen,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        if (showCompare) ...[
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              '৳${_money(compare)}',
+              style: const TextStyle(
+                fontSize: 14,
+                height: 20 / 14,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF8D949D),
+                decoration: TextDecoration.lineThrough,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _cartItemImage(CartItem item, bool hasImage) {
+    return Container(
+      width: 80,
+      height: 80,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(4),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(6),
+        child: item.product.hasRemoteImage
+            ? Image.network(
+                item.product.imagePath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.image_not_supported,
+                    size: 28,
+                    color: Color(0xFFE8EAE8),
+                  );
+                },
+              )
+            : hasImage
+            ? Image.asset(
+                item.product.imagePath,
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) {
+                  return const Icon(
+                    Icons.image_not_supported,
+                    size: 28,
+                    color: Color(0xFFE8EAE8),
+                  );
+                },
+              )
+            : const Icon(
+                Icons.image_not_supported,
+                size: 28,
+                color: Color(0xFFE8EAE8),
+              ),
       ),
     );
   }
@@ -470,5 +519,83 @@ class CartView extends GetView<CartController> {
 
   String _money(double value) {
     return value % 1 == 0 ? value.toStringAsFixed(0) : value.toStringAsFixed(2);
+  }
+}
+
+/// [−] [qty] [+] — 24² keys, modest inner inset; sits at row trailing edge.
+class _CartQtyStepper extends StatelessWidget {
+  const _CartQtyStepper({
+    required this.quantity,
+    required this.enabled,
+    required this.onDecrease,
+    required this.onIncrease,
+  });
+
+  final int quantity;
+  final bool enabled;
+  final VoidCallback onDecrease;
+  final VoidCallback onIncrease;
+
+  static const _keyBg = Color(0xFFEEEEEE);
+  static const _titleInk = Color(0xFF191930);
+  static const _keySide = 24.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: enabled ? 1 : 0.45,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _greyKey(
+            icon: Icons.remove,
+            iconColor: Colors.black,
+            onTap: enabled ? onDecrease : null,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            '$quantity',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              height: 1.25,
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(width: 8),
+          _greyKey(
+            icon: Icons.add,
+            iconColor: _titleInk,
+            onTap: enabled ? onIncrease : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _greyKey({
+    required IconData icon,
+    required Color iconColor,
+    required VoidCallback? onTap,
+  }) {
+    return Material(
+      color: _keyBg,
+      borderRadius: BorderRadius.circular(4),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: _keySide,
+          height: _keySide,
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(3),
+              child: Icon(icon, size: 13, color: iconColor),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }

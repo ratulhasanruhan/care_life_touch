@@ -328,6 +328,16 @@ class CartController extends GetxController {
           : cached.variants,
       hasOffer: current.hasOffer || cached.hasOffer,
       offerLabel: current.offerLabel ?? cached.offerLabel,
+      genericName: (current.genericName?.trim().isNotEmpty ?? false)
+          ? current.genericName
+          : cached.genericName,
+      strength: (current.strength?.trim().isNotEmpty ?? false)
+          ? current.strength
+          : cached.strength,
+      shortDescription:
+          (current.shortDescription?.trim().isNotEmpty ?? false)
+              ? current.shortDescription
+              : cached.shortDescription,
     );
 
     _knownProducts[item.productId] = merged;
