@@ -6,6 +6,7 @@ import '../../../data/models/api_exception.dart';
 import '../../../data/models/cart_api_model.dart';
 import '../../../data/providers/storage_provider.dart';
 import '../../../data/repositories/cart_repository.dart';
+import '../../../data/repositories/product_repository.dart';
 import '../../home/models/product_model.dart';
 
 /// Cart Controller - Manages shopping cart state and operations
@@ -84,22 +85,57 @@ class CartController extends GetxController {
     int quantity = 1,
     String? variantId,
   }) async {
-    final resolvedVariantId = (variantId ?? product.defaultVariantId ?? '')
-        .trim();
+    var resolvedVariantId = _resolveVariantIdForCart(product, variantId);
+    var productForCart = product;
+
+    // Search/list payloads often omit variant ids; full product details include them (same as opening details).
+    if (resolvedVariantId.isEmpty) {
+      final slug = product.slug?.trim();
+      if (slug != null && slug.isNotEmpty) {
+        try {
+          final hydrated =
+              await Get.find<ProductRepository>().getProductBySlug(slug);
+          resolvedVariantId = _resolveVariantIdForCart(hydrated, variantId);
+          if (resolvedVariantId.isNotEmpty) {
+            productForCart = hydrated;
+          }
+        } catch (error, stackTrace) {
+          AppLogger.error(
+            'Could not load product details for cart',
+            error,
+            stackTrace,
+          );
+        }
+      }
+    }
+
     if (resolvedVariantId.isEmpty) {
       _showError('This product is not available for cart yet.');
       return;
     }
 
-    _knownProducts[product.id] = product;
+    _knownProducts[productForCart.id] = productForCart;
 
     await _mutateCart(
       () => _cartRepository.addToCart(
-        productId: product.id,
+        productId: productForCart.id,
         variantId: resolvedVariantId,
         quantity: quantity,
       ),
     );
+  }
+
+  /// Picks a variant id for the cart API: explicit param, then product default, then any parsed variant.
+  static String _resolveVariantIdForCart(ProductModel product, String? variantId) {
+    final explicit = (variantId ?? '').trim();
+    if (explicit.isNotEmpty) return explicit;
+    final def = (product.defaultVariantId ?? '').trim();
+    if (def.isNotEmpty) return def;
+    for (final v in product.variants) {
+      final id = v.id.trim();
+      if (id.isNotEmpty) return id;
+    }
+    return '';
   }
 
   Future<void> removeFromCart(String productId) async {

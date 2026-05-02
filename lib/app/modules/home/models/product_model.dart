@@ -72,29 +72,70 @@ class ProductModel {
     final categoryName = (json['category'] is Map)
         ? (json['category']['name'] ?? '').toString()
         : '';
-    final variantsRaw = json['variants'] is List
-        ? (json['variants'] as List)
-        : const [];
-    final variantMaps = variantsRaw
+    final List<dynamic> variantsRaw;
+    if (json['variants'] is List) {
+      variantsRaw = json['variants'] as List;
+    } else if (json['variant'] is Map) {
+      variantsRaw = [json['variant']];
+    } else if (json['variant'] is List) {
+      variantsRaw = json['variant'] as List;
+    } else if (json['selectedVariant'] is Map) {
+      variantsRaw = [json['selectedVariant']];
+    } else if (json['defaultVariant'] is Map) {
+      variantsRaw = [json['defaultVariant']];
+    } else {
+      variantsRaw = const [];
+    }
+    var variantMaps = variantsRaw
         .whereType<Map>()
         .map(
           (item) => item.map((key, value) => MapEntry(key.toString(), value)),
         )
         .toList();
+    // Some list endpoints return variants as ObjectId strings only (no embedded maps).
+    if (variantMaps.isEmpty && variantsRaw.isNotEmpty) {
+      final synthetic = <Map<String, dynamic>>[];
+      for (final item in variantsRaw) {
+        if (item is Map) continue;
+        final s = item?.toString().trim() ?? '';
+        if (s.isNotEmpty && s.toLowerCase() != 'null') {
+          synthetic.add({'_id': s});
+        }
+      }
+      variantMaps = synthetic;
+    }
     final firstVariant = variantMaps.isNotEmpty
         ? variantMaps.first
         : const <String, dynamic>{};
+    final variantStringField = json['variant'] is String
+        ? json['variant']?.toString().trim()
+        : null;
+    final defaultVariantStringField = json['defaultVariant'] is String
+        ? json['defaultVariant']?.toString().trim()
+        : null;
     final rawVariantId =
         json['defaultVariantId'] ??
+        json['default_variant_id'] ??
         json['variantId'] ??
+        json['variant_id'] ??
+        (variantStringField?.isNotEmpty == true ? variantStringField : null) ??
+        (defaultVariantStringField?.isNotEmpty == true
+            ? defaultVariantStringField
+            : null) ??
         firstVariant['_id'] ??
-        firstVariant['id'];
+        firstVariant['id'] ??
+        firstVariant['variantId'];
     final defaultVariantId = rawVariantId?.toString().trim();
 
     final parsedVariants = variantMaps
         .map(
           (variant) => ProductVariant(
-            id: (variant['_id'] ?? variant['id'] ?? '').toString().trim(),
+            id: (variant['_id'] ??
+                    variant['id'] ??
+                    variant['variantId'] ??
+                    '')
+                .toString()
+                .trim(),
             unit: (variant['unit'] ?? variant['packSize'] ?? '1 unit')
                 .toString(),
             price: _toDouble(
@@ -113,9 +154,15 @@ class ProductModel {
     final selectedVariantMap =
         (defaultVariantId != null && defaultVariantId.isNotEmpty)
         ? variantMaps.firstWhere(
-            (variant) =>
-                (variant['_id'] ?? variant['id'] ?? '').toString().trim() ==
-                defaultVariantId,
+            (variant) {
+              final vid = (variant['_id'] ??
+                      variant['id'] ??
+                      variant['variantId'] ??
+                      '')
+                  .toString()
+                  .trim();
+              return vid == defaultVariantId;
+            },
             orElse: () => firstVariant,
           )
         : firstVariant;
@@ -204,11 +251,14 @@ class ProductModel {
         ? brandIdFromRaw
         : '';
 
+    final slugText =
+        (json['slug'] ?? json['productSlug'] ?? json['product_slug'] ?? '')
+            .toString()
+            .trim();
+
     return ProductModel(
       id: id,
-      slug: (json['slug'] ?? '').toString().isEmpty
-          ? null
-          : json['slug'].toString(),
+      slug: slugText.isEmpty ? null : slugText,
       defaultVariantId: defaultVariantId == null || defaultVariantId.isEmpty
           ? null
           : defaultVariantId,
