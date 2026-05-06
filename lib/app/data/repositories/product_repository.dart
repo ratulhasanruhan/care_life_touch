@@ -25,8 +25,9 @@ class ProductRepository {
     int? limit,
   }) async {
     final normalizedQuery = query.trim();
+    final encodedQuery = Uri.encodeQueryComponent(normalizedQuery);
     final params = <String, dynamic>{
-      'q': normalizedQuery,
+      'q': encodedQuery,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
     };
@@ -38,7 +39,7 @@ class ProductRepository {
     } on ApiException catch (error) {
       // Some environments accept only `q` for /search.
       if (error.statusCode == 400) {
-        final fallbackParams = {'q': normalizedQuery};
+        final fallbackParams = {'q': encodedQuery};
         AppLogger.warning(
           'Search API retry with minimal query',
           fallbackParams,
