@@ -506,7 +506,13 @@ class _ProductItemCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(4),
               child: image.trim().isEmpty
                   ? const Icon(Icons.image_outlined, color: Color(0xFFA2A8AF))
-                  : Image.network(image, fit: BoxFit.cover),
+                  : Image.network(
+                      image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(Icons.image_not_supported, color: Color(0xFFA2A8AF));
+                      },
+                    ),
             ),
           ),
           const SizedBox(width: 12),
