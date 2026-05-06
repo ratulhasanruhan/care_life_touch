@@ -72,7 +72,7 @@ class ProductCard extends StatelessWidget {
                           Text(
                             product.genericStrengthSubtitle!,
                             style: TextStyle(
-                              fontSize: genericFontSize,
+                              fontSize: isCompact ? 14.0 : 15.0,
                               fontWeight: FontWeight.w400,
                               color: const Color(0xB301060F),
                               height: 1.25,
@@ -180,9 +180,9 @@ class ProductCard extends StatelessWidget {
                   child: Text(
                     discountLabel,
                     style: TextStyle(
-                      fontSize: isCompact ? 9 : 10,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
+                      fontSize: isCompact ? 11 : 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -430,9 +430,9 @@ class ProductCard extends StatelessWidget {
                maxLines: 1,
                overflow: TextOverflow.ellipsis,
                style: TextStyle(
-                 fontSize: isCompact ? 14 : 15,
-                 fontWeight: FontWeight.w400,
-                 color: const Color(0xFF8D949D),
+                 fontSize: isCompact ? 15 : 16,
+                 fontWeight: FontWeight.w600,
+                 color: Colors.black54,
                  decoration: TextDecoration.lineThrough,
                ),
              ),

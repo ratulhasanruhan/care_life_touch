@@ -154,8 +154,8 @@ class _AddToCartModalState extends State<AddToCartModal> {
                         TextSpan(
                           text: '৳${_formatMoney(selectedPrice)}',
                           style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                             color: Color(0xFF064E36),
                           ),
                           children: [
@@ -164,11 +164,11 @@ class _AddToCartModalState extends State<AddToCartModal> {
                               TextSpan(
                                 text: '  ৳${_formatMoney(selectedComparePrice)}',
                                 style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w400,
-                                  color: Color(0xFF9AA3A8),
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black54,
                                   decoration: TextDecoration.lineThrough,
-                                  decorationColor: Color(0xFF9AA3A8),
+                                  decorationColor: Colors.black54,
                                 ),
                               ),
                           ],

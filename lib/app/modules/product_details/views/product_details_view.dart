@@ -126,7 +126,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                 child: Text(
                   controller.product.brand,
                   style: const TextStyle(
-                    fontSize: 12,
+                    fontSize: 14,
                     fontWeight: FontWeight.w400,
                     color: Color(0xB301060F),
                   ),
@@ -212,7 +212,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                       controller.product.name,
                       style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.w500,
+                        fontWeight: FontWeight.w700,
                         color: Color(0xFF01060F),
                       ),
                     ),
@@ -241,7 +241,7 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
                   Text(
                     controller.product.moqDisplay,
                     style: const TextStyle(
-                      fontSize: 8,
+                      fontSize: 12,
                       fontWeight: FontWeight.w400,
                       color: Color(0xB301060F),
                     ),
@@ -636,19 +636,19 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         Text(
           '৳${_money(product.price)}',
           style: const TextStyle(
-            fontSize: 12,
+            fontSize: 16,
             fontWeight: FontWeight.w700,
             color: Color(0xFF064E36),
           ),
         ),
         if (hasCompare) ...[
-          const SizedBox(width: 6),
+          const SizedBox(width: 7),
           Text(
             '৳${_money(product.maxPrice!)}',
             style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF8D949D),
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+              color: Colors.black54,
               decoration: TextDecoration.lineThrough,
             ),
           ),
@@ -669,8 +669,8 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
         Text(
           '৳${_money(current)}',
           style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
             color: Color(0xFF064E36),
           ),
         ),
@@ -679,9 +679,9 @@ class ProductDetailsView extends GetView<ProductDetailsController> {
           Text(
             '৳${_money(isInCart ? compare * quantity : compare)}',
             style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w400,
-              color: Color(0xFF8D949D),
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Colors.black54,
               decoration: TextDecoration.lineThrough,
             ),
           ),

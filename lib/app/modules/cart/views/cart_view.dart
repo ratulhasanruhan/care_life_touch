@@ -201,7 +201,7 @@ class CartView extends GetView<CartController> {
                                 style: TextStyle(
                                   fontSize: 12,
                                   height: 18 / 12,
-                                  fontWeight: FontWeight.w400,
+                                  fontWeight: FontWeight.w500,
                                   color: const Color(0xFF01060F).withValues(
                                     alpha: 0.7,
                                   ),
@@ -310,10 +310,10 @@ class CartView extends GetView<CartController> {
             child: Text(
               '৳${_money(compare)}',
               style: const TextStyle(
-                fontSize: 14,
+                fontSize: 15,
                 height: 20 / 14,
                 fontWeight: FontWeight.w400,
-                color: Color(0xFF8D949D),
+                color: Colors.black54,
                 decoration: TextDecoration.lineThrough,
               ),
               maxLines: 1,
