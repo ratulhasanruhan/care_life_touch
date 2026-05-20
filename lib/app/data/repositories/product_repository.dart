@@ -25,9 +25,9 @@ class ProductRepository {
     int? limit,
   }) async {
     final normalizedQuery = query.trim();
-    final encodedQuery = Uri.encodeQueryComponent(normalizedQuery);
+    // Pass the raw query - GetConnect will handle URL encoding automatically
     final params = <String, dynamic>{
-      'q': encodedQuery,
+      'q': normalizedQuery,
       if (page != null) 'page': page,
       if (limit != null) 'limit': limit,
     };
@@ -39,7 +39,7 @@ class ProductRepository {
     } on ApiException catch (error) {
       // Some environments accept only `q` for /search.
       if (error.statusCode == 400) {
-        final fallbackParams = {'q': encodedQuery};
+        final fallbackParams = {'q': normalizedQuery};
         AppLogger.warning(
           'Search API retry with minimal query',
           fallbackParams,
